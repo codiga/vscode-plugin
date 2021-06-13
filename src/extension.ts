@@ -1,25 +1,38 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+
+import { initializeClient } from "./graphql/client";
+import { getUser } from "./graphql/user";
+import { DIAGNOSTICS_COLLECTION_NAME } from "./constants";
+import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
+import { testApi } from "./commands/test-api";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "codiga-vscode-plugin" is now active!');
+export async function activate(context: vscode.ExtensionContext) {
+  initializeClient();
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('codiga-vscode-plugin.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vscode-plugin!');
-	});
+  const user = await getUser();
 
-	context.subscriptions.push(disposable);
+  if (!user) {
+    vscode.window.showInformationMessage(
+      "Codiga: invalid API keys, configure your API keys"
+    );
+  }
+
+  const diagnotics = vscode.languages.createDiagnosticCollection(
+    DIAGNOSTICS_COLLECTION_NAME
+  );
+  context.subscriptions.push(diagnotics);
+
+  subscribeToDocumentChanges(context, diagnotics);
+
+  let disposable = vscode.commands.registerCommand("codiga.testAPI", () => {
+    testApi();
+  });
+
+  context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated
