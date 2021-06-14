@@ -21,6 +21,12 @@ interface DocumentInformation {
 }
 
 const DOCUMENTS_INFORMATIONS: Record<string, DocumentInformation> = {};
+const DIAGNOSTICS_TO_VIOLATIONS: Map<vscode.Diagnostic, FileAnalysisViolation> = new Map();
+
+export function getViolationFromDiagnostic(diag: vscode.Diagnostic): FileAnalysisViolation | undefined {
+  return DIAGNOSTICS_TO_VIOLATIONS.get(diag);
+}
+
 
 /**
  * Indicates if a document should be updated or not based
@@ -109,6 +115,9 @@ export async function refreshDiagnostics(
     return;
   }
 
+  // clear the initial map of diagnostics
+  DIAGNOSTICS_TO_VIOLATIONS.clear();
+
   const violations = await getViolations(
     relativePath,
     doc.getText(),
@@ -116,7 +125,9 @@ export async function refreshDiagnostics(
   );
 
   violations.forEach((violation) => {
-    newDiagnostics.push(createDiagnostic(doc, violation));
+    const diag = createDiagnostic(doc, violation);
+    newDiagnostics.push(diag);
+    DIAGNOSTICS_TO_VIOLATIONS.set(diag, violation);
   });
 
   diagnostics.set(doc.uri, newDiagnostics);

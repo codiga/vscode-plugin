@@ -8,3 +8,5 @@ export const STATUS_ERROR = 'Error';
 export const STATUS_DONE = 'Done';
 
 export const DIAGNOSTIC_CODE = 'Codiga';
+
+export const LEARN_MORE_COMMAND = 'LearnMore';
