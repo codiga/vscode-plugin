@@ -32,7 +32,7 @@ export function initializeClient() {
  * @returns
  */
 function getAccessKey(): string {
-  return vscode.workspace.getConfiguration().get("codiga.api.accessKey")!;
+  return vscode.workspace.getConfiguration().get("code-inspector.api.accessKey")!;
 }
 
 /**
@@ -40,7 +40,7 @@ function getAccessKey(): string {
  * @returns
  */
 function getSecretKey(): string {
-  return vscode.workspace.getConfiguration().get("codiga.api.secretKey")!;
+  return vscode.workspace.getConfiguration().get("code-inspector.api.secretKey")!;
 }
 
 /**
@@ -77,6 +77,12 @@ export function doQuery(
   return query;
 }
 
+/**
+ * Similar than doQuery but for a mutation.
+ * @param graphqlMutation - mutation to execute
+ * @param variables - variable to pass
+ * @returns - the result of the mutation or undefined if an error was raised.
+ */
 export function doMutation(
   graphqlMutation: DocumentNode,
   variables: Record<string, string | undefined | null> = {}

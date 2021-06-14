@@ -14,8 +14,6 @@ export const CREATE_FILE_ANALYSIS: DocumentNode = gql`
       filename: $filename,
       projectId: $projectId
     )
-  }
-  mutation{
     recordAccess(accessType: VsCode, actionType: FileAnalysisRequest)
   }
 `;

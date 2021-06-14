@@ -18,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   if (!user) {
     vscode.window.showInformationMessage(
-      "Codiga: invalid API keys, configure your API keys"
+      "Code Inspector: invalid API keys, configure your API keys"
     );
   }
 
@@ -32,7 +32,6 @@ export async function activate(context: vscode.ExtensionContext) {
   
   // add support of code action for each language
   allLanguages.forEach(lang => {
-    console.log(`initializing ${lang}`);
     context.subscriptions.push(
 		  vscode.languages.registerCodeActionsProvider(lang, new MoreInfo(), {
 			  providedCodeActionKinds: MoreInfo.providedCodeActionKinds
@@ -43,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   subscribeToDocumentChanges(context, diagnotics);
 
-  let disposable = vscode.commands.registerCommand("codiga.testAPI", () => {
+  let disposable = vscode.commands.registerCommand("code-inspector.testAPI", () => {
     testApi();
   });
 

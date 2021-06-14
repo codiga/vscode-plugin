@@ -1,10 +1,20 @@
 {
   "name": "code-inspector-vscode-plugin",
-  "displayName": "Code Inspector VsCode extension",
+  "displayName": "Code Inspector",
   "description": "Analyze code for 12+ languages using a powerful static analysis engine.",
   "publisher": "code-inspector",
-  "repository": "https://github.com/codeinspectorio/vscode-plugin",
+  "license" : "BSD-2-Clause",
+  "author": "Xcoding Labs Inc",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeinspectorio/vscode-plugin.git"
+  },
+  "bugs": {
+		"url": "https://github.com/codeinspectorio/vscode-plugin/issues"
+	},
   "icon": "images/logo.png",
+  "categories": ["Programming Languages", "Linters"],
+  "keywords": ["linters", "code analysis", "code quality", "technical debt"],
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.57.0"
@@ -20,25 +30,25 @@
   "contributes": {
     "configuration": [
       {
-        "title": "Codiga",
+        "title": "Code Inspector",
         "properties": {
-          "codiga.enabled": {
+          "code-inspector.enabled": {
             "type": "boolean",
             "default": true,
             "description": "Enable Codiga Analysis Engine",
             "scope": "application"
           },
-          "codiga.api.accessKey": {
+          "code-inspector.api.accessKey": {
             "type": "string",
-            "default": "<YOUR-CODE-INSPECTOR-ACCESS-KEY>",
+            "default": "<ACCESS-KEY>",
             "description": "Your Code Inspector access key",
             "minLength": 6,
             "maxLength": 20,
             "scope": "application"
           },
-          "codiga.api.secretKey": {
+          "code-inspector.api.secretKey": {
             "type": "string",
-            "default": "<YOUR-CODE-INSPECTOR-SECRET-KEY>",
+            "default": "<SECRET-KEY>",
             "description": "Your Code Inspector secret key",
             "minLength": 6,
             "maxLength": 20,
@@ -49,8 +59,8 @@
     ],
     "commands": [
       {
-        "command": "codiga.testAPI",
-        "title": "Test Codiga API"
+        "command": "code-inspector.testAPI",
+        "title": "Test Code Inspector API"
       }
     ]
   },

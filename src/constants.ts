@@ -7,6 +7,6 @@ export const POLLING_DEADLINE_MILLISECONDS: number = 10000;
 export const STATUS_ERROR = 'Error';
 export const STATUS_DONE = 'Done';
 
-export const DIAGNOSTIC_CODE = 'Codiga';
+export const DIAGNOSTIC_CODE = 'Code Inspector';
 
 export const LEARN_MORE_COMMAND = 'LearnMore';
