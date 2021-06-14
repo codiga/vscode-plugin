@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(diagnotics);
 
   // Get all language supported by vscode
-  const allLanguages = await vscode.languages.getLanguages()
+  const allLanguages = await vscode.languages.getLanguages();
   
   // add support of code action for each language
   allLanguages.forEach(lang => {
