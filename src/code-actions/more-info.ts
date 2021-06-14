@@ -2,6 +2,11 @@ import * as vscode from 'vscode';
 import { DIAGNOSTIC_CODE, LEARN_MORE_COMMAND } from '../constants';
 import { getViolationFromDiagnostic } from '../diagnostics/diagnostics';
 
+/**
+ * Provide the action within VsCode to launch a browser and show
+ * the page about the violation. It starts the 
+ * LEARN_MORE_COMMAND with the URL reported by the violation.
+ */
 export class MoreInfo implements vscode.CodeActionProvider {
 
 	public static readonly providedCodeActionKinds = [

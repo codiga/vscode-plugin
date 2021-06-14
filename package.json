@@ -1,7 +1,10 @@
 {
-  "name": "codiga-vscode-plugin",
-  "displayName": "vscode-plugin",
-  "description": "",
+  "name": "code-inspector-vscode-plugin",
+  "displayName": "Code Inspector VsCode extension",
+  "description": "Analyze code for 12+ languages using a powerful static analysis engine.",
+  "publisher": "code-inspector",
+  "repository": "https://github.com/codeinspectorio/vscode-plugin",
+  "icon": "images/logo.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.57.0"
