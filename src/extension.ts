@@ -27,11 +27,19 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(diagnotics);
 
-  context.subscriptions.push(
-		vscode.languages.registerCodeActionsProvider('python', new MoreInfo(), {
-			providedCodeActionKinds: MoreInfo.providedCodeActionKinds
+  // Get all language supported by vscode
+  const allLanguages = await vscode.languages.getLanguages()
+  
+  // add support of code action for each language
+  allLanguages.forEach(lang => {
+    console.log(`initializing ${lang}`);
+    context.subscriptions.push(
+		  vscode.languages.registerCodeActionsProvider(lang, new MoreInfo(), {
+			  providedCodeActionKinds: MoreInfo.providedCodeActionKinds
 		})
 	);
+  });
+
 
   subscribeToDocumentChanges(context, diagnotics);
 
