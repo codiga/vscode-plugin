@@ -20,9 +20,22 @@ interface DocumentInformation {
   violations: FileAnalysisViolation[];
 }
 
+/**
+ * Internal variables we keep to track the violations
+ * and diagnostics information.
+ */
+
+// Keep track of the last information for a given URI
 const DOCUMENTS_INFORMATIONS: Record<string, DocumentInformation> = {};
+
+// Direct mapping of a diagnostic to a violation so that we can find a violation when generating quick actions.
 const DIAGNOSTICS_TO_VIOLATIONS: Map<vscode.Diagnostic, FileAnalysisViolation> = new Map();
 
+/**
+ * Just a function to get access to DIAGNOSTICS_TO_VIOLATIONS outside this module.
+ * @param diag
+ * @returns 
+ */
 export function getViolationFromDiagnostic(diag: vscode.Diagnostic): FileAnalysisViolation | undefined {
   return DIAGNOSTICS_TO_VIOLATIONS.get(diag);
 }
