@@ -15,7 +15,7 @@
   "icon": "images/logo.png",
   "categories": ["Programming Languages", "Linters"],
   "keywords": ["linters", "code analysis", "code quality", "technical debt"],
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.57.0"
   },

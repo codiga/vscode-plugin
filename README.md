@@ -47,6 +47,10 @@ If you do not want to open a ticket, you can also directly [contact us](https://
 
 ## Release Notes
 
+### Version 0.0.2
+
+ - More documentation
+
 ### Version 0.0.1
 
  - Initial release

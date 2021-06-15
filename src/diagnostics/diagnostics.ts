@@ -1,9 +1,3 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
-
-/** To demonstrate code actions associated with Diagnostics problems, this file provides a mock diagnostics entries. */
-
 import * as vscode from "vscode";
 import { getLanguageForFile } from "../utils/fileUtils";
 import { DIAGNOSTIC_CODE, NUMBER_OF_CHARACTERS_TO_TRIGGER_ANALYSIS } from "../constants";
