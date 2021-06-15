@@ -50,6 +50,7 @@ If you do not want to open a ticket, you can also directly [contact us](https://
 ### Version 0.0.2
 
  - More documentation
+ - New bundle package
 
 ### Version 0.0.1
 
