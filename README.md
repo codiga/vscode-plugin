@@ -1,6 +1,6 @@
 # Code Inspector Plugin
 
-Integrates Code Inspector analysis engine into VS Code.
+Integrates Code Inspector analysis engine into VS Code. You can download it from the [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=code-inspector.code-inspector-vscode-plugin) directly.
 This plugin analyzes code for 12+ languages without installing any additional tools.
 
 It checks the same rules in your VS Code editor than in your CI/CD pipeline when using [Code Inspector](https://www.code-inspector.com) for checking your code quality.
