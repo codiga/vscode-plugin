@@ -2,8 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 
-import { initializeClient } from "./graphql/client";
-import { getUser } from "./graphql/user";
+import { initializeClient } from "./graphql-api/client";
+import { getUser } from "./graphql-api/user";
 import { DIAGNOSTICS_COLLECTION_NAME, LEARN_MORE_COMMAND } from "./constants";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { testApi } from "./commands/test-api";
@@ -13,7 +13,7 @@ import { MoreInfo } from "./code-actions/more-info";
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
   initializeClient();
-
+  
   const user = await getUser();
 
   if (!user) {

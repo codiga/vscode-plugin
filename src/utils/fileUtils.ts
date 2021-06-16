@@ -1,4 +1,4 @@
-import { Language } from "../graphql/types";
+import { Language } from "../graphql-api/types";
 const pathModule = require("path");
 
 const EXTENSION_TO_LANGUAGE: Record<string, Language> = {

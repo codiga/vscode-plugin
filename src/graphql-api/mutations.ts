@@ -1,7 +1,6 @@
-import { gql } from "@apollo/client/core";
-import { DocumentNode } from "graphql/language/ast";
+import { gql } from "graphql-request";
 
-export const CREATE_FILE_ANALYSIS: DocumentNode = gql`
+export const CREATE_FILE_ANALYSIS: string = gql`
   mutation createFileAnalysis(
     $language: LanguageEnumeration!,
     $code: String!,

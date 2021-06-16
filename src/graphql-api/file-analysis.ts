@@ -28,7 +28,7 @@ export async function getViolations(
     return [];
   }
 
-  const fileAnalysisIdentifier: number = fileAnalysis.data.createFileAnalysis;
+  const fileAnalysisIdentifier: number = fileAnalysis.createFileAnalysis;
 
 
   const deadline: number = new Date().getTime() + POLLING_DEADLINE_MILLISECONDS;
@@ -36,15 +36,15 @@ export async function getViolations(
 
   while (now < deadline) {
     const fileAnalysis = await doQuery(
-      GET_FILE_ANALYSIS, {"identifier": fileAnalysisIdentifier}, true);
+      GET_FILE_ANALYSIS, {"identifier": fileAnalysisIdentifier});
     
     if (!fileAnalysis){
       console.debug('no file analysis found');
       return [];
     }
 
-    if (fileAnalysis.data.getFileAnalysis) {
-      const status = fileAnalysis.data.getFileAnalysis.status;
+    if (fileAnalysis.getFileAnalysis) {
+      const status = fileAnalysis.getFileAnalysis.status;
 
       if (status === STATUS_ERROR) {
         console.debug('analysis error');
@@ -52,7 +52,7 @@ export async function getViolations(
       }
 
       if (status === STATUS_DONE) {
-        const analysisViolations: [Record<any, any>] = fileAnalysis.data.getFileAnalysis.violations;
+        const analysisViolations: [Record<any, any>] = fileAnalysis.getFileAnalysis.violations;
         const analysisToReturn = analysisViolations.map((violation) => {
           return {
             identifier: violation.id,

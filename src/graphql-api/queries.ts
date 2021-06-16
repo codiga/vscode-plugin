@@ -1,7 +1,7 @@
-import { gql } from "@apollo/client/core";
+import { gql } from "graphql-request";
 import { DocumentNode } from "graphql/language/ast";
 
-export const GET_USER: DocumentNode = gql`
+export const GET_USER: string = gql`
   query getUser {
     user {
       username
@@ -9,7 +9,7 @@ export const GET_USER: DocumentNode = gql`
   }
 `;
 
-export const GET_FILE_ANALYSIS: DocumentNode = gql`
+export const GET_FILE_ANALYSIS: string = gql`
   query getFileAnalysis($identifier: Long!) {
     getFileAnalysis(id: $identifier) {
       status

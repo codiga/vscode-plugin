@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { getLanguageForFile } from "../utils/fileUtils";
 import { DIAGNOSTIC_CODE, NUMBER_OF_CHARACTERS_TO_TRIGGER_ANALYSIS } from "../constants";
-import { FileAnalysisViolation, Language } from "../graphql/types";
-import { getViolations } from "../graphql/file-analysis";
+import { FileAnalysisViolation, Language } from "../graphql-api/types";
+import { getViolations } from "../graphql-api/file-analysis";
 
 
 /**

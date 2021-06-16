@@ -7,6 +7,6 @@ export async function getUser(): Promise<string | undefined> {
   if (!query || query.error || query.errors) {
     return undefined;
   } else {
-    return query.data.user.username;
+    return query.user.username;
   }
 }

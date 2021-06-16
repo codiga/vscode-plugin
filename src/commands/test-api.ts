@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { getUser } from "../graphql/user";
+import { getUser } from "../graphql-api/user";
 
 /**
  * Verify access to the API and display an error
@@ -8,6 +8,7 @@ import { getUser } from "../graphql/user";
  */
 export async function testApi() {
   const user = await getUser();
+  console.debug('test api');
   if (!user) {
     vscode.window.showInformationMessage("Invalid API keys. Enter valid API keys from your Code Inspector profile");
   } else {

@@ -4,7 +4,7 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import { getLanguageForFile } from '../../../utils/fileUtils';
-import { Language } from '../../../graphql/types';
+import { Language } from '../../../graphql-api/types';
 // import * as myExtension from '../../extension';
 
 suite('fileUtils.ts test', () => {

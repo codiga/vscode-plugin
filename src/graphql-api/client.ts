@@ -1,30 +1,16 @@
-import {
-  ApolloClient,
-  InMemoryCache,
-  NormalizedCacheObject,
-  HttpLink,
-  FetchPolicy,
-} from "@apollo/client/core";
-import { DocumentNode } from "graphql/language/ast";
+import { GraphQLClient, gql } from 'graphql-request';
 import { fetch } from "cross-fetch";
 import * as vscode from "vscode";
 import { GRAPHQL_ENDPOINT } from "../constants";
 
-var client: ApolloClient<NormalizedCacheObject>;
+var client: GraphQLClient;
 
 /**
  * Initialize the GraphQL client that will be used
  * to perform all the GraphQL request.
  */
 export function initializeClient() {
-  client = new ApolloClient({
-    uri: GRAPHQL_ENDPOINT,
-    link: new HttpLink({
-      uri: GRAPHQL_ENDPOINT,
-      fetch,
-    }),
-    cache: new InMemoryCache(),
-  });
+  client = new GraphQLClient(GRAPHQL_ENDPOINT);
 }
 
 /**
@@ -43,6 +29,14 @@ function getSecretKey(): string {
   return vscode.workspace.getConfiguration().get("code-inspector.api.secretKey")!;
 }
 
+function generateHeaders() {
+  const headers = {
+        "X-Access-Key": getAccessKey(),
+        "X-Secret-Key": getSecretKey(),
+      };
+  return headers;
+}
+
 /**
  * That is the main function to perform a GraphQL query. This is the main function
  * being used across the codebase.
@@ -50,27 +44,10 @@ function getSecretKey(): string {
  * @returns
  */
 export function doQuery(
-  graphqlQuery: DocumentNode,
+  graphqlQuery: string,
   variables: Record<string, string | undefined | null | number> = {},
-  forceRefetch: boolean = false,
 ) {
-  var fetchPolicy: FetchPolicy = 'cache-first';
-  if (forceRefetch) {
-    fetchPolicy = 'no-cache';
-  }
-
-  const query = client
-    .query({
-      query: graphqlQuery,
-      context: {
-        headers: {
-          "X-Access-Key": getAccessKey(),
-          "X-Secret-Key": getSecretKey(),
-        },
-      },
-      variables: variables,
-      fetchPolicy: fetchPolicy,
-    })
+  const query = client.request(graphqlQuery, variables, generateHeaders())
     .catch(() => {
       return undefined;
     });
@@ -84,21 +61,12 @@ export function doQuery(
  * @returns - the result of the mutation or undefined if an error was raised.
  */
 export function doMutation(
-  graphqlMutation: DocumentNode,
+  graphqlMutation: string,
   variables: Record<string, string | undefined | null> = {}
 ) {
-  const query = client
-    .mutate({
-      mutation: graphqlMutation,
-      context: {
-        headers: {
-          "X-Access-Key": getAccessKey(),
-          "X-Secret-Key": getSecretKey(),
-        },
-      },
-      variables: variables,
-    })
-    .catch(() => {
+  const query = client.request(graphqlMutation, variables, generateHeaders())
+    .catch((e) => {
+      console.debug(e);
       return undefined;
     });
   return query;
