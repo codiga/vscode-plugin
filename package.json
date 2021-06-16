@@ -14,23 +14,33 @@
   },
   "icon": "images/logo.png",
   "categories": [
-    "Other"
+    "Linters",
+    "Programming Languages"
   ],
   "keywords": [
     "linters",
     "code analysis",
     "code quality",
-    "technical debt"
+    "technical debt",
+    "static code analysis",
+    "PHP",
+    "Python",
+    "Ruby",
+    "Java",
+    "Javascript",
+    "Scala",
+    "C/C++",
+    "React",
+    "Typescript"
   ],
   "version": "0.0.2",
   "engines": {
     "vscode": "^1.57.0"
   },
   "activationEvents": [
-    "onStartupFinished",
-    "onCommand:codiga-vscode-plugin.helloWorld"
+    "onStartupFinished"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension",
   "contributes": {
     "configuration": [
       {
@@ -75,10 +85,9 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "deploy": "vsce publish --yarn",
-    "vscode:prepublish": "npm run -S esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
-    "esbuild": "npm run -S esbuild-base -- --sourcemap",
-    "esbuild-watch": "npm run -S esbuild-base -- --sourcemap --watch",
+    "vscode:prepublish": "webpack --mode production",
+    "webpack": "webpack --mode development",
+    "webpack-dev": "webpack --mode development --watch",
     "test-compile": "tsc -p ./"
   },
   "devDependencies": {
@@ -88,13 +97,15 @@
     "@types/vscode": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
-    "esbuild": "^0.12.8",
     "eslint": "^7.27.0",
     "glob": "^7.1.7",
     "mocha": "^8.4.0",
+    "ts-loader": "^9.2.3",
     "typescript": "^4.3.2",
     "vsce": "^1.93.0",
-    "vscode-test": "^1.5.2"
+    "vscode-test": "^1.5.2",
+    "webpack": "^5.39.0",
+    "webpack-cli": "^4.7.2"
   },
   "dependencies": {
     "@apollo/client": "^3.3.20",
