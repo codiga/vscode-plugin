@@ -1,5 +1,4 @@
 import { gql } from "graphql-request";
-import { DocumentNode } from "graphql/language/ast";
 
 export const GET_USER: string = gql`
   query getUser {

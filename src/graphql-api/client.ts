@@ -1,5 +1,4 @@
 import { GraphQLClient, gql } from 'graphql-request';
-import { fetch } from "cross-fetch";
 import * as vscode from "vscode";
 import { GRAPHQL_ENDPOINT } from "../constants";
 
