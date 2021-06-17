@@ -33,7 +33,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.57.0"
   },
@@ -84,7 +84,7 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "deploy": "vsce publish --yarn",
+    "deploy": "vsce publish --no-yarn",
     "vscode:prepublish": "npm run -S esbuild-base -- --minify",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run -S esbuild-base -- --sourcemap",

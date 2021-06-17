@@ -8,7 +8,7 @@ var client: GraphQLClient;
  * Initialize the GraphQL client that will be used
  * to perform all the GraphQL request.
  */
-export function initializeClient() {
+export function initializeClient(): void {
   client = new GraphQLClient(GRAPHQL_ENDPOINT);
 }
 
