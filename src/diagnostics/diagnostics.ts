@@ -70,17 +70,6 @@ function shouldUpdateDocument(doc: vscode.TextDocument): boolean {
   return false;
 }
 
-function getExistingViolations(
-  doc: vscode.TextDocument
-): FileAnalysisViolation[] {
-  const uri = doc.uri;
-  const docUriString: string = uri.toString();
-  if (DOCUMENTS_INFORMATIONS[docUriString]) {
-    return DOCUMENTS_INFORMATIONS[docUriString].violations;
-  }
-  return new Array<FileAnalysisViolation>();
-}
-
 /**
  * Update the document information once updated. Register
  * the number of lines and characters in the document.
@@ -119,7 +108,10 @@ export async function getParametersForDocument(
         return result;
       }
 
-      const workspaceFolders = vscode.workspace.workspaceFolders!;
+      let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
+      if (vscode.workspace.workspaceFolders) {
+        workspaceFolders = vscode.workspace.workspaceFolders;
+      }
 
       for (const folder of workspaceFolders) {
         const path = vscode.Uri.joinPath(folder.uri, "package.json");
