@@ -71,22 +71,23 @@ export async function getViolations(
       }
 
       if (status === STATUS_DONE) {
-        const analysisViolations: [Record<any, any>] =
+        const analysisViolations: [FileAnalysisViolation] =
           fileAnalysis.getFileAnalysis.violations;
-        const analysisToReturn = analysisViolations.map((violation) => {
-          return {
-            identifier: violation.id,
-            language: violation.language,
-            description: violation.description,
-            severity: violation.severity,
-            category: violation.category,
-            line: violation.line,
-            lineCount: violation.lineCount,
-            tool: violation.tool,
-            rule: violation.rule,
-            ruleUrl: violation.ruleUrl,
-          };
-        });
+        const analysisToReturn: FileAnalysisViolation[] =
+          analysisViolations.map((violation) => {
+            return {
+              id: violation.id,
+              language: violation.language,
+              description: violation.description,
+              severity: violation.severity,
+              category: violation.category,
+              line: violation.line,
+              lineCount: violation.lineCount,
+              tool: violation.tool,
+              rule: violation.rule,
+              ruleUrl: violation.ruleUrl,
+            };
+          });
         return analysisToReturn;
       }
     }

@@ -1,5 +1,5 @@
 export interface FileAnalysisViolation {
-  identifier: number;
+  id: number;
   language: string;
   description: string;
   severity: number;

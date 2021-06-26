@@ -114,13 +114,14 @@ export async function getParametersForDocument(
   const result: string[] = [];
 
   if (language === Language.Javascript || language === Language.Typescript) {
-
     try {
       if (!vscode.workspace.workspaceFolders) {
         return result;
       }
 
-      for (const folder of vscode.workspace.workspaceFolders!) {
+      const workspaceFolders = vscode.workspace.workspaceFolders!;
+
+      for (const folder of workspaceFolders) {
         const path = vscode.Uri.joinPath(folder.uri, "package.json");
         const packageFile = await vscode.workspace.fs.readFile(path);
         const packageFileContent = packageFile.toString();
@@ -134,7 +135,7 @@ export async function getParametersForDocument(
         }
 
         if (packageContent.dependencies.react) {
-\          result.push(ENGINE_ESLINT_REACT_ENABLED);
+          result.push(ENGINE_ESLINT_REACT_ENABLED);
         }
         if (packageContent.dependencies.graphql) {
           result.push(ENGINE_ESLINT_GRAPHQL_ENABLED);
@@ -142,10 +143,10 @@ export async function getParametersForDocument(
         if (packageContent.dependencies.typeorm) {
           result.push(ENGINE_ESLINT_TYPEORM_ENABLED);
         }
-        if (packageContent.dependencies['apollo-client']) {
+        if (packageContent.dependencies["apollo-client"]) {
           result.push(ENGINE_ESLINT_APOLLO_CLIENT_ENABLED);
         }
-        if (packageContent.dependencies['aws-sdk']) {
+        if (packageContent.dependencies["aws-sdk"]) {
           result.push(ENGINE_ESLINT_AWS_SDK_ENABLED);
         }
       }
@@ -204,7 +205,9 @@ export async function refreshDiagnostics(
     parameters
   );
 
-  console.debug(`analysis for file ${relativePath}, got ${violations.length} violations`);
+  console.debug(
+    `analysis for file ${relativePath}, got ${violations.length} violations`
+  );
 
   violations.forEach((violation) => {
     const diag = createDiagnostic(doc, violation);
@@ -231,15 +234,18 @@ function createDiagnostic(
    * Find the number of leading space so that we do not annotate
    * spaces.
    */
-  for(let i = 0 ; i < lineOfCode.length ; i++) {
-    if (lineOfCode.charAt(i) !== ' ') {
+  for (let i = 0; i < lineOfCode.length; i++) {
+    if (lineOfCode.charAt(i) !== " ") {
       break;
     }
     numberOfLeadingSpaces = numberOfLeadingSpaces + 1;
   }
 
   // create range that represents, where in the document the word is
-  const startPosition = new vscode.Position(textLine.range.start.line, textLine.range.start.character + numberOfLeadingSpaces);
+  const startPosition = new vscode.Position(
+    textLine.range.start.line,
+    textLine.range.start.character + numberOfLeadingSpaces
+  );
   const range = new vscode.Range(startPosition, textLine.range.end);
 
   const diagnostic = new vscode.Diagnostic(

@@ -1,6 +1,6 @@
 export const DIAGNOSTICS_COLLECTION_NAME = "codiga";
 export const GRAPHQL_ENDPOINT = "https://api.code-inspector.com/graphql";
-export const NUMBER_OF_CHARACTERS_TO_TRIGGER_ANALYSIS = 1;
+export const NUMBER_OF_CHARACTERS_TO_TRIGGER_ANALYSIS = 3;
 export const POLLING_INTERVAL_MILLISECONDS = 200;
 export const POLLING_DEADLINE_MILLISECONDS = 10000;
 
