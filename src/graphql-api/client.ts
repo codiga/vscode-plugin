@@ -16,23 +16,30 @@ export function initializeClient(): void {
  * Get the access key from the VScode preferences.
  * @returns
  */
-function getAccessKey(): string {
+function getAccessKey(): string | undefined {
   return vscode.workspace
     .getConfiguration()
-    .get("code-inspector.api.accessKey")!;
+    .get("code-inspector.api.accessKey");
 }
 
 /**
  * Get the secret key from the VScode preferences.
  * @returns
  */
-function getSecretKey(): string {
+function getSecretKey(): string | undefined {
   return vscode.workspace
     .getConfiguration()
     .get("code-inspector.api.secretKey")!;
 }
 
 function generateHeaders() {
+  const accessKey = getAccessKey();
+  const secretKey = getSecretKey();
+
+  if (!accessKey || !secretKey) {
+    return {};
+  }
+
   const headers = {
     "X-Access-Key": getAccessKey(),
     "X-Secret-Key": getSecretKey(),
