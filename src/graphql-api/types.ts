@@ -20,6 +20,23 @@ export interface FileAnalysis {
   violations: FileAnalysisViolation[];
 }
 
+export interface Repository {
+  kind: string;
+  url: string;
+}
+
+export interface Project {
+  id: number;
+  name: string;
+  repository: Repository | undefined;
+}
+
+export interface User {
+  id: number;
+  accountType: string;
+  username: string;
+}
+
 export enum Language {
   Java = "Java",
   Javascript = "Javascript",

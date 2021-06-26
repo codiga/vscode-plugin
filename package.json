@@ -52,6 +52,12 @@
             "description": "Enable Codiga Analysis Engine",
             "scope": "application"
           },
+          "code-inspector.associatedProject": {
+            "type": "number",
+            "default": 0,
+            "description": "Associated project id from Code Inspector",
+            "scope": "resource"
+          },
           "code-inspector.api.accessKey": {
             "type": "string",
             "default": "<ACCESS-KEY>",
@@ -73,8 +79,19 @@
     ],
     "commands": [
       {
+        "category": "Code Inspector",
         "command": "code-inspector.testAPI",
-        "title": "Test Code Inspector API"
+        "title": "Test API connection"
+      },
+      {
+        "category": "Code Inspector",
+        "command": "code-inspector.configureAssociatedProject",
+        "title": "Configure Associated Project"
+      },
+      {
+        "category": "Code Inspector",
+        "command": "code-inspector.getAssociatedProject",
+        "title": "Show associated project"
       }
     ]
   },

@@ -1,4 +1,4 @@
-import { GraphQLClient, gql } from 'graphql-request';
+import { GraphQLClient, gql } from "graphql-request";
 import * as vscode from "vscode";
 import { GRAPHQL_ENDPOINT } from "../constants";
 
@@ -16,23 +16,34 @@ export function initializeClient(): void {
  * Get the access key from the VScode preferences.
  * @returns
  */
-function getAccessKey(): string {
-  return vscode.workspace.getConfiguration().get("code-inspector.api.accessKey")!;
+function getAccessKey(): string | undefined {
+  return vscode.workspace
+    .getConfiguration()
+    .get("code-inspector.api.accessKey");
 }
 
 /**
  * Get the secret key from the VScode preferences.
  * @returns
  */
-function getSecretKey(): string {
-  return vscode.workspace.getConfiguration().get("code-inspector.api.secretKey")!;
+function getSecretKey(): string | undefined {
+  return vscode.workspace
+    .getConfiguration()
+    .get("code-inspector.api.secretKey");
 }
 
 function generateHeaders() {
+  const accessKey = getAccessKey();
+  const secretKey = getSecretKey();
+
+  if (!accessKey || !secretKey) {
+    return {};
+  }
+
   const headers = {
-        "X-Access-Key": getAccessKey(),
-        "X-Secret-Key": getSecretKey(),
-      };
+    "X-Access-Key": getAccessKey(),
+    "X-Secret-Key": getSecretKey(),
+  };
   return headers;
 }
 
@@ -44,9 +55,10 @@ function generateHeaders() {
  */
 export function doQuery(
   graphqlQuery: string,
-  variables: Record<string, string | undefined | null | number> = {},
+  variables: Record<string, string | undefined | null | number> = {}
 ) {
-  const query = client.request(graphqlQuery, variables, generateHeaders())
+  const query = client
+    .request(graphqlQuery, variables, generateHeaders())
     .catch(() => {
       return undefined;
     });
@@ -61,9 +73,10 @@ export function doQuery(
  */
 export function doMutation(
   graphqlMutation: string,
-  variables: Record<string, string | undefined | null> = {}
+  variables: Record<string, string | undefined | number | null> = {}
 ) {
-  const query = client.request(graphqlMutation, variables, generateHeaders())
+  const query = client
+    .request(graphqlMutation, variables, generateHeaders())
     .catch((e) => {
       console.debug(e);
       return undefined;

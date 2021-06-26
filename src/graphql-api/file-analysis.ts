@@ -8,6 +8,7 @@ import {
   STATUS_ERROR,
 } from "../constants";
 import { GET_FILE_ANALYSIS } from "./queries";
+import { getAssociatedProjectIdentifier } from "../utils/configurationUtils";
 
 function sleep(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time));
@@ -31,11 +32,18 @@ export async function getViolations(
   // Convert array of parameters into k1=v1;k2=v2
   const parametersString = parameters.join(";");
 
-  const variables: Record<string, string | undefined | null> = {
+  let associatedProjectId: number | null = null;
+
+  const associatedProjectIdentifier = getAssociatedProjectIdentifier();
+  if (associatedProjectIdentifier) {
+    associatedProjectId = associatedProjectIdentifier;
+  }
+
+  const variables: Record<string, string | undefined | number | null> = {
     language: language,
     code: content,
     filename: filename,
-    projectId: null,
+    projectId: associatedProjectId,
     parameters: parametersString.length > 0 ? parametersString : null,
   };
 
