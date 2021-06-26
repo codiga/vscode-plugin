@@ -1,1 +1,2 @@
 src/graphql/mutation.ts
+src/graphql/queries.ts
