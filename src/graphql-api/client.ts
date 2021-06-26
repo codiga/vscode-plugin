@@ -29,7 +29,7 @@ function getAccessKey(): string | undefined {
 function getSecretKey(): string | undefined {
   return vscode.workspace
     .getConfiguration()
-    .get("code-inspector.api.secretKey")!;
+    .get("code-inspector.api.secretKey");
 }
 
 function generateHeaders() {
