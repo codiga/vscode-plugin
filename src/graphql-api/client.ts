@@ -1,4 +1,4 @@
-import { GraphQLClient, gql } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
 import * as vscode from "vscode";
 import { GRAPHQL_ENDPOINT } from "../constants";
 

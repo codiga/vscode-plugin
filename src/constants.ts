@@ -10,6 +10,7 @@ export const STATUS_DONE = "Done";
 export const DIAGNOSTIC_CODE = "Code Inspector";
 
 export const LEARN_MORE_COMMAND = "LearnMore";
+export const IGNORE_VIOLATION_COMMAND = "IgnoreViolation";
 
 export const ENGINE_ESLINT_APOLLO_CLIENT_ENABLED =
   "ENGINE_ESLINT_APOLLO_CLIENT_ENABLED";

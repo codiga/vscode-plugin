@@ -20,7 +20,6 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".tf": Language.Terraform,
   ".js": Language.Javascript,
   ".jsx": Language.Javascript,
-  ".jsx": Language.Javascript,
   ".java": Language.Java,
   ".scala": Language.Scala,
   ".json": Language.Json,

@@ -89,6 +89,7 @@ export async function getViolations(
               description: violation.description,
               severity: violation.severity,
               category: violation.category,
+              filename: fileAnalysis.getFileAnalysis.filename,
               line: violation.line,
               lineCount: violation.lineCount,
               tool: violation.tool,

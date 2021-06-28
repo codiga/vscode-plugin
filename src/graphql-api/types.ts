@@ -4,6 +4,7 @@ export interface FileAnalysisViolation {
   description: string;
   severity: number;
   category: string;
+  filename: string;
   line: number;
   lineCount: number;
   tool: string;
