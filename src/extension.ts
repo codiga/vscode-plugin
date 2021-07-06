@@ -61,13 +61,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
   subscribeToDocumentChanges(context, diagnotics);
 
-  const disposable = vscode.commands.registerCommand(
-    "code-inspector.testAPI",
-    () => {
-      testApi();
-    }
-  );
+  /**
+   * Register the command to test the connection to the Code Inspector API.
+   */
+  vscode.commands.registerCommand("code-inspector.testAPI", () => {
+    testApi();
+  });
 
+  /**
+   * Register the command to associate a project with Code Inspector.
+   */
   vscode.commands.registerCommand(
     "code-inspector.configureAssociatedProject",
     () => {
@@ -75,18 +78,27 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  /**
+   * Register the command to see the register project
+   */
   vscode.commands.registerCommand("code-inspector.getAssociatedProject", () => {
     getAssociatedProject();
   });
 
-  context.subscriptions.push(disposable);
-
+  /**
+   * Register the learn more command, this is a command that is pushed
+   * when we have a diagnostic being shown for a violation.
+   */
   context.subscriptions.push(
     vscode.commands.registerCommand(LEARN_MORE_COMMAND, (url) =>
       vscode.env.openExternal(vscode.Uri.parse(url))
     )
   );
 
+  /**
+   * Register the command to ignore a diagnostic. This is a command
+   * that is pushed when we have a diagnostic being shown/surfaced.
+   */
   context.subscriptions.push(
     vscode.commands.registerCommand(
       IGNORE_VIOLATION_COMMAND,

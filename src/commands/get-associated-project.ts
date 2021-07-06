@@ -34,7 +34,7 @@ export async function getAssociatedProject(): Promise<void> {
 
   // Find the associated project.
   const project: Project | undefined = projects.find(
-    (p) => p.id == currentValue
+    (p) => p.id === currentValue
   );
 
   if (!project) {

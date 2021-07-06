@@ -49,7 +49,7 @@
           "code-inspector.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "Enable Codiga Analysis Engine",
+            "description": "Enable Code Inspector Analysis Engine",
             "scope": "application"
           },
           "code-inspector.associatedProject": {
