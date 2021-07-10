@@ -7,7 +7,7 @@ import {
   ENGINE_ESLINT_GRAPHQL_ENABLED,
   ENGINE_ESLINT_REACT_ENABLED,
   ENGINE_ESLINT_TYPEORM_ENABLED,
-  NUMBER_OF_CHARACTERS_TO_TRIGGER_ANALYSIS,
+  TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { FileAnalysisViolation, Language } from "../graphql-api/types";
 import { getViolations } from "../graphql-api/file-analysis";
@@ -33,6 +33,8 @@ const DOCUMENTS_INFORMATIONS: Record<string, DocumentInformation> = {};
 const DIAGNOSTICS_TO_VIOLATIONS: Map<vscode.Diagnostic, FileAnalysisViolation> =
   new Map();
 
+const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
+
 /**
  * Just a function to get access to DIAGNOSTICS_TO_VIOLATIONS outside this module.
  * @param diag
@@ -45,29 +47,45 @@ export function getViolationFromDiagnostic(
 }
 
 /**
- * Indicates if a document should be updated or not based
- * on the number of lines or characters being modified. We do this
- * to avoid hammering the API with too many calls.
- * @param doc - the vscode document under analysis
- * @returns if the document should be updated or not.
+ * This function is here to check when we should (or not)
+ * inspect a document. It checks that there was not another
+ * request for inspection within TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS
+ * and if not, trigger an analysis.
+ *
+ * @param doc - the document we are trying to update
+ * @returns - if we should run the analysis or not
  */
-function shouldUpdateDocument(doc: vscode.TextDocument): boolean {
-  const uri = doc.uri;
-  const docUriString: string = uri.toString();
-  if (!DOCUMENTS_INFORMATIONS[docUriString]) {
-    return true;
-  }
-  const characterDifference: number = Math.abs(
-    DOCUMENTS_INFORMATIONS[docUriString].characters - doc.getText().length
+async function shouldProceed(doc: vscode.TextDocument): Promise<boolean> {
+  const filename = doc.uri.toString();
+  const currentTimestampMs = Date.now();
+
+  /**
+   * Set the timestamp in a hashmap so that other thread
+   * and analysis request can see it.
+   */
+  DIAGNOSTICS_TIMESTAMP.set(filename, currentTimestampMs);
+
+  /**
+   * Wait for some time. During that time, the user
+   * might type another key that trigger other analysis
+   * (and will update the hashmap).
+   */
+  await new Promise((r) =>
+    setTimeout(r, TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS)
   );
 
-  if (characterDifference >= NUMBER_OF_CHARACTERS_TO_TRIGGER_ANALYSIS) {
-    return true;
-  }
-  if (DOCUMENTS_INFORMATIONS[docUriString].lines !== doc.lineCount) {
-    return true;
-  }
-  return false;
+  /**
+   * Get the actual timeout in the hashmap. It might have
+   * changed since we sleep and therefore, take tha latest
+   * value.
+   */
+  const actualTimeoutMs = DIAGNOSTICS_TIMESTAMP.get(filename);
+
+  /**
+   * check that the actual latest value is the one we called
+   * the function with. If yes, let's go!
+   */
+  return actualTimeoutMs === currentTimestampMs;
 }
 
 /**
@@ -179,8 +197,8 @@ export async function refreshDiagnostics(
     return;
   }
 
-  if (!shouldUpdateDocument(doc)) {
-    console.debug("doc should NOT be updated");
+  const shouldDoAnalysis = await shouldProceed(doc);
+  if (!shouldDoAnalysis) {
     return;
   }
 
@@ -202,6 +220,9 @@ export async function refreshDiagnostics(
   );
 
   violations.forEach((violation) => {
+    // console.debug(
+    //   `violation at line ${violation.line}: ${violation.description}`
+    // );
     const diag = createDiagnostic(doc, violation);
     newDiagnostics.push(diag);
     DIAGNOSTICS_TO_VIOLATIONS.set(diag, violation);
