@@ -4,6 +4,7 @@ import { IGNORE_VIOLATION } from "../graphql-api/mutations";
 import { FileAnalysisViolation } from "../graphql-api/types";
 import { getAssociatedProjectIdentifier } from "../utils/configurationUtils";
 import { IgnoreViolationType } from "../utils/IgnoreViolationType";
+import { hasKeys } from "../graphql-api/configuration";
 
 /**
  * Command to ignore a violation for a project or a file.
@@ -13,12 +14,19 @@ export async function ignoreViolation(
   ignoreViolationType: IgnoreViolationType,
   violation: FileAnalysisViolation
 ): Promise<void> {
+  if (!hasKeys()) {
+    vscode.window.showInformationMessage(
+      "Code Inspector API keys not configured. Configure the API keys first"
+    );
+    return;
+  }
+
   // Get the current value of the associated project.
   const currentValue = getAssociatedProjectIdentifier();
 
   if (!currentValue || currentValue === 0) {
     vscode.window.showInformationMessage(
-      "No project associated with Code Inspector, associate a Code Inspector project first"
+      "No project associated with Code Inspector, enter your API key in settings and associate a Code Inspector project first"
     );
     return;
   }

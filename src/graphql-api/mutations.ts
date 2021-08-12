@@ -7,6 +7,7 @@ export const CREATE_FILE_ANALYSIS: string = gql`
     $filename: String!
     $projectId: Long
     $parameters: String
+    $fingerprint: String
   ) {
     createFileAnalysis(
       language: $language
@@ -14,6 +15,7 @@ export const CREATE_FILE_ANALYSIS: string = gql`
       filename: $filename
       projectId: $projectId
       parameters: $parameters
+      fingerprint: $fingerprint
     )
     recordAccess(accessType: VsCode, actionType: FileAnalysisRequest)
   }

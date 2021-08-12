@@ -1,7 +1,10 @@
 # Change Log
 
-
 ## [Unreleased]
+
+## [0.0.10]
+
+- Allow analysis without putting API keys
 
 ## [0.0.5]
 

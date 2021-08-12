@@ -23,8 +23,8 @@ export const GET_PROJECTS: string = gql`
 `;
 
 export const GET_FILE_ANALYSIS: string = gql`
-  query getFileAnalysis($identifier: Long!) {
-    getFileAnalysis(id: $identifier) {
+  query getFileAnalysis($identifier: Long!, $fingerprint: String) {
+    getFileAnalysis(id: $identifier, fingerprint: $fingerprint) {
       status
       id
       filename
