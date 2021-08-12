@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
-import * as vscode from "vscode";
 import { GRAPHQL_ENDPOINT } from "../constants";
+import { getAccessKey, getSecretKey } from "./configuration";
 
 var client: GraphQLClient;
 
@@ -10,26 +10,6 @@ var client: GraphQLClient;
  */
 export function initializeClient(): void {
   client = new GraphQLClient(GRAPHQL_ENDPOINT);
-}
-
-/**
- * Get the access key from the VScode preferences.
- * @returns
- */
-function getAccessKey(): string | undefined {
-  return vscode.workspace
-    .getConfiguration()
-    .get("code-inspector.api.accessKey");
-}
-
-/**
- * Get the secret key from the VScode preferences.
- * @returns
- */
-function getSecretKey(): string | undefined {
-  return vscode.workspace
-    .getConfiguration()
-    .get("code-inspector.api.secretKey");
 }
 
 function generateHeaders() {

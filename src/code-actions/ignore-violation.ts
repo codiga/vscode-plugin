@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { DIAGNOSTIC_CODE, IGNORE_VIOLATION_COMMAND } from "../constants";
 import { getViolationFromDiagnostic } from "../diagnostics/diagnostics";
 import { IgnoreViolationType } from "../utils/IgnoreViolationType";
+import { hasKeys } from "../graphql-api/configuration";
 
 interface ActionData {
   title: string;
@@ -43,6 +44,13 @@ export class IgnoreViolationCodeAction implements vscode.CodeActionProvider {
     _token: vscode.CancellationToken
   ): vscode.CodeAction[] {
     const codeActions: vscode.CodeAction[] = [];
+
+    /**
+     * If API keys are not configured, we return nothing.
+     */
+    if (!hasKeys()) {
+      return codeActions;
+    }
 
     context.diagnostics
       .filter((diagnostic) => diagnostic.code === DIAGNOSTIC_CODE)
