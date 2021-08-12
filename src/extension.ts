@@ -18,19 +18,21 @@ import { ignoreViolation } from "./commands/ignore-violation";
 import { IgnoreViolationCodeAction } from "./code-actions/ignore-violation";
 import { FileAnalysisViolation } from "./graphql-api/types";
 import { IgnoreViolationType } from "./utils/IgnoreViolationType";
+import { initializeLocalStorage } from "./utils/localStorage";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
   initializeClient();
+  initializeLocalStorage(context.workspaceState);
 
   const user = await getUser();
 
-  if (!user) {
-    vscode.window.showInformationMessage(
-      "Code Inspector: invalid API keys, configure your API keys"
-    );
-  }
+  // if (!user) {
+  //   vscode.window.showInformationMessage(
+  //     "Code Inspector: invalid API keys, configure your API keys"
+  //   );
+  // }
 
   const diagnotics = vscode.languages.createDiagnosticCollection(
     DIAGNOSTICS_COLLECTION_NAME

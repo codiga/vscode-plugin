@@ -9,6 +9,7 @@ import {
 } from "../constants";
 import { GET_FILE_ANALYSIS } from "./queries";
 import { getAssociatedProjectIdentifier } from "../utils/configurationUtils";
+import { getUserFingerprint } from "../utils/configurationUtils";
 
 function sleep(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time));
@@ -39,11 +40,15 @@ export async function getViolations(
     associatedProjectId = associatedProjectIdentifier;
   }
 
+  // Get the fingerprint from localstorage to initiate the request
+  const userFingerprint = getUserFingerprint();
+
   const variables: Record<string, string | undefined | number | null> = {
     language: language,
     code: content,
     filename: filename,
     projectId: associatedProjectId,
+    fingerprint: userFingerprint,
     parameters: parametersString.length > 0 ? parametersString : null,
   };
 
@@ -63,6 +68,7 @@ export async function getViolations(
   while (now < deadline) {
     const fileAnalysis = await doQuery(GET_FILE_ANALYSIS, {
       identifier: fileAnalysisIdentifier,
+      fingerprint: userFingerprint,
     });
 
     if (!fileAnalysis) {

@@ -18,7 +18,7 @@ export async function ignoreViolation(
 
   if (!currentValue || currentValue === 0) {
     vscode.window.showInformationMessage(
-      "No project associated with Code Inspector, associate a Code Inspector project first"
+      "No project associated with Code Inspector, enter your API key in settings and associate a Code Inspector project first"
     );
     return;
   }
