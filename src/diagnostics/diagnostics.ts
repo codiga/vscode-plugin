@@ -4,7 +4,9 @@ import {
   DIAGNOSTIC_CODE,
   ENGINE_ESLINT_APOLLO_CLIENT_ENABLED,
   ENGINE_ESLINT_AWS_SDK_ENABLED,
+  ENGINE_ESLINT_CHROME_EXTENSION_ENABLED,
   ENGINE_ESLINT_GRAPHQL_ENABLED,
+  ENGINE_ESLINT_JEST_ENABLED,
   ENGINE_ESLINT_REACT_ENABLED,
   ENGINE_ESLINT_TYPEORM_ENABLED,
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
@@ -132,32 +134,58 @@ export async function getParametersForDocument(
       }
 
       for (const folder of workspaceFolders) {
-        const path = vscode.Uri.joinPath(folder.uri, "package.json");
-        const packageFile = await vscode.workspace.fs.readFile(path);
-        const packageFileContent = packageFile.toString();
-        const packageContent = JSON.parse(packageFileContent);
-
-        /**
-         * If there is nothing in the package content, just return.
-         */
-        if (!packageContent || !packageContent.dependencies) {
-          continue;
+        // Read manifest.json to detect potential Chrome plugin
+        try {
+          const manifestPath = vscode.Uri.joinPath(folder.uri, "manifest.json");
+          const manifestFile = await vscode.workspace.fs.readFile(manifestPath);
+          const manifestFileContent = manifestFile.toString();
+          const manifestContent = JSON.parse(manifestFileContent);
+          if (manifestContent.background && manifestContent.permissions) {
+            result.push(ENGINE_ESLINT_CHROME_EXTENSION_ENABLED);
+          }
+        } catch (err) {
+          // noops
         }
 
-        if (packageContent.dependencies.react) {
-          result.push(ENGINE_ESLINT_REACT_ENABLED);
-        }
-        if (packageContent.dependencies.graphql) {
-          result.push(ENGINE_ESLINT_GRAPHQL_ENABLED);
-        }
-        if (packageContent.dependencies.typeorm) {
-          result.push(ENGINE_ESLINT_TYPEORM_ENABLED);
-        }
-        if (packageContent.dependencies["apollo-client"]) {
-          result.push(ENGINE_ESLINT_APOLLO_CLIENT_ENABLED);
-        }
-        if (packageContent.dependencies["aws-sdk"]) {
-          result.push(ENGINE_ESLINT_AWS_SDK_ENABLED);
+        try {
+          // Read package.json for nodejs dependencies
+          const packageFilePath = vscode.Uri.joinPath(
+            folder.uri,
+            "package.json"
+          );
+          const packageFile = await vscode.workspace.fs.readFile(
+            packageFilePath
+          );
+          const packageFileContent = packageFile.toString();
+          const packageContent = JSON.parse(packageFileContent);
+
+          /**
+           * If there is nothing in the package content, just return.
+           */
+          if (!packageContent || !packageContent.dependencies) {
+            continue;
+          }
+
+          if (packageContent.dependencies.react) {
+            result.push(ENGINE_ESLINT_REACT_ENABLED);
+          }
+          if (packageContent.dependencies.graphql) {
+            result.push(ENGINE_ESLINT_GRAPHQL_ENABLED);
+          }
+          if (packageContent.dependencies.typeorm) {
+            result.push(ENGINE_ESLINT_TYPEORM_ENABLED);
+          }
+          if (packageContent.dependencies.jest) {
+            result.push(ENGINE_ESLINT_JEST_ENABLED);
+          }
+          if (packageContent.dependencies["apollo-client"]) {
+            result.push(ENGINE_ESLINT_APOLLO_CLIENT_ENABLED);
+          }
+          if (packageContent.dependencies["aws-sdk"]) {
+            result.push(ENGINE_ESLINT_AWS_SDK_ENABLED);
+          }
+        } catch (err) {
+          // noops
         }
       }
     } catch (error: unknown) {

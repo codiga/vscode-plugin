@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.1.1]
+
+- Support chrome plugin
+- Support jest
+
 ## [0.0.10]
 
 - Allow analysis without putting API keys
