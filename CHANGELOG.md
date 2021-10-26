@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.2]
+
+- New API Token format
+
 ## [0.1.1]
 
 - Support chrome plugin

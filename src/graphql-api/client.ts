@@ -1,8 +1,8 @@
 import { GraphQLClient } from "graphql-request";
 import { GRAPHQL_ENDPOINT } from "../constants";
-import { getAccessKey, getSecretKey } from "./configuration";
+import { getAccessKey, getApiToken, getSecretKey } from "./configuration";
 
-var client: GraphQLClient;
+let client: GraphQLClient;
 
 /**
  * Initialize the GraphQL client that will be used
@@ -12,17 +12,28 @@ export function initializeClient(): void {
   client = new GraphQLClient(GRAPHQL_ENDPOINT);
 }
 
-function generateHeaders() {
+function generateHeaders(): Record<string, string> {
   const accessKey = getAccessKey();
   const secretKey = getSecretKey();
+  const apiToken = getApiToken();
+
+  /**
+   * First, check if there is a token. If that is the case,
+   * prioritize its use.
+   */
+  if (apiToken && apiToken.length > 20) {
+    return {
+      "X-Api-Token": apiToken,
+    };
+  }
 
   if (!accessKey || !secretKey) {
     return {};
   }
 
   const headers = {
-    "X-Access-Key": getAccessKey(),
-    "X-Secret-Key": getSecretKey(),
+    "X-Access-Key": accessKey,
+    "X-Secret-Key": secretKey,
   };
   return headers;
 }

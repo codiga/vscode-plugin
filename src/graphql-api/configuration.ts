@@ -1,6 +1,14 @@
 import * as vscode from "vscode";
 
 /**
+ * Get the API Token from the VScode preferences.
+ * @returns
+ */
+export function getApiToken(): string | undefined {
+  return vscode.workspace.getConfiguration().get("code-inspector.api.token");
+}
+
+/**
  * Get the access key from the VScode preferences.
  * @returns
  */
