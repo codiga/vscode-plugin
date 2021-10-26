@@ -26,8 +26,6 @@ export async function activate(context: vscode.ExtensionContext) {
   initializeClient();
   initializeLocalStorage(context.workspaceState);
 
-  const user = await getUser();
-
   // if (!user) {
   //   vscode.window.showInformationMessage(
   //     "Code Inspector: invalid API keys, configure your API keys"
