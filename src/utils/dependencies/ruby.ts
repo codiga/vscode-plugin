@@ -35,25 +35,3 @@ export async function readGemfile(gemfileUri: vscode.Uri): Promise<string[]> {
   }
   return result;
 }
-
-/**
- * Get the dependencies for the project. Check the folder and if we find
- * a gemfile file.
- *
- * @returns
- */
-export async function getDependencies(): Promise<string[]> {
-  let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
-  if (vscode.workspace.workspaceFolders) {
-    workspaceFolders = vscode.workspace.workspaceFolders;
-  }
-
-  for (const folder of workspaceFolders) {
-    // Read Gemfile for Ruby dependencies
-    const packageFilePath = vscode.Uri.joinPath(folder.uri, GEMFILE_FILE);
-    if (fs.existsSync(packageFilePath.path)) {
-      return await readGemfile(packageFilePath);
-    }
-  }
-  return [];
-}

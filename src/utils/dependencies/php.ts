@@ -38,25 +38,3 @@ export async function readComposerFile(
   }
   return result;
 }
-
-/**
- * Get the dependencies for the project. Check the folder and if we find
- * a dependency file, return the dependencies.
- * @returns
- */
-export async function getDependencies(): Promise<string[]> {
-  let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
-
-  if (vscode.workspace.workspaceFolders) {
-    workspaceFolders = vscode.workspace.workspaceFolders;
-  }
-
-  for (const folder of workspaceFolders) {
-    // Read package.json for nodejs dependencies
-    const packageFilePath = vscode.Uri.joinPath(folder.uri, COMPOSER_FILE);
-    if (fs.existsSync(packageFilePath.path)) {
-      return await readComposerFile(packageFilePath);
-    }
-  }
-  return [];
-}
