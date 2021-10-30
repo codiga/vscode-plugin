@@ -3,7 +3,6 @@
 import * as vscode from "vscode";
 
 import { initializeClient } from "./graphql-api/client";
-import { getUser } from "./graphql-api/user";
 import {
   DIAGNOSTICS_COLLECTION_NAME,
   IGNORE_VIOLATION_COMMAND,
@@ -14,6 +13,7 @@ import { testApi } from "./commands/test-api";
 import { configureProject } from "./commands/configure-associated-project";
 import { MoreInfo } from "./code-actions/more-info";
 import { getAssociatedProject } from "./commands/get-associated-project";
+import { useRecipe } from "./commands/use-recipe";
 import { ignoreViolation } from "./commands/ignore-violation";
 import { IgnoreViolationCodeAction } from "./code-actions/ignore-violation";
 import { FileAnalysisViolation } from "./graphql-api/types";
@@ -77,6 +77,13 @@ export async function activate(context: vscode.ExtensionContext) {
       configureProject();
     }
   );
+
+  /**
+   * Register the command to read a recipe.
+   */
+  vscode.commands.registerCommand("codiga.recipe", () => {
+    useRecipe();
+  });
 
   /**
    * Register the command to see the register project

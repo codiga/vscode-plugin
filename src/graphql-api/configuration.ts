@@ -38,7 +38,7 @@ export function hasKeys(): boolean {
   if (typeof accessKey === "undefined" || typeof secretKey === "undefined") {
     return false;
   }
-  if (accessKey.length == 0 || secretKey.length == 0) {
+  if (accessKey.length === 0 || secretKey.length === 0) {
     return false;
   }
   if (accessKey === "<ACCESS-KEY>" || secretKey === "<SECRET-KEY>") {

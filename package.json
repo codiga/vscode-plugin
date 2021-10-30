@@ -92,6 +92,11 @@
         "title": "Test API connection"
       },
       {
+        "category": "Codiga",
+        "command": "codiga.recipe",
+        "title": "Use recipe"
+      },
+      {
         "category": "Code Inspector",
         "command": "code-inspector.configureAssociatedProject",
         "title": "Configure Associated Project"

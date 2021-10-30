@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { Language } from "../graphql-api/types";
 const pathModule = require("path");
 
@@ -28,6 +29,20 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".yaml": Language.Yaml,
   ".bash": Language.Shell,
 };
+
+export function getBasename(filename: string): string | undefined {
+  const parsedFilename: any = pathModule.parse(filename);
+  const basename: string | undefined = parsedFilename.base;
+  return basename;
+}
+
+export function getLanguageForDocument(
+  document: vscode.TextDocument
+): Language {
+  const path = document.uri.path;
+  const relativePath = vscode.workspace.asRelativePath(path);
+  return getLanguageForFile(relativePath);
+}
 
 export function getLanguageForFile(filename: string): Language {
   const parsedFilename: any = pathModule.parse(filename);

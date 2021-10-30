@@ -26,3 +26,8 @@ export const ENGINE_ESLINT_AWS_SDK_ENABLED =
   "ENGINE_ESLINT_AWS_SDK_ENABLED=true";
 export const ENGINE_ESLINT_TYPEORM_ENABLED =
   "ENGINE_ESLINT_TYPEORM_ENABLED=true";
+
+export const NODE_PACKAGE_FILE = "package.json";
+export const COMPOSER_FILE = "composer.json";
+export const REQUIREMENTS_FILE = "requirements.txt";
+export const GEMFILE_FILE = "Gemfile";
