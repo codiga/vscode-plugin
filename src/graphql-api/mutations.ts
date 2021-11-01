@@ -47,3 +47,14 @@ export const IGNORE_VIOLATION: string = gql`
     }
   }
 `;
+
+export const USE_RECIPE: string = gql`
+  mutation createFileAnalysis($fingerprint: String, $recipeId: Long!) {
+    recordAccess(
+      accessType: VsCode
+      actionType: AssistantRecipeUse
+      recipeId: $recipeId
+      userFingerprint: $fingerprint
+    )
+  }
+`;

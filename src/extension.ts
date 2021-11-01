@@ -13,12 +13,14 @@ import { testApi } from "./commands/test-api";
 import { configureProject } from "./commands/configure-associated-project";
 import { MoreInfo } from "./code-actions/more-info";
 import { getAssociatedProject } from "./commands/get-associated-project";
-import { useRecipe } from "./commands/use-recipe";
+import { useRecipeExtended } from "./commands/use-recipe-extended";
 import { ignoreViolation } from "./commands/ignore-violation";
 import { IgnoreViolationCodeAction } from "./code-actions/ignore-violation";
 import { FileAnalysisViolation } from "./graphql-api/types";
 import { IgnoreViolationType } from "./utils/IgnoreViolationType";
 import { initializeLocalStorage } from "./utils/localStorage";
+import { useRecipeQuick } from "./commands/use-recipe-quick";
+import { createRecipe } from "./commands/create-recipe";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -60,7 +62,6 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   subscribeToDocumentChanges(context, diagnotics);
-
   /**
    * Register the command to test the connection to the Code Inspector API.
    */
@@ -77,12 +78,17 @@ export async function activate(context: vscode.ExtensionContext) {
       configureProject();
     }
   );
-
   /**
    * Register the command to read a recipe.
    */
-  vscode.commands.registerCommand("codiga.recipe", () => {
-    useRecipe();
+  vscode.commands.registerCommand("codiga.recipeExtended", () => {
+    useRecipeExtended();
+  });
+  vscode.commands.registerCommand("codiga.recipeQuick", () => {
+    useRecipeQuick();
+  });
+  vscode.commands.registerCommand("codiga.recipeCreate", () => {
+    createRecipe();
   });
 
   /**

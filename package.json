@@ -85,6 +85,15 @@
         }
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorHasSelection",
+          "command": "codiga.recipeCreate",
+          "group": "z_commands"
+        }
+      ]
+    },
     "commands": [
       {
         "category": "Code Inspector",
@@ -93,8 +102,18 @@
       },
       {
         "category": "Codiga",
-        "command": "codiga.recipe",
-        "title": "Use recipe"
+        "command": "codiga.recipeExtended",
+        "title": "Use recipe (Extended)"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.recipeQuick",
+        "title": "Use recipe (Quick)"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.recipeCreate",
+        "title": "Create Codiga Recipe"
       },
       {
         "category": "Code Inspector",

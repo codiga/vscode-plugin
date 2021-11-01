@@ -46,11 +46,13 @@ function generateHeaders(): Record<string, string> {
  */
 export function doQuery(
   graphqlQuery: string,
-  variables: Record<string, string | undefined | null | number> = {}
+  variables: Record<string, string | undefined | null | number | string[]> = {}
 ) {
   const query = client
     .request(graphqlQuery, variables, generateHeaders())
-    .catch(() => {
+    .catch((e) => {
+      console.error("exception");
+      console.error(e);
       return undefined;
     });
   return query;
@@ -69,6 +71,7 @@ export function doMutation(
   const query = client
     .request(graphqlMutation, variables, generateHeaders())
     .catch((e) => {
+      console.error("exception");
       console.debug(e);
       return undefined;
     });

@@ -10,7 +10,7 @@ import { getApiToken } from "../graphql-api/configuration";
  * through a bridge in order to get all the recipes and recommendations.
  * @returns
  */
-export async function useRecipe(): Promise<void> {
+export async function useRecipeExtended(): Promise<void> {
   if (vscode.window.activeTextEditor) {
     /**
      * Get all parameters for the request.
