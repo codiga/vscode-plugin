@@ -3,7 +3,6 @@
 import * as vscode from "vscode";
 
 import { initializeClient } from "./graphql-api/client";
-import { getUser } from "./graphql-api/user";
 import {
   DIAGNOSTICS_COLLECTION_NAME,
   IGNORE_VIOLATION_COMMAND,
@@ -19,12 +18,21 @@ import { IgnoreViolationCodeAction } from "./code-actions/ignore-violation";
 import { FileAnalysisViolation } from "./graphql-api/types";
 import { IgnoreViolationType } from "./utils/IgnoreViolationType";
 import { initializeLocalStorage } from "./utils/localStorage";
+import { useRecipe } from "./commands/use-recipe";
+import { createRecipe } from "./commands/create-recipe";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
   initializeClient();
   initializeLocalStorage(context.workspaceState);
+
+  const codigaStatusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    10
+  );
+  codigaStatusBar.command = "codiga.recipeExtended";
+  context.subscriptions.push(codigaStatusBar);
 
   // if (!user) {
   //   vscode.window.showInformationMessage(
@@ -60,7 +68,6 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   subscribeToDocumentChanges(context, diagnotics);
-
   /**
    * Register the command to test the connection to the Code Inspector API.
    */
@@ -77,6 +84,16 @@ export async function activate(context: vscode.ExtensionContext) {
       configureProject();
     }
   );
+  /**
+   * Register the command to read a recipe.
+   */
+
+  vscode.commands.registerCommand("codiga.recipeUse", () => {
+    useRecipe(codigaStatusBar);
+  });
+  vscode.commands.registerCommand("codiga.recipeCreate", () => {
+    createRecipe();
+  });
 
   /**
    * Register the command to see the register project

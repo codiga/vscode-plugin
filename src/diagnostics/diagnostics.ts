@@ -248,12 +248,15 @@ export async function refreshDiagnostics(
   );
 
   violations.forEach((violation) => {
-    // console.debug(
-    //   `violation at line ${violation.line}: ${violation.description}`
-    // );
-    const diag = createDiagnostic(doc, violation);
-    newDiagnostics.push(diag);
-    DIAGNOSTICS_TO_VIOLATIONS.set(diag, violation);
+    try {
+      const diag = createDiagnostic(doc, violation);
+      if (diag) {
+        newDiagnostics.push(diag);
+        DIAGNOSTICS_TO_VIOLATIONS.set(diag, violation);
+      }
+    } catch {
+      console.error("error while annotating code");
+    }
   });
 
   diagnostics.set(doc.uri, newDiagnostics);
@@ -263,7 +266,7 @@ export async function refreshDiagnostics(
 function createDiagnostic(
   doc: vscode.TextDocument,
   violation: FileAnalysisViolation
-): vscode.Diagnostic {
+): vscode.Diagnostic | undefined {
   const violationLine: number = violation.line - 1;
 
   const textLine: vscode.TextLine = doc.lineAt(violationLine);
@@ -289,13 +292,18 @@ function createDiagnostic(
   );
   const range = new vscode.Range(startPosition, textLine.range.end);
 
-  const diagnostic = new vscode.Diagnostic(
-    range,
-    violation.description,
-    vscode.DiagnosticSeverity.Information
-  );
-  diagnostic.code = DIAGNOSTIC_CODE;
-  return diagnostic;
+  try {
+    const diagnostic = new vscode.Diagnostic(
+      range,
+      violation.description,
+      vscode.DiagnosticSeverity.Information
+    );
+    diagnostic.code = DIAGNOSTIC_CODE;
+    return diagnostic;
+  } catch {
+    console.error("error while annotating code");
+  }
+  return undefined;
 }
 
 export function subscribeToDocumentChanges(

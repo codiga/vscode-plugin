@@ -85,11 +85,30 @@
         }
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorHasSelection",
+          "command": "codiga.recipeCreate",
+          "group": "z_commands"
+        }
+      ]
+    },
     "commands": [
       {
         "category": "Code Inspector",
         "command": "code-inspector.testAPI",
         "title": "Test API connection"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.recipeUse",
+        "title": "Codiga use recipe"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.recipeCreate",
+        "title": "Create Codiga Recipe"
       },
       {
         "category": "Code Inspector",
@@ -100,6 +119,13 @@
         "category": "Code Inspector",
         "command": "code-inspector.getAssociatedProject",
         "title": "Show associated project"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "codiga.recipeUse",
+        "key": "ctrl+alt+C",
+        "mac": "shift+cmd+C"
       }
     ]
   },

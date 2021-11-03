@@ -12,6 +12,19 @@ export interface FileAnalysisViolation {
   ruleUrl: string | undefined;
 }
 
+export interface AssistantRecipe {
+  id: number;
+  name: string;
+  description: string;
+  language: string;
+  isPublic: boolean;
+  isGlobal: boolean;
+  keywords: string[];
+  tags: string[];
+  code: string;
+  imports: string[];
+}
+
 export interface FileAnalysis {
   identifier: number;
   language: string;

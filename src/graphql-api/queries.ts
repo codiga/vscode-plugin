@@ -46,3 +46,34 @@ export const GET_FILE_ANALYSIS: string = gql`
     }
   }
 `;
+
+export const GET_RECIPES: string = gql`
+  query getRecipesForClient(
+    $keywords: [String!]!
+    $fingerprint: String
+    $dependencies: [String!]!
+    $parameters: String
+    $language: LanguageEnumeration!
+    $filename: String
+  ) {
+    getRecipesForClient(
+      keywords: $keywords
+      fingerprint: $fingerprint
+      dependencies: $dependencies
+      parameters: $parameters
+      language: $language
+      filename: $filename
+    ) {
+      id
+      name
+      description
+      isPublic
+      keywords
+      tags
+      code
+      imports
+      language
+      creationTimestampMs
+    }
+  }
+`;
