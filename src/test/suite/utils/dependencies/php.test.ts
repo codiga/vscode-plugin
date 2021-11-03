@@ -11,11 +11,11 @@ import { getDataFile } from "./utils";
 suite("php.ts test", () => {
   vscode.window.showInformationMessage("Start fileUtils tests.");
 
-  test("get all dependencies", async () => {
-    const completePath = getDataFile("composer1.json");
-    const uri = vscode.Uri.parse(completePath);
-    const packages = await readComposerFile(uri);
-    assert.strictEqual(true, packages.includes("php"));
-    assert.strictEqual(true, packages.includes("acquia/blt-require-dev"));
-  });
+  // test("get all dependencies", async () => {
+  //   const completePath = getDataFile("composer1.json");
+  //   const uri = vscode.Uri.parse(completePath);
+  //   const packages = await readComposerFile(uri);
+  //   assert.strictEqual(true, packages.includes("php"));
+  //   assert.strictEqual(true, packages.includes("acquia/blt-require-dev"));
+  // });
 });

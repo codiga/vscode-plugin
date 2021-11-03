@@ -1,6 +1,6 @@
 {
   "name": "code-inspector-vscode-plugin",
-  "displayName": "Code Inspector",
+  "displayName": "Codiga",
   "description": "Analyze code for 12+ languages using a powerful static analysis engine.",
   "publisher": "code-inspector",
   "license": "MIT",
@@ -49,13 +49,13 @@
           "code-inspector.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "Enable Code Inspector Analysis Engine",
+            "description": "Enable Codiga Analysis Engine",
             "scope": "application"
           },
           "code-inspector.associatedProject": {
             "type": "number",
             "default": 0,
-            "description": "Associated project id from Code Inspector",
+            "description": "Associated project id from Codiga",
             "scope": "resource"
           },
           "code-inspector.api.token": {
@@ -64,22 +64,6 @@
             "description": "Your Code Inspector API Token (Preferred authentication method)",
             "minLength": 32,
             "maxLength": 50,
-            "scope": "application"
-          },
-          "code-inspector.api.accessKey": {
-            "type": "string",
-            "default": "<ACCESS-KEY>",
-            "description": "Your Code Inspector access key (old authentication method, deprecated)",
-            "minLength": 6,
-            "maxLength": 20,
-            "scope": "application"
-          },
-          "code-inspector.api.secretKey": {
-            "type": "string",
-            "default": "<SECRET-KEY>",
-            "description": "Your Code Inspector secret key (old authentication method, deprecated)",
-            "minLength": 6,
-            "maxLength": 20,
             "scope": "application"
           }
         }

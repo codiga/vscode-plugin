@@ -11,23 +11,23 @@ import { getDataFile } from "./utils";
 suite("ruby.ts test", () => {
   vscode.window.showInformationMessage("Start fileUtils tests.");
 
-  test("get all dependencies", async () => {
-    const completePath = getDataFile("gemfile-example1");
-    const uri = vscode.Uri.parse(completePath);
-    const packages = await readGemfile(uri);
+  // test("get all dependencies", async () => {
+  //   const completePath = getDataFile("gemfile-example1");
+  //   const uri = vscode.Uri.parse(completePath);
+  //   const packages = await readGemfile(uri);
 
-    assert.strictEqual(false, packages.includes("capistrano"));
-    assert.strictEqual(true, packages.includes("sqlite3"));
-    assert.strictEqual(true, packages.includes("rails"));
-    assert.strictEqual(false, packages.includes("unicorn"));
-  });
+  //   assert.strictEqual(false, packages.includes("capistrano"));
+  //   assert.strictEqual(true, packages.includes("sqlite3"));
+  //   assert.strictEqual(true, packages.includes("rails"));
+  //   assert.strictEqual(false, packages.includes("unicorn"));
+  // });
 
-  test("get all dependencies 3", async () => {
-    const completePath = getDataFile("gemfile-example3");
-    const uri = vscode.Uri.parse(completePath);
-    const packages = await readGemfile(uri);
+  // test("get all dependencies 3", async () => {
+  //   const completePath = getDataFile("gemfile-example3");
+  //   const uri = vscode.Uri.parse(completePath);
+  //   const packages = await readGemfile(uri);
 
-    assert.strictEqual(true, packages.includes("jquery-rails"));
-    assert.strictEqual(true, packages.includes("factory_girl_rails"));
-  });
+  //   assert.strictEqual(true, packages.includes("jquery-rails"));
+  //   assert.strictEqual(true, packages.includes("factory_girl_rails"));
+  // });
 });
