@@ -5,11 +5,13 @@ import * as vscode from "vscode";
  * @returns
  */
 export function getApiToken(): string | undefined {
-  return vscode.workspace.getConfiguration().get("code-inspector.api.token");
+  return vscode.workspace.getConfiguration().get("codiga.api.token");
 }
 
 /**
  * Get the access key from the VScode preferences.
+ *
+ * This is an old method that uses the old API authentication method.
  * @returns
  */
 export function getAccessKey(): string | undefined {
@@ -20,6 +22,8 @@ export function getAccessKey(): string | undefined {
 
 /**
  * Get the secret key from the VScode preferences.
+ *
+ * This is an old method where people stored before their API keys.
  * @returns
  */
 export function getSecretKey(): string | undefined {

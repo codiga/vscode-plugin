@@ -71,19 +71,16 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Register the command to test the connection to the Code Inspector API.
    */
-  vscode.commands.registerCommand("code-inspector.testAPI", () => {
+  vscode.commands.registerCommand("codiga.testAPI", () => {
     testApi();
   });
 
   /**
    * Register the command to associate a project with Code Inspector.
    */
-  vscode.commands.registerCommand(
-    "code-inspector.configureAssociatedProject",
-    () => {
-      configureProject();
-    }
-  );
+  vscode.commands.registerCommand("codiga.configureAssociatedProject", () => {
+    configureProject();
+  });
   /**
    * Register the command to read a recipe.
    */
@@ -98,7 +95,7 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Register the command to see the register project
    */
-  vscode.commands.registerCommand("code-inspector.getAssociatedProject", () => {
+  vscode.commands.registerCommand("codiga.getAssociatedProject", () => {
     getAssociatedProject();
   });
 

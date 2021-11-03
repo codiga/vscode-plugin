@@ -50,7 +50,7 @@ export async function configureProject(): Promise<void> {
       : vscode.ConfigurationTarget.Global;
 
     await configuration.update(
-      "code-inspector.associatedProject",
+      "codiga.associatedProject",
       selectedProject?.id,
       target
     );

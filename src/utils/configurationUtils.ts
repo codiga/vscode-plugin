@@ -13,10 +13,21 @@ export function getAssociatedProjectIdentifier(): number | undefined {
       currentDocument.uri
     );
 
-    return configuration.get("code-inspector.associatedProject");
+    return configuration.get("codiga.associatedProject");
   } else {
     return undefined;
   }
+}
+
+/**
+ * Get the project current associated with the current workspace.
+ * @returns either the associated project or undefined.
+ */
+export function isAnalysisEnabled(): boolean {
+  return (
+    vscode.workspace.getConfiguration().get("codiga.codeAnalysisEnabled") ||
+    true
+  );
 }
 
 const generateRandomString = (length: number) => {

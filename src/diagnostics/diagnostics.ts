@@ -13,6 +13,7 @@ import {
 } from "../constants";
 import { FileAnalysisViolation, Language } from "../graphql-api/types";
 import { getViolations } from "../graphql-api/file-analysis";
+import { isAnalysisEnabled } from "../utils/configurationUtils";
 
 /**
  * The information we gather to detect any document change.
@@ -210,6 +211,10 @@ export async function refreshDiagnostics(
   const newDiagnostics: vscode.Diagnostic[] = [];
   const language: Language = getLanguageForFile(relativePath);
 
+  if (!isAnalysisEnabled()) {
+    console.debug("analysis disabled;");
+    return;
+  }
   if (language === Language.Unknown) {
     console.debug("unknown language, skipping");
     return;

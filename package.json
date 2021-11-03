@@ -44,24 +44,24 @@
   "contributes": {
     "configuration": [
       {
-        "title": "Code Inspector",
+        "title": "Codiga",
         "properties": {
-          "code-inspector.enabled": {
+          "codiga.codeAnalysisEnabled": {
             "type": "boolean",
             "default": true,
-            "description": "Enable Codiga Analysis Engine",
+            "description": "Enable Codiga Code Analysis Engine",
             "scope": "application"
           },
-          "code-inspector.associatedProject": {
+          "codiga.associatedProject": {
             "type": "number",
             "default": 0,
             "description": "Associated project id from Codiga",
             "scope": "resource"
           },
-          "code-inspector.api.token": {
+          "codiga.api.token": {
             "type": "string",
             "default": "<API-TOKEN>",
-            "description": "Your Code Inspector API Token (Preferred authentication method)",
+            "description": "Your Codiga API Token (Preferred authentication method)",
             "minLength": 32,
             "maxLength": 50,
             "scope": "application"
@@ -80,8 +80,8 @@
     },
     "commands": [
       {
-        "category": "Code Inspector",
-        "command": "code-inspector.testAPI",
+        "category": "Codiga",
+        "command": "codiga.testAPI",
         "title": "Test API connection"
       },
       {
@@ -95,13 +95,13 @@
         "title": "Create Codiga Recipe"
       },
       {
-        "category": "Code Inspector",
-        "command": "code-inspector.configureAssociatedProject",
+        "category": "Codiga",
+        "command": "codiga.configureAssociatedProject",
         "title": "Configure Associated Project"
       },
       {
-        "category": "Code Inspector",
-        "command": "code-inspector.getAssociatedProject",
+        "category": "Codiga",
+        "command": "codiga.getAssociatedProject",
         "title": "Show associated project"
       }
     ],
