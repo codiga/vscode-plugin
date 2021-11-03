@@ -1,8 +1,8 @@
 {
-  "name": "code-inspector-vscode-plugin",
+  "name": "vscode-plugin",
   "displayName": "Codiga",
   "description": "Analyze code for 12+ languages using a powerful static analysis engine.",
-  "publisher": "code-inspector",
+  "publisher": "codiga",
   "license": "MIT",
   "author": "Xcoding Labs Inc",
   "repository": {
