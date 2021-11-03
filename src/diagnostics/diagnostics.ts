@@ -248,13 +248,14 @@ export async function refreshDiagnostics(
   );
 
   violations.forEach((violation) => {
-    // console.debug(
-    //   `violation at line ${violation.line}: ${violation.description}`
-    // );
-    const diag = createDiagnostic(doc, violation);
-    if (diag) {
-      newDiagnostics.push(diag);
-      DIAGNOSTICS_TO_VIOLATIONS.set(diag, violation);
+    try {
+      const diag = createDiagnostic(doc, violation);
+      if (diag) {
+        newDiagnostics.push(diag);
+        DIAGNOSTICS_TO_VIOLATIONS.set(diag, violation);
+      }
+    } catch {
+      console.error("error while annotating code");
     }
   });
 

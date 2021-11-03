@@ -1,0 +1,284 @@
+import * as vscode from "vscode";
+import { AssistantRecipe, Language } from "../graphql-api/types";
+import { getLanguageForDocument, getBasename } from "../utils/fileUtils";
+import { getDependencies } from "../utils/dependencies/get-dependencies";
+import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
+import { getUser } from "../graphql-api/user";
+import { useRecipeCallback } from "../graphql-api/use-recipe";
+
+let latestRecipe: AssistantRecipe | undefined;
+
+/**
+ * Get the indentation at a given position
+ * @param editor
+ * @param position
+ * @returns
+ */
+function getCurrentIndentation(
+  editor: vscode.TextEditor,
+  position: vscode.Position
+): number {
+  if (!editor) {
+    return 0;
+  }
+  const doc = editor.document;
+  if (!doc) {
+    return 0;
+  }
+  const line = doc.lineAt(position.line);
+
+  if (!line) {
+    return 0;
+  }
+
+  const lineText = line.text;
+
+  let nspaces = 0;
+  for (let i = 0; i < lineText.length; i = i + 1) {
+    if (lineText.charAt(i) !== " ") {
+      break;
+    }
+    nspaces = nspaces + 1;
+  }
+  return nspaces;
+}
+
+/**
+ * Delete code that was previously added into the editor
+ * @param editor
+ * @param initialPosition
+ * @param recipe
+ * @returns
+ */
+function deleteInsertedCode(
+  editor: vscode.TextEditor,
+  initialPosition: vscode.Position,
+  recipe: AssistantRecipe | undefined
+) {
+  if (!recipe) {
+    return;
+  }
+  editor.edit((editBuilder) => {
+    const previousRecipeDecodedCode = Buffer.from(
+      recipe.code || "",
+      "base64"
+    ).toString("utf8");
+    const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
+    const lastLineAdded = previousCodeAddedLines.pop() || "";
+    const replaceRange = new vscode.Range(
+      initialPosition,
+      new vscode.Position(
+        initialPosition.line + previousCodeAddedLines.length,
+        lastLineAdded.length
+      )
+    );
+    editBuilder.delete(replaceRange);
+  });
+}
+
+/**
+ * Adapt indentation of the code. We do not change the first line
+ * but we indent the rest of the code according to the rest of the
+ * text.
+ * @param code
+ * @param indentation
+ * @returns
+ */
+function adaptIndentation(code: string, indentation: number): string {
+  if (indentation === 0) {
+    return code;
+  }
+  const codeArray = code.split("\n");
+  const newCode = [];
+  newCode.push(codeArray.shift());
+  for (const line of codeArray) {
+    newCode.push(`${" ".repeat(indentation)}${line}`);
+  }
+  const res = newCode.join("\n");
+  return res;
+}
+
+/**
+ * Add recipe to the editor. It adds at the existing position
+ * in the editor.
+ * @param editor
+ * @param initialPosition
+ * @param recipe
+ */
+function addRecipeToEditor(
+  editor: vscode.TextEditor,
+  initialPosition: vscode.Position,
+  recipe: AssistantRecipe
+) {
+  const currentIdentation = getCurrentIndentation(editor, initialPosition);
+
+  const encodedCode = recipe.code;
+  const decodedCode = adaptIndentation(
+    Buffer.from(encodedCode, "base64").toString("utf8"),
+    currentIdentation
+  );
+  if (latestRecipe) {
+    editor.edit((editBuilder) => {
+      const previousRecipeDecodedCode = adaptIndentation(
+        Buffer.from(latestRecipe?.code || "", "base64").toString("utf8"),
+        currentIdentation
+      );
+      const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
+      const lastLineAdded = previousCodeAddedLines.pop() || "";
+      const replaceRange = new vscode.Range(
+        initialPosition,
+        new vscode.Position(
+          initialPosition.line + previousCodeAddedLines.length,
+          lastLineAdded.length
+        )
+      );
+      editBuilder.replace(replaceRange, decodedCode);
+    });
+  } else {
+    editor.edit((editBuilder) => {
+      editBuilder.insert(initialPosition, decodedCode);
+    });
+  }
+
+  latestRecipe = recipe;
+}
+
+/**
+ * Update the quickpick results by doing a GraphQL query and showing
+ * the results.
+ * @param quickPickEditor
+ * @param statusBar
+ * @param keywords
+ * @param filename
+ * @param language
+ * @param dependencies
+ * @returns
+ */
+async function updateQuickpickResults(
+  quickPickEditor: vscode.QuickPick<vscode.QuickPickItem>,
+  statusBar: vscode.StatusBarItem,
+  keywords: string[],
+  filename: string | undefined,
+  language: Language,
+  dependencies: string[]
+) {
+  /**
+   * Start a request to get all recipes.
+   */
+  const recipes = await getRecipesForClient(
+    keywords,
+    filename,
+    language,
+    dependencies
+  );
+
+  if (!recipes) {
+    console.info("no result");
+    statusBar.text = "Codiga: no result";
+    quickPickEditor.items = [];
+    return;
+  }
+
+  if (recipes.length === 0) {
+    console.info("empty result");
+    statusBar.text = "Codiga: empty result";
+    quickPickEditor.items = [];
+    return;
+  }
+
+  statusBar.text = `Codiga: ${recipes.length} recipes found`;
+
+  quickPickEditor.items = recipes.map((r) => {
+    return {
+      label: r.name,
+      description: `${r.description} - (${r.keywords.join(",")})`,
+      recipe: r,
+    };
+  });
+}
+
+/**
+ * Show the user logged in in the status bar.
+ */
+async function showUser(statusBar: vscode.StatusBarItem) {
+  const user = await getUser();
+  if (!user) {
+    statusBar.text = "Codiga ready (anonymous)";
+    statusBar.show();
+  } else {
+    statusBar.text = `Codiga ready (${user.username})`;
+    statusBar.show();
+  }
+}
+
+/**
+ * Use a Codiga recipe. Main entry point of this command.
+ * @returns
+ */
+export async function useRecipe(
+  statusBar: vscode.StatusBarItem
+): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+
+  latestRecipe = undefined;
+  statusBar.name = "Codiga";
+
+  await showUser(statusBar);
+
+  /**
+   * Get all parameters for the request.
+   */
+  const doc = editor.document;
+  const path = doc.uri.path;
+  const relativePath = vscode.workspace.asRelativePath(path);
+  const language: Language = getLanguageForDocument(doc);
+  const basename: string | undefined = getBasename(relativePath);
+  const dependencies: string[] = await getDependencies(doc);
+  const initialPosition: vscode.Position = editor.selection.active;
+
+  const quickPick = vscode.window.createQuickPick();
+  quickPick.title = "Codiga Coding Assistant";
+  quickPick.placeholder = "Enter search terms";
+  quickPick.items = [];
+  quickPick.canSelectMany = false;
+  quickPick.matchOnDescription = true;
+  quickPick.onDidChangeValue(async (text) => {
+    const keywords = text.split(" ");
+    if (keywords.length === 0) {
+      return "Enter search terms";
+    }
+    await updateQuickpickResults(
+      quickPick,
+      statusBar,
+      keywords,
+      basename,
+      language,
+      dependencies
+    );
+  });
+
+  // when changing the selection, add the code to the editor.
+  quickPick.onDidChangeSelection(async (e: any) => {
+    if (e.length > 0) {
+      const recipe = e[0].recipe;
+      addRecipeToEditor(editor, initialPosition, recipe);
+    }
+  });
+
+  // when hiding, if a recipe was selected, send a callback to
+  // notify we want to use it.
+  quickPick.onDidHide(async () => {
+    if (latestRecipe) {
+      await useRecipeCallback(latestRecipe.id);
+    }
+    quickPick.dispose();
+    statusBar.hide();
+  });
+
+  quickPick.onDidAccept(() => {});
+
+  quickPick.show();
+}

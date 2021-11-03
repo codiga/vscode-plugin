@@ -102,13 +102,8 @@
       },
       {
         "category": "Codiga",
-        "command": "codiga.recipeExtended",
-        "title": "Use recipe (Extended)"
-      },
-      {
-        "category": "Codiga",
-        "command": "codiga.recipeQuick",
-        "title": "Use recipe (Quick)"
+        "command": "codiga.recipeUse",
+        "title": "Codiga use recipe"
       },
       {
         "category": "Codiga",
@@ -124,6 +119,13 @@
         "category": "Code Inspector",
         "command": "code-inspector.getAssociatedProject",
         "title": "Show associated project"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "codiga.recipeUse",
+        "key": "ctrl+alt+C",
+        "mac": "shift+cmd+C"
       }
     ]
   },

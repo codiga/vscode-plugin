@@ -1,9 +1,14 @@
-# Code Inspector Plugin
+# Codiga VS Code Extension
 
-Integrates Code Inspector analysis engine into VS Code. You can download it from the [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=code-inspector.code-inspector-vscode-plugin) directly.
+Integrates Codiga analysis engine into VS Code. You can download it from the [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=code-inspector.code-inspector-vscode-plugin) directly.
 This plugin analyzes code for 12+ languages without installing any additional tools.
 
-It checks the same rules in your VS Code editor than in your CI/CD pipeline when using [Code Inspector](https://www.code-inspector.com) for checking your code quality.
+Codiga provides two capabilities:
+
+- use of code recipes for 12+ languages
+- code analysis for 12+ languages with no setup!
+
+![Use of recipe in Python](images/use-recipe.gif)
 
 ## Supported Languages
 
@@ -11,10 +16,12 @@ C, C++, Java, Javascript, Typescript, Python, Dart, Ruby, PHP, Scala, Apex, Terr
 
 ## Setup
 
-### Getting API keys from Code Inspector
+**Note**: Setup is necessary only if you need to use your personal recipes or code analysis rules. By default, it uses a set of predefined public and safe recipes and code verification rules.
 
-You need an APU Token from [Code Inspector](https://code-inspector.com).
-Log on [Code Inspector](https://frontend.code-inspector.com) using your GitHub, GitLab or Bitbucket account.
+### Getting API keys from Codiga
+
+You need an API Token from [Codiga](https://codiga.io).
+Log on [Codiga](https://frontend.codiga.io) using your GitHub, GitLab or Bitbucket account.
 
 Then, in your preferences, generate a new API key as shown below.
 
@@ -29,16 +36,6 @@ Your access and secret keys are then generated: all you need is to add them to y
 Enter your API keys in your VS Code extension, as shown below.
 
 ![Enter your API keys](https://github.com/codeinspectorio/vscode-plugin/blob/main/images/configuration.png?raw=true)
-
-## Using Code Inspector in your CI/CD pipeline
-
-You can run the same rules in your codebase during your CI/CD pipeline and/or automate your code reviews.
-
-You can easily integrate Code Inspector with
-
-- GitHub using the [GitHub App integration](https://github.com/marketplace/code-inspector)
-- Bitbucket using the [Bitbucket App integration](https://marketplace.atlassian.com/apps/1222117/code-inspector)
-- Any other CI/CD pipeline (see our documentation)
 
 ## Sending feedback
 

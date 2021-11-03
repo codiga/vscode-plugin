@@ -13,13 +13,12 @@ import { testApi } from "./commands/test-api";
 import { configureProject } from "./commands/configure-associated-project";
 import { MoreInfo } from "./code-actions/more-info";
 import { getAssociatedProject } from "./commands/get-associated-project";
-import { useRecipeExtended } from "./commands/use-recipe-extended";
 import { ignoreViolation } from "./commands/ignore-violation";
 import { IgnoreViolationCodeAction } from "./code-actions/ignore-violation";
 import { FileAnalysisViolation } from "./graphql-api/types";
 import { IgnoreViolationType } from "./utils/IgnoreViolationType";
 import { initializeLocalStorage } from "./utils/localStorage";
-import { useRecipeQuick } from "./commands/use-recipe-quick";
+import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 
 // this method is called when your extension is activated
@@ -27,6 +26,13 @@ import { createRecipe } from "./commands/create-recipe";
 export async function activate(context: vscode.ExtensionContext) {
   initializeClient();
   initializeLocalStorage(context.workspaceState);
+
+  const codigaStatusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    10
+  );
+  codigaStatusBar.command = "codiga.recipeExtended";
+  context.subscriptions.push(codigaStatusBar);
 
   // if (!user) {
   //   vscode.window.showInformationMessage(
@@ -81,11 +87,9 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Register the command to read a recipe.
    */
-  vscode.commands.registerCommand("codiga.recipeExtended", () => {
-    useRecipeExtended();
-  });
-  vscode.commands.registerCommand("codiga.recipeQuick", () => {
-    useRecipeQuick();
+
+  vscode.commands.registerCommand("codiga.recipeUse", () => {
+    useRecipe(codigaStatusBar);
   });
   vscode.commands.registerCommand("codiga.recipeCreate", () => {
     createRecipe();
