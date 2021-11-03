@@ -65,15 +65,31 @@ function deleteInsertedCode(
     ).toString("utf8");
     const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
     const lastLineAdded = previousCodeAddedLines.pop() || "";
-    const replaceRange = new vscode.Range(
+    const deleteRange = new vscode.Range(
       initialPosition,
       new vscode.Position(
         initialPosition.line + previousCodeAddedLines.length,
         lastLineAdded.length
       )
     );
-    editBuilder.delete(replaceRange);
+    editBuilder.delete(deleteRange);
   });
+}
+
+function insertSnippet(
+  editor: vscode.TextEditor,
+  initialPosition: vscode.Position,
+  recipe: AssistantRecipe
+) {
+  console.log("insert snippet");
+  const currentIdentation = getCurrentIndentation(editor, initialPosition);
+  const decodedCode = adaptIndentation(
+    Buffer.from(recipe.code, "base64").toString("utf8"),
+    currentIdentation
+  );
+  console.log(decodedCode);
+  const snippet = new vscode.SnippetString(decodedCode);
+  editor.insertSnippet(snippet, initialPosition);
 }
 
 /**
@@ -135,6 +151,8 @@ function addRecipeToEditor(
       editBuilder.replace(replaceRange, decodedCode);
     });
   } else {
+    // const snippet = new vscode.SnippetString(decodedCode);
+    // editor.insertSnippet(snippet, initialPosition);
     editor.edit((editBuilder) => {
       editBuilder.insert(initialPosition, decodedCode);
     });
@@ -261,24 +279,50 @@ export async function useRecipe(
   });
 
   // when changing the selection, add the code to the editor.
-  quickPick.onDidChangeSelection(async (e: any) => {
+  quickPick.onDidAccept(async (e: any) => {
+    const selected = quickPick.selectedItems;
+    if (selected.length > 0) {
+      const firstRecipe: any = selected[0];
+      const recipe = firstRecipe.recipe;
+
+      /**
+       * If we select the same recipe, insert it as a snippet
+       */
+      if (latestRecipe && recipe.id === latestRecipe.id) {
+        quickPick.dispose();
+        statusBar.hide();
+        //deleteInsertedCode(editor, initialPosition, latestRecipe);
+        insertSnippet(editor, initialPosition, recipe);
+        await useRecipeCallback(latestRecipe.id);
+      } else {
+        addRecipeToEditor(editor, initialPosition, recipe);
+      }
+    }
+  });
+
+  /**
+   * We change the recipe shown as the user changes the selection
+   */
+  quickPick.onDidChangeActive((e: any) => {
     if (e.length > 0) {
       const recipe = e[0].recipe;
       addRecipeToEditor(editor, initialPosition, recipe);
     }
   });
 
+  // quickPick.onDidAccept((e) => {
+  //   console.log("accept");
+  // });
+
   // when hiding, if a recipe was selected, send a callback to
   // notify we want to use it.
   quickPick.onDidHide(async () => {
     if (latestRecipe) {
-      await useRecipeCallback(latestRecipe.id);
+      deleteInsertedCode(editor, initialPosition, latestRecipe);
     }
     quickPick.dispose();
     statusBar.hide();
   });
-
-  quickPick.onDidAccept(() => {});
 
   quickPick.show();
 }

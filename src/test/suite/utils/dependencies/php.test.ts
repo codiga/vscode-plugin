@@ -4,6 +4,7 @@ import * as assert from "assert";
 // as well as import your extension to test it
 import * as vscode from "vscode";
 import { readComposerFile } from "../../../../utils/dependencies/php";
+import { getDataFile } from "./utils";
 
 // import * as myExtension from '../../extension';
 
@@ -11,7 +12,7 @@ suite("php.ts test", () => {
   vscode.window.showInformationMessage("Start fileUtils tests.");
 
   test("get all dependencies", async () => {
-    const completePath = `${__dirname}/../../../../../src/test/data/composer1.json`;
+    const completePath = getDataFile("composer1.json");
     const uri = vscode.Uri.parse(completePath);
     const packages = await readComposerFile(uri);
     assert.strictEqual(true, packages.includes("php"));

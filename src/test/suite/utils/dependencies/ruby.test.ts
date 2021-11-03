@@ -4,6 +4,7 @@ import * as assert from "assert";
 // as well as import your extension to test it
 import * as vscode from "vscode";
 import { readGemfile } from "../../../../utils/dependencies/ruby";
+import { getDataFile } from "./utils";
 
 // import * as myExtension from '../../extension';
 
@@ -11,7 +12,7 @@ suite("ruby.ts test", () => {
   vscode.window.showInformationMessage("Start fileUtils tests.");
 
   test("get all dependencies", async () => {
-    const completePath = `${__dirname}/../../../../../src/test/data/gemfile-example1`;
+    const completePath = getDataFile("gemfile-example1");
     const uri = vscode.Uri.parse(completePath);
     const packages = await readGemfile(uri);
 
@@ -22,7 +23,7 @@ suite("ruby.ts test", () => {
   });
 
   test("get all dependencies 3", async () => {
-    const completePath = `${__dirname}/../../../../../src/test/data/gemfile-example3`;
+    const completePath = getDataFile("gemfile-example3");
     const uri = vscode.Uri.parse(completePath);
     const packages = await readGemfile(uri);
 
