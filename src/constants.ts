@@ -7,7 +7,7 @@ export const TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS = 1500;
 export const STATUS_ERROR = "Error";
 export const STATUS_DONE = "Done";
 
-export const DIAGNOSTIC_CODE = "Code Inspector";
+export const DIAGNOSTIC_CODE = "codiga";
 
 export const LEARN_MORE_COMMAND = "LearnMore";
 export const IGNORE_VIOLATION_COMMAND = "IgnoreViolation";
