@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import { getLanguageForDocument, getBasename } from "../utils/fileUtils";
+import { getBasename } from "../utils/fileUtils";
+import { getLanguageForDocument } from "../utils/vscodeUtils";
 import {
   getCurrentIndentationForDocument,
   adaptIndentation,
@@ -32,6 +33,7 @@ export async function providesCodeCompletion(
     language,
     dependencies
   );
+  console.log(recipes);
 
   const currentIdentation = getCurrentIndentationForDocument(
     document,
@@ -44,12 +46,14 @@ export async function providesCodeCompletion(
   );
 
   return recipes.map((r) => {
-    const decodedCode = adaptIndentation(
-      Buffer.from(r.code || "", "base64").toString("utf8"),
+    const decodedCode = Buffer.from(r.code || "", "base64").toString("utf8");
+    const decodedCodeWithIndentation = adaptIndentation(
+      decodedCode,
       currentIdentation
     );
 
-    const snippetCompletion = new vscode.CompletionItem(r.name);
+    const title = `${r.name} (${r.keywords.join(" ")})`;
+    const snippetCompletion = new vscode.CompletionItem(title);
     if (r.description) {
       snippetCompletion.documentation = new vscode.MarkdownString(
         `### Description\n${r.description}\n### Code\n \`\`\`python\n${decodedCode}\n\`\`\``
@@ -59,7 +63,9 @@ export async function providesCodeCompletion(
     const insertingRange = new vscode.Range(insertionPositionStart, position);
     snippetCompletion.range = insertingRange;
 
-    snippetCompletion.insertText = new vscode.SnippetString(decodedCode);
+    snippetCompletion.insertText = new vscode.SnippetString(
+      decodedCodeWithIndentation
+    );
     return snippetCompletion;
   });
 }
