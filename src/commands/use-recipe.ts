@@ -58,6 +58,7 @@ function deleteInsertedCode(
   if (!recipe) {
     return;
   }
+
   editor.edit((editBuilder) => {
     const previousRecipeDecodedCode = Buffer.from(
       recipe.code || "",

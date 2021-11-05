@@ -1,6 +1,6 @@
 # Codiga VS Code Extension
 
-Integrates Codiga analysis engine into VS Code. You can download it from the [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=code-inspector.code-inspector-vscode-plugin) directly.
+Integrates Codiga analysis engine into VS Code. You can download it from the [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin) directly.
 This plugin analyzes code for 12+ languages without installing any additional tools.
 
 Codiga provides two capabilities:
@@ -25,7 +25,7 @@ Log on [Codiga](https://frontend.codiga.io) using your GitHub, GitLab or Bitbuck
 
 Then, in your preferences, generate a new API key as shown below.
 
-![Generate API Token on Code Inspector](https://raw.githubusercontent.com/codeinspectorio/vscode-plugin/main/images/api-token-creation.gif?raw=true)
+![Generate API Token on Codiga](images/api-token-creation.gif)
 
 Your access and secret keys are then generated: all you need is to add them to your VS Code Plugin configuration.
 
@@ -35,12 +35,12 @@ Your access and secret keys are then generated: all you need is to add them to y
 
 Enter your API keys in your VS Code extension, as shown below.
 
-![Enter your API keys](https://github.com/codeinspectorio/vscode-plugin/blob/main/images/configuration.png?raw=true)
+![Enter your API keys](images/configuration.png)
 
 ## Sending feedback
 
-You can either fill a [bug report](https://github.com/codeinspectorio/vscode-plugin/issues) directly.
-If you do not want to open a ticket, you can also directly [contact us](https://code-inspector.com/contact).
+You can either fill a [bug report](https://github.com/codiga/vscode-plugin/issues) directly.
+If you do not want to open a ticket, you can also directly [contact us](https://codiga.io/contact).
 
 ## Release Notes
 
@@ -59,6 +59,6 @@ If you do not want to open a ticket, you can also directly [contact us](https://
 
 ## Learn More
 
-- [Official Documentation](https://docs.code-inspector.com)
-- [List of all supported languages](https://doc.code-inspector.com/docs/faq/#what-languages-are-supported)
-- [Privacy Policy](https://code-inspector.com/privacy)
+- [Official Documentation](https://docs.codiga.io)
+- [List of all supported languages](https://doc.codiga.io/docs/faq/#what-languages-are-supported)
+- [Privacy Policy](https://www.codiga.io/privacy)
