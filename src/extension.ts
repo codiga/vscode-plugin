@@ -7,6 +7,7 @@ import {
   DIAGNOSTICS_COLLECTION_NAME,
   IGNORE_VIOLATION_COMMAND,
   LEARN_MORE_COMMAND,
+  AUTO_COMPLETION_CHARACTER_TRIGGER,
 } from "./constants";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { testApi } from "./commands/test-api";
@@ -123,6 +124,7 @@ export async function activate(context: vscode.ExtensionContext) {
       ) => await ignoreViolation(ignoreViolationType, violation)
     )
   );
+
   allLanguages.forEach((lang) => {
     const codeCompletionProvider =
       vscode.languages.registerCompletionItemProvider(
@@ -136,7 +138,7 @@ export async function activate(context: vscode.ExtensionContext) {
             return await providesCodeCompletion(document, position);
           },
         },
-        " "
+        ...AUTO_COMPLETION_CHARACTER_TRIGGER
       );
 
     context.subscriptions.push(codeCompletionProvider);
