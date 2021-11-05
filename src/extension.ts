@@ -7,6 +7,7 @@ import {
   DIAGNOSTICS_COLLECTION_NAME,
   IGNORE_VIOLATION_COMMAND,
   LEARN_MORE_COMMAND,
+  AUTO_COMPLETION_CHARACTER_TRIGGER,
 } from "./constants";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { testApi } from "./commands/test-api";
@@ -20,6 +21,7 @@ import { IgnoreViolationType } from "./utils/IgnoreViolationType";
 import { initializeLocalStorage } from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
+import { providesCodeCompletion } from "./code-completion/assistant-completion";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -122,6 +124,25 @@ export async function activate(context: vscode.ExtensionContext) {
       ) => await ignoreViolation(ignoreViolationType, violation)
     )
   );
+
+  allLanguages.forEach((lang) => {
+    const codeCompletionProvider =
+      vscode.languages.registerCompletionItemProvider(
+        lang,
+        {
+          async provideCompletionItems(
+            document: vscode.TextDocument,
+            position: vscode.Position
+          ) {
+            console.log("triggered");
+            return await providesCodeCompletion(document, position);
+          },
+        },
+        ...AUTO_COMPLETION_CHARACTER_TRIGGER
+      );
+
+    context.subscriptions.push(codeCompletionProvider);
+  });
 }
 
 // this method is called when your extension is deactivated

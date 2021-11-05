@@ -5,43 +5,12 @@ import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
 import { getUser } from "../graphql-api/user";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
+import {
+  adaptIndentation,
+  getCurrentIndentation,
+} from "../utils/indentationUtils";
 
 let latestRecipe: AssistantRecipe | undefined;
-
-/**
- * Get the indentation at a given position
- * @param editor
- * @param position
- * @returns
- */
-function getCurrentIndentation(
-  editor: vscode.TextEditor,
-  position: vscode.Position
-): number {
-  if (!editor) {
-    return 0;
-  }
-  const doc = editor.document;
-  if (!doc) {
-    return 0;
-  }
-  const line = doc.lineAt(position.line);
-
-  if (!line) {
-    return 0;
-  }
-
-  const lineText = line.text;
-
-  let nspaces = 0;
-  for (let i = 0; i < lineText.length; i = i + 1) {
-    if (lineText.charAt(i) !== " ") {
-      break;
-    }
-    nspaces = nspaces + 1;
-  }
-  return nspaces;
-}
 
 /**
  * Delete code that was previously added into the editor
@@ -91,28 +60,6 @@ function insertSnippet(
   console.log(decodedCode);
   const snippet = new vscode.SnippetString(decodedCode);
   editor.insertSnippet(snippet, initialPosition);
-}
-
-/**
- * Adapt indentation of the code. We do not change the first line
- * but we indent the rest of the code according to the rest of the
- * text.
- * @param code
- * @param indentation
- * @returns
- */
-function adaptIndentation(code: string, indentation: number): string {
-  if (indentation === 0) {
-    return code;
-  }
-  const codeArray = code.split("\n");
-  const newCode = [];
-  newCode.push(codeArray.shift());
-  for (const line of codeArray) {
-    newCode.push(`${" ".repeat(indentation)}${line}`);
-  }
-  const res = newCode.join("\n");
-  return res;
 }
 
 /**
