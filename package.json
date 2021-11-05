@@ -7,10 +7,10 @@
   "author": "Xcoding Labs Inc",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codeinspectorio/vscode-plugin.git"
+    "url": "https://github.com/codiga/vscode-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/codeinspectorio/vscode-plugin/issues"
+    "url": "https://github.com/codiga/vscode-plugin/issues"
   },
   "icon": "images/logo.png",
   "categories": [

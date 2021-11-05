@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
 import { getBasename } from "../utils/fileUtils";
-import { getLanguageForDocument } from "../utils/vscodeUtils";
 import {
   getCurrentIndentationForDocument,
   adaptIndentation,
