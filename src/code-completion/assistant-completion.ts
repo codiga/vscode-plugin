@@ -17,7 +17,36 @@ export async function providesCodeCompletion(
   // get all text until the `position` and check if it reads `console.`
   // and if so then complete if `log`, `warn`, and `error`
   const line = document.lineAt(position);
-  const keywords = line.text.split(" ").filter((v) => v.length > 0);
+  const lineText = line.text;
+
+  /**
+   * Do not trigger if we are in the middle of some code
+   */
+  if (
+    lineText.includes(")") ||
+    lineText.includes("(") ||
+    lineText.includes(".") ||
+    lineText.includes(";")
+  ) {
+    return undefined;
+  }
+
+  /**
+   * if we are before the end of the line, we are triggered only if there are only space after the cursor.
+   * so if we are on a line and there are non-space characers after us, we do not trigger
+   * a request.
+   */
+  if (lineText.length > position.character) {
+    const isAuthorized = true;
+    for (let i = position.character - 1; i < lineText.length; i++) {
+      const c = lineText.charAt(i);
+      if (c !== " ") {
+        return undefined;
+      }
+    }
+  }
+
+  const keywords = lineText.split(" ").filter((v) => v.length > 0);
   const path = document.uri.path;
   if (keywords.length === 0) {
     return undefined;
@@ -33,7 +62,6 @@ export async function providesCodeCompletion(
     language,
     dependencies
   );
-  console.log(recipes);
 
   const currentIdentation = getCurrentIndentationForDocument(
     document,
