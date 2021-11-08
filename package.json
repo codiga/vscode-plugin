@@ -33,7 +33,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.1.4",
+  "version": "0.1.5",
   "engines": {
     "vscode": "^1.57.0"
   },
