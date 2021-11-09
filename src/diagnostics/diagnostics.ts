@@ -198,7 +198,7 @@ export async function getParametersForDocument(
 
 /**
  * Analyzes the text document for problems.
- * This demo diagnostic problem provider finds all mentions of 'emoji'.
+ *
  * @param doc text document to analyze
  * @param diagnostics diagnostic collection
  */

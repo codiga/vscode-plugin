@@ -26,7 +26,7 @@ export function getAssociatedProjectIdentifier(): number | undefined {
 export function isAnalysisEnabled(): boolean {
   return (
     vscode.workspace.getConfiguration().get("codiga.codeAnalysisEnabled") ||
-    true
+    false
   );
 }
 
