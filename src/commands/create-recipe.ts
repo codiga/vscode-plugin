@@ -14,7 +14,7 @@ export async function createRecipe(): Promise<void> {
     const text = editor.document.getText(selection);
     const language: Language = getLanguageForDocument(editor.document);
     const code = Buffer.from(text, "utf8").toString("base64");
-    const url = `https://frontend.code-inspector.com/assistant/recipe/create?code=${code}&language=${language}`;
+    const url = `https://app.codiga.io/assistant/recipe/create?code=${code}&language=${language}`;
     vscode.env.openExternal(vscode.Uri.parse(url));
   }
 }
