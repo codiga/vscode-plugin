@@ -49,6 +49,7 @@ export async function providesCodeCompletion(
   }
 
   const keywords = lineText.split(" ").filter((v) => v.length > 0);
+  console.log(keywords);
   const path = document.uri.path;
   if (keywords.length === 0) {
     return undefined;
@@ -76,7 +77,9 @@ export async function providesCodeCompletion(
   );
 
   return recipes.map((r) => {
-    const decodedCode = Buffer.from(r.code || "", "base64").toString("utf8");
+    const decodedCode = Buffer.from(r.vscodeFormat || "", "base64").toString(
+      "utf8"
+    );
     const importsCode = r.imports
       .filter((i) => !hasImport(document, i))
       .join("\n");
@@ -88,6 +91,13 @@ export async function providesCodeCompletion(
       decodedCodeWithImport,
       currentIdentation
     );
+
+    // add the shortcut to the list of keywords used to trigger the completion.
+    const keywords = r.keywords;
+    console.log(r.shortcut);
+    if (r.shortcut && r.shortcut.length > 0) {
+      keywords.push(r.shortcut);
+    }
 
     const title = `${r.name} (${r.keywords.join(" ")})`;
     const snippetCompletion = new vscode.CompletionItem(title);

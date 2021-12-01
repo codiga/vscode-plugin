@@ -23,6 +23,8 @@ export interface AssistantRecipe {
   tags: string[];
   code: string;
   imports: string[];
+  shortcut: string;
+  vscodeFormat: string;
 }
 
 export interface FileAnalysis {

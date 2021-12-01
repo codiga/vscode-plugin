@@ -35,7 +35,7 @@ function deleteInsertedCode(
 
   editor.edit((editBuilder) => {
     const previousRecipeDecodedCode = Buffer.from(
-      recipe.code || "",
+      recipe.vscodeFormat || "",
       "base64"
     ).toString("utf8");
     const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
@@ -171,7 +171,8 @@ async function updateQuickpickResults(
   quickPickEditor.items = recipes.map((r) => {
     return {
       label: r.name,
-      description: `${r.keywords.join(",")}`,
+      alwaysShow: true,
+      description: `(keywords: ${r.keywords.join(" ")})`,
       recipe: r,
     };
   });
