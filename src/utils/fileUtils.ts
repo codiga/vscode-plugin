@@ -104,7 +104,7 @@ export function firstLineToImport(
 ): number {
   const documentText = document.getText();
   const lines = documentText.split("\n");
-  var lineNumber = 0;
+  let lineNumber = 0;
 
   for (const line in lines) {
     if (language === Language.Python) {
