@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import { getBasename, getLanguageForDocument } from "../utils/fileUtils";
+import {
+  getBasename,
+  getLanguageForDocument,
+  hasImport,
+} from "../utils/fileUtils";
 import {
   getCurrentIndentationForDocument,
   adaptIndentation,
@@ -36,7 +40,6 @@ export async function providesCodeCompletion(
    * a request.
    */
   if (lineText.length > position.character) {
-    const isAuthorized = true;
     for (let i = position.character - 1; i < lineText.length; i++) {
       const c = lineText.charAt(i);
       if (c !== " ") {
@@ -46,6 +49,7 @@ export async function providesCodeCompletion(
   }
 
   const keywords = lineText.split(" ").filter((v) => v.length > 0);
+  console.log(keywords);
   const path = document.uri.path;
   if (keywords.length === 0) {
     return undefined;
@@ -73,17 +77,33 @@ export async function providesCodeCompletion(
   );
 
   return recipes.map((r) => {
-    const decodedCode = Buffer.from(r.code || "", "base64").toString("utf8");
+    const decodedCode = Buffer.from(r.vscodeFormat || "", "base64").toString(
+      "utf8"
+    );
+    const importsCode = r.imports
+      .filter((i) => !hasImport(document, i))
+      .join("\n");
+    const importsCodeFinal =
+      importsCode.length > 0 ? importsCode + "\n" : importsCode;
+
+    const decodedCodeWithImport = importsCodeFinal + decodedCode;
     const decodedCodeWithIndentation = adaptIndentation(
-      decodedCode,
+      decodedCodeWithImport,
       currentIdentation
     );
+
+    // add the shortcut to the list of keywords used to trigger the completion.
+    const keywords = r.keywords;
+    console.log(r.shortcut);
+    if (r.shortcut && r.shortcut.length > 0) {
+      keywords.push(r.shortcut);
+    }
 
     const title = `${r.name} (${r.keywords.join(" ")})`;
     const snippetCompletion = new vscode.CompletionItem(title);
     if (r.description) {
       snippetCompletion.documentation = new vscode.MarkdownString(
-        `### Description\n${r.description}\n### Code\n \`\`\`python\n${decodedCode}\n\`\`\``
+        `${r.description}\n### Code\n \`\`\`python\n${decodedCode}\n\`\`\``
       );
     }
     snippetCompletion.detail = DIAGNOSTIC_CODE;

@@ -72,8 +72,10 @@ export const GET_RECIPES: string = gql`
       tags
       code
       imports
+      shortcut
       language
       creationTimestampMs
+      vscodeFormat
     }
   }
 `;
