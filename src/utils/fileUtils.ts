@@ -75,3 +75,53 @@ export function getLanguageForFile(filename: string): Language {
 
   return Language.Unknown;
 }
+
+/**
+ * Check if the document has a specific import.
+ * @param document
+ * @param importStatement
+ * @returns
+ */
+export function hasImport(
+  document: vscode.TextDocument,
+  importStatement: string
+): boolean {
+  const documentText = document.getText();
+  const lines = documentText.split("\n");
+  return lines.find((l) => l === importStatement) !== undefined;
+}
+
+/**
+ * Get the first line to import an import/library statement
+ * in a given document.
+ * @param document
+ * @param language
+ * @returns
+ */
+export function firstLineToImport(
+  document: vscode.TextDocument,
+  language: Language
+): number {
+  const documentText = document.getText();
+  const lines = documentText.split("\n");
+  var lineNumber = 0;
+
+  for (const line in lines) {
+    if (language === Language.Python) {
+      if (line.startsWith("#") || line.startsWith("import")) {
+        lineNumber = lineNumber + 1;
+      }
+    }
+    if (language === Language.Javascript || language === Language.Typescript) {
+      if (
+        line.includes("/*") ||
+        line.startsWith("import") ||
+        line.includes("*/") ||
+        line.includes("*")
+      ) {
+        lineNumber = lineNumber + 1;
+      }
+    }
+  }
+  return lineNumber;
+}

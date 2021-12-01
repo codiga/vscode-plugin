@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import { getLanguageForDocument, getBasename } from "../utils/fileUtils";
+import {
+  getLanguageForDocument,
+  getBasename,
+  hasImport,
+  firstLineToImport,
+} from "../utils/fileUtils";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
 import { getUser } from "../graphql-api/user";
@@ -49,17 +54,26 @@ function deleteInsertedCode(
 function insertSnippet(
   editor: vscode.TextEditor,
   initialPosition: vscode.Position,
-  recipe: AssistantRecipe
+  recipe: AssistantRecipe,
+  language: Language
 ) {
-  console.log("insert snippet");
   const currentIdentation = getCurrentIndentation(editor, initialPosition);
   const decodedCode = adaptIndentation(
     Buffer.from(recipe.code, "base64").toString("utf8"),
     currentIdentation
   );
-  console.log(decodedCode);
   const snippet = new vscode.SnippetString(decodedCode);
   editor.insertSnippet(snippet, initialPosition);
+
+  for (const importStatement of recipe.imports) {
+    if (!hasImport(editor.document, importStatement)) {
+      const snippetString = new vscode.SnippetString(importStatement + "\n");
+      const line = firstLineToImport(editor.document, language);
+      const position = new vscode.Position(line, 0);
+
+      editor.insertSnippet(snippetString, position);
+    }
+  }
 }
 
 /**
@@ -157,7 +171,7 @@ async function updateQuickpickResults(
   quickPickEditor.items = recipes.map((r) => {
     return {
       label: r.name,
-      description: `${r.description} - (${r.keywords.join(",")})`,
+      description: `${r.keywords.join(",")}`,
       recipe: r,
     };
   });
@@ -239,8 +253,7 @@ export async function useRecipe(
       if (latestRecipe && recipe.id === latestRecipe.id) {
         quickPick.dispose();
         statusBar.hide();
-        //deleteInsertedCode(editor, initialPosition, latestRecipe);
-        insertSnippet(editor, initialPosition, recipe);
+        insertSnippet(editor, initialPosition, recipe, language);
         await useRecipeCallback(latestRecipe.id);
       } else {
         addRecipeToEditor(editor, initialPosition, recipe);
