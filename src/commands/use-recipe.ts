@@ -59,7 +59,7 @@ function insertSnippet(
 ) {
   const currentIdentation = getCurrentIndentation(editor, initialPosition);
   const decodedCode = adaptIndentation(
-    Buffer.from(recipe.code, "base64").toString("utf8"),
+    Buffer.from(recipe.vscodeFormat, "base64").toString("utf8"),
     currentIdentation
   );
   const snippet = new vscode.SnippetString(decodedCode);
@@ -90,7 +90,7 @@ function addRecipeToEditor(
 ) {
   const currentIdentation = getCurrentIndentation(editor, initialPosition);
 
-  const encodedCode = recipe.code;
+  const encodedCode = recipe.vscodeFormat;
   const decodedCode = adaptIndentation(
     Buffer.from(encodedCode, "base64").toString("utf8"),
     currentIdentation
@@ -98,7 +98,9 @@ function addRecipeToEditor(
   if (latestRecipe) {
     editor.edit((editBuilder) => {
       const previousRecipeDecodedCode = adaptIndentation(
-        Buffer.from(latestRecipe?.code || "", "base64").toString("utf8"),
+        Buffer.from(latestRecipe?.vscodeFormat || "", "base64").toString(
+          "utf8"
+        ),
         currentIdentation
       );
       const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
