@@ -22,6 +22,12 @@ export async function providesCodeCompletion(
   const line = document.lineAt(position);
   const lineText = line.text;
 
+  if (
+    !vscode.workspace.getConfiguration().get("codiga.codingAssistantCompletion")
+  ) {
+    return undefined;
+  }
+
   /**
    * Do not trigger if we are in the middle of some code
    */
