@@ -88,7 +88,7 @@ export function hasImport(
 ): boolean {
   const documentText = document.getText();
   const lines = documentText.split("\n");
-  return lines.find((l) => l === importStatement) !== undefined;
+  return lines.find((l) => l.includes(importStatement)) !== undefined;
 }
 
 /**
@@ -124,4 +124,8 @@ export function firstLineToImport(
     }
   }
   return lineNumber;
+}
+
+export function insertIndentSize (size: number, tabSize: number) {
+  return Array(size / tabSize).fill('\t').join('');
 }
