@@ -7,7 +7,7 @@ import {
 } from "../utils/fileUtils";
 import {
   getCurrentIndentationForDocument,
-  adaptIndentation,
+  decodeIndent,
 } from "../utils/indentationUtils";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
@@ -83,9 +83,12 @@ export async function providesCodeCompletion(
   );
 
   return recipes.map((r) => {
-    const decodedCode = Buffer.from(r.vscodeFormat || "", "base64").toString(
+    const decodeFromBase64 = Buffer.from(r.vscodeFormat || "", "base64").toString(
       "utf8"
     );
+
+    const decodedCode = decodeIndent(decodeFromBase64);
+
     const importsCode = r.imports
       .filter((i) => !hasImport(document, i))
       .join("\n");
@@ -93,10 +96,6 @@ export async function providesCodeCompletion(
       importsCode.length > 0 ? importsCode + "\n" : importsCode;
 
     const decodedCodeWithImport = importsCodeFinal + decodedCode;
-    const decodedCodeWithIndentation = adaptIndentation(
-      decodedCodeWithImport,
-      currentIdentation
-    );
 
     // add the shortcut to the list of keywords used to trigger the completion.
     const keywords = r.keywords;
@@ -117,7 +116,7 @@ export async function providesCodeCompletion(
     snippetCompletion.range = insertingRange;
 
     snippetCompletion.insertText = new vscode.SnippetString(
-      decodedCodeWithIndentation
+      decodedCodeWithImport
     );
     return snippetCompletion;
   });

@@ -11,8 +11,9 @@ import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
 import { getUser } from "../graphql-api/user";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
 import {
-  adaptIndentation,
   getCurrentIndentation,
+  adaptIndentation,
+  decodeIndent,
 } from "../utils/indentationUtils";
 
 let latestRecipe: AssistantRecipe | undefined;
@@ -33,11 +34,16 @@ function deleteInsertedCode(
     return;
   }
 
+  const currentIdentation = getCurrentIndentation(editor, initialPosition);
   editor.edit((editBuilder) => {
-    const previousRecipeDecodedCode = Buffer.from(
+    const previousDecodeFromBase64 = Buffer.from(
       recipe.vscodeFormat || "",
       "base64"
     ).toString("utf8");
+    const previousRecipeDecodedCode = adaptIndentation(
+      decodeIndent(previousDecodeFromBase64),
+      currentIdentation
+    );
     const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
     const lastLineAdded = previousCodeAddedLines.pop() || "";
     const deleteRange = new vscode.Range(
@@ -57,11 +63,10 @@ function insertSnippet(
   recipe: AssistantRecipe,
   language: Language
 ) {
-  const currentIdentation = getCurrentIndentation(editor, initialPosition);
-  const decodedCode = adaptIndentation(
-    Buffer.from(recipe.vscodeFormat, "base64").toString("utf8"),
-    currentIdentation
+  const decodeFromBase64 = Buffer.from(recipe.vscodeFormat, "base64").toString(
+    "utf8"
   );
+  const decodedCode = decodeIndent(decodeFromBase64);
   const snippet = new vscode.SnippetString(decodedCode);
   editor.insertSnippet(snippet, initialPosition);
 
@@ -70,7 +75,6 @@ function insertSnippet(
       const snippetString = new vscode.SnippetString(importStatement + "\n");
       const line = firstLineToImport(editor.document, language);
       const position = new vscode.Position(line, 0);
-
       editor.insertSnippet(snippetString, position);
     }
   }
@@ -89,18 +93,20 @@ function addRecipeToEditor(
   recipe: AssistantRecipe
 ) {
   const currentIdentation = getCurrentIndentation(editor, initialPosition);
-
   const encodedCode = recipe.vscodeFormat;
+  const decodeFromBase64 = Buffer.from(encodedCode, "base64").toString("utf8");
   const decodedCode = adaptIndentation(
-    Buffer.from(encodedCode, "base64").toString("utf8"),
+    decodeIndent(decodeFromBase64),
     currentIdentation
   );
   if (latestRecipe) {
     editor.edit((editBuilder) => {
+      const previousDecodeFromBase64 = Buffer.from(
+        latestRecipe?.vscodeFormat || "",
+        "base64"
+      ).toString("utf8");
       const previousRecipeDecodedCode = adaptIndentation(
-        Buffer.from(latestRecipe?.vscodeFormat || "", "base64").toString(
-          "utf8"
-        ),
+        decodeIndent(previousDecodeFromBase64),
         currentIdentation
       );
       const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
@@ -155,14 +161,12 @@ async function updateQuickpickResults(
   );
 
   if (!recipes) {
-    console.info("no result");
     statusBar.text = "Codiga: no result";
     quickPickEditor.items = [];
     return;
   }
 
   if (recipes.length === 0) {
-    console.info("empty result");
     statusBar.text = "Codiga: empty result";
     quickPickEditor.items = [];
     return;
@@ -250,16 +254,20 @@ export async function useRecipe(
       const firstRecipe: any = selected[0];
       const recipe = firstRecipe.recipe;
 
+      if (latestRecipe) {
+        deleteInsertedCode(editor, initialPosition, latestRecipe);
+      }
       /**
        * If we select the same recipe, insert it as a snippet
        */
       if (latestRecipe && recipe.id === latestRecipe.id) {
         quickPick.dispose();
         statusBar.hide();
+
         insertSnippet(editor, initialPosition, recipe, language);
         await useRecipeCallback(latestRecipe.id);
       } else {
-        addRecipeToEditor(editor, initialPosition, recipe);
+        insertSnippet(editor, initialPosition, recipe, language);
       }
     }
   });

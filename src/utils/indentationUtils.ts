@@ -63,3 +63,12 @@ export function getCurrentIndentation(
   }
   return getCurrentIndentationForDocument(doc, position);
 }
+
+/**
+ * Decode Codiga Indent variables from recipe
+ * @param code
+ * @returns
+ */
+ export function decodeIndent (code: string) {
+  return code.replace(/&\[CODIGA_INDENT\]/g, '\t');
+}
