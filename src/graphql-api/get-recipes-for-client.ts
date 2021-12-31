@@ -39,7 +39,6 @@ export async function getRecipesForClient(
   const recipes = await doQuery(GET_RECIPES, variables);
 
   if (!recipes) {
-    console.log("no getRecipes");
     return [];
   }
 

@@ -8,20 +8,18 @@ import { decodeIndent } from "../../../utils/indentationUtils";
 suite("indentationUtil.ts test", () => {
   vscode.window.showInformationMessage("Start indentationUtil tests.");
 
-  const expectedRecipe =
+  test("Make sure CODIGA_INDENT is decoded", () => {
+    const expectedRecipe =
     'function (this) {\n' +
     '\tconsole.log(this)\n' +
     '\tconsole.log(that)\n' +
     '}\n';
 
-  const fetchRecipe =
-    'function (this) {\n' +
-    '&[CODIGA_INDENT]console.log(this)\n' +
-    '&[CODIGA_INDENT]console.log(that)\n' +
-    '}\n';
-
-
-  test("Make sure CODIGA_INDENT is decoded", () => {
+    const fetchRecipe =
+      'function (this) {\n' +
+      '&[CODIGA_INDENT]console.log(this)\n' +
+      '&[CODIGA_INDENT]console.log(that)\n' +
+      '}\n';
     assert.strictEqual(decodeIndent(fetchRecipe), expectedRecipe);
   });
 });

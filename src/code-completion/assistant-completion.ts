@@ -55,7 +55,6 @@ export async function providesCodeCompletion(
   }
 
   const keywords = lineText.split(" ").filter((v) => v.length > 0);
-  console.log(keywords);
   const path = document.uri.path;
   if (keywords.length === 0) {
     return undefined;
@@ -99,7 +98,6 @@ export async function providesCodeCompletion(
 
     // add the shortcut to the list of keywords used to trigger the completion.
     const keywords = r.keywords;
-    console.log(r.shortcut);
     if (r.shortcut && r.shortcut.length > 0) {
       keywords.push(r.shortcut);
     }
@@ -114,10 +112,16 @@ export async function providesCodeCompletion(
     snippetCompletion.detail = DIAGNOSTIC_CODE;
     const insertingRange = new vscode.Range(insertionPositionStart, position);
     snippetCompletion.range = insertingRange;
+    snippetCompletion.command =  {
+      arguments: [r.id],
+      command: "codiga.registeUsage",
+      title: "Codiga registe usage"
+    };
 
     snippetCompletion.insertText = new vscode.SnippetString(
       decodedCodeWithImport
     );
+
     return snippetCompletion;
   });
 }

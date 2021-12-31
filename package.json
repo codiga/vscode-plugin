@@ -146,10 +146,12 @@
     "mocha": "^8.4.0",
     "typescript": "^4.3.2",
     "vsce": "^1.93.0",
-    "vscode-test": "^1.5.2"
+    "@vscode/test-electron": "^2.0.1"
   },
   "dependencies": {
+    "@types/sinon": "^10.0.6",
     "graphql": "^15.5.0",
-    "graphql-request": "^3.4.0"
+    "graphql-request": "^3.4.0",
+    "sinon": "^12.0.1"
   }
 }

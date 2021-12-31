@@ -5,7 +5,6 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import { getLanguageForFile } from "../../../utils/fileUtils";
 import { Language } from "../../../graphql-api/types";
-// import * as myExtension from '../../extension';
 
 suite("fileUtils.ts test", () => {
   vscode.window.showInformationMessage("Start fileUtils tests.");

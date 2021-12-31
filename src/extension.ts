@@ -22,6 +22,7 @@ import { initializeLocalStorage } from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
+import { useRecipeCallback } from "./graphql-api/use-recipe";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -102,6 +103,13 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   /**
+   * Register the command to send recipe usage information
+   */
+  vscode.commands.registerCommand("codiga.registeUsage", async (id: number) => {
+    await useRecipeCallback(id);
+  });
+
+  /**
    * Register the learn more command, this is a command that is pushed
    * when we have a diagnostic being shown for a violation.
    */
@@ -134,7 +142,6 @@ export async function activate(context: vscode.ExtensionContext) {
             document: vscode.TextDocument,
             position: vscode.Position
           ) {
-            console.log("triggered");
             return await providesCodeCompletion(document, position);
           },
         },
