@@ -15,7 +15,7 @@ async function main() {
 		/**
 		 * Use win64 instead of win32 for testing Windows
 		 */
-		 if (process.platform === 'win32') {
+		if (process.platform === 'win32') {
 			await runTests({
 				extensionDevelopmentPath,
 				extensionTestsPath,

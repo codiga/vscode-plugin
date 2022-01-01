@@ -15,9 +15,12 @@
   "icon": "images/logo.png",
   "categories": [
     "Linters",
+    "Snippets",
     "Programming Languages"
   ],
   "keywords": [
+    "coding assistant",
+    "snippets",
     "linters",
     "code analysis",
     "code quality",
