@@ -105,7 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Register the command to send recipe usage information
    */
-  vscode.commands.registerCommand("codiga.registeUsage", async (id: number) => {
+  vscode.commands.registerCommand("codiga.registerUsage", async (id: number) => {
     await useRecipeCallback(id);
   });
 

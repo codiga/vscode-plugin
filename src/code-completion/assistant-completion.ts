@@ -114,8 +114,8 @@ export async function providesCodeCompletion(
     snippetCompletion.range = insertingRange;
     snippetCompletion.command =  {
       arguments: [r.id],
-      command: "codiga.registeUsage",
-      title: "Codiga registe usage"
+      command: "codiga.registerUsage",
+      title: "Codiga Register Usage"
     };
 
     snippetCompletion.insertText = new vscode.SnippetString(

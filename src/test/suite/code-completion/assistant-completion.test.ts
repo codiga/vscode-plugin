@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as sinon from "sinon";
 
 import * as getRecipesApiCall from "../../../graphql-api/get-recipes-for-client";
-import * as usedRecipeApiCAll from "../../../graphql-api/use-recipe";
+import * as usedRecipeApiCall from "../../../graphql-api/use-recipe";
 import { Language } from "../../../graphql-api/types";
 import {
   wait,
@@ -50,7 +50,7 @@ suite("assistant-completion.ts test", () => {
     getRecipeStub = sandbox
       .stub(getRecipesApiCall, "getRecipesForClient")
       .withArgs(["spawn", "thr"], "assistant-completion.rs", Language.Rust, []);
-    usedRecipeMock = sandbox.mock(usedRecipeApiCAll)
+    usedRecipeMock = sandbox.mock(usedRecipeApiCall)
       .expects("useRecipeCallback")
       .withArgs(42069)
       .once();
@@ -96,9 +96,6 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     await closeFile();
 
-    console.debug(documentTransformed);
-    console.debug(new vscode.SnippetString(documentRecipeIndentExpectedWithFourSpaces)
-    .value);
     assert.ok(usedRecipeMock.verify());
     assert.ok(
       documentTransformed ===
@@ -144,9 +141,9 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     await closeFile();
 
-    assert.ok(usedRecipeMock.verify())
+    assert.ok(usedRecipeMock.verify());
     assert.ok(
-      documentTransformed ==
+      documentTransformed ===
         new vscode.SnippetString(documentRecipeIndentExpectedWithTabs)
           .value
     );

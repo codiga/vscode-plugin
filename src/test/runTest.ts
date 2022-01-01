@@ -19,7 +19,7 @@ async function main() {
 			await runTests({
 				extensionDevelopmentPath,
 				extensionTestsPath,
-				version: '1.40.0',
+				version: '1.63.2',
 				platform: 'win32-x64-archive',
 				launchArgs: [
 					// This disables all extensions except the one being tested
