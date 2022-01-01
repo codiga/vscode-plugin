@@ -221,12 +221,10 @@ export async function refreshDiagnostics(
   }
 
   if (doc.getText().length === 0) {
-    console.debug("empty code");
     return;
   }
 
   if (doc.lineCount < 5) {
-    console.debug("not enough lines");
     return;
   }
 
