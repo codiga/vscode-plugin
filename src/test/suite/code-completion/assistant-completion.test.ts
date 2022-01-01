@@ -77,7 +77,7 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     await closeFile();
 
-    assert.ok(usedRecipeMock.verify())
+    assert.ok(usedRecipeMock.verify());
     assert.strictEqual(documentTransformed, documentRecipeExpected);
   });
 
@@ -96,9 +96,12 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     await closeFile();
 
-    assert.ok(usedRecipeMock.verify())
+    console.debug(documentTransformed);
+    console.debug(new vscode.SnippetString(documentRecipeIndentExpectedWithFourSpaces)
+    .value);
+    assert.ok(usedRecipeMock.verify());
     assert.ok(
-      documentTransformed ==
+      documentTransformed ===
         new vscode.SnippetString(documentRecipeIndentExpectedWithFourSpaces)
           .value
     );
@@ -118,9 +121,9 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     await closeFile();
 
-    assert.ok(usedRecipeMock.verify())
+    assert.ok(usedRecipeMock.verify());
     assert.ok(
-      documentTransformed ==
+      documentTransformed ===
         new vscode.SnippetString(documentRecipeIndentExpectedWithTwoSpaces)
           .value
     );

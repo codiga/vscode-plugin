@@ -1,33 +1,32 @@
 import * as vscode from "vscode";
-import * as path from "path";
-
+var os = require('os');
 import { AssistantRecipe } from "../../graphql-api/types";
 import { decodeIndent } from "../../utils/indentationUtils";
 
 export const testDataFolderCodeCompletion = "/code-completion/testdata/";
 
 export const documentRecipeExpected =
-  "use std::thread;\n" +
-  "thread::spawn(move || {\n" +
-  "  // thread code here\n" +
+  "use std::thread;" + os.EOL +
+  "thread::spawn(move || {" + os.EOL +
+  "  // thread code here" + os.EOL +
   "});";
 export const documentRecipeIndentExpectedWithFourSpaces = decodeIndent(
-  "use std::thread;\n" +
-  "thread::spawn(move || {\n" +
-  "    // thread code here\n" +
+  "use std::thread;" + os.EOL +
+  "thread::spawn(move || {" + os.EOL +
+  "    // thread code here" + os.EOL +
   "});"
 );
 export const documentRecipeIndentExpectedWithTwoSpaces = decodeIndent(
-  "use std::thread;\n" +
-  "thread::spawn(move || {\n" +
-  "  // thread code here\n" +
+  "use std::thread;"  + os.EOL +
+  "thread::spawn(move || {"  + os.EOL +
+  "  // thread code here"  + os.EOL +
   "});"
 );
 
 export const documentRecipeIndentExpectedWithTabs = decodeIndent(
-  "use std::thread;\n" +
-  "thread::spawn(move || {\n" +
-  "\t// thread code here\n" +
+  "use std::thread;" + os.EOL +
+  "thread::spawn(move || {" + os.EOL +
+  "\t// thread code here" + os.EOL +
   "});"
 );
 
