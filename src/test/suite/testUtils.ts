@@ -1,33 +1,44 @@
 import * as vscode from "vscode";
-var os = require('os');
 import { AssistantRecipe } from "../../graphql-api/types";
 import { decodeIndent } from "../../utils/indentationUtils";
-
+import os = require("os");
 export const testDataFolderCodeCompletion = "/code-completion/testdata/";
 
 export const documentRecipeExpected =
-  "use std::thread;" + os.EOL +
-  "thread::spawn(move || {" + os.EOL +
-  "  // thread code here" + os.EOL +
+  "use std::thread;" +
+  os.EOL +
+  "thread::spawn(move || {" +
+  os.EOL +
+  "  // thread code here" +
+  os.EOL +
   "});";
 export const documentRecipeIndentExpectedWithFourSpaces = decodeIndent(
-  "use std::thread;" + os.EOL +
-  "thread::spawn(move || {" + os.EOL +
-  "    // thread code here" + os.EOL +
-  "});"
+  "use std::thread;" +
+    os.EOL +
+    "thread::spawn(move || {" +
+    os.EOL +
+    "    // thread code here" +
+    os.EOL +
+    "});"
 );
 export const documentRecipeIndentExpectedWithTwoSpaces = decodeIndent(
-  "use std::thread;"  + os.EOL +
-  "thread::spawn(move || {"  + os.EOL +
-  "  // thread code here"  + os.EOL +
-  "});"
+  "use std::thread;" +
+    os.EOL +
+    "thread::spawn(move || {" +
+    os.EOL +
+    "  // thread code here" +
+    os.EOL +
+    "});"
 );
 
 export const documentRecipeIndentExpectedWithTabs = decodeIndent(
-  "use std::thread;" + os.EOL +
-  "thread::spawn(move || {" + os.EOL +
-  "\t// thread code here" + os.EOL +
-  "});"
+  "use std::thread;" +
+    os.EOL +
+    "thread::spawn(move || {" +
+    os.EOL +
+    "\t// thread code here" +
+    os.EOL +
+    "});"
 );
 
 export const recipeWithIndentVariable =
@@ -91,23 +102,31 @@ export async function autoComplete() {
 }
 
 export const Config = Object.freeze({
-	tabSize: 'editor.tabSize',
-	insertSpaces: 'editor.insertSpaces',
+  tabSize: "editor.tabSize",
+  insertSpaces: "editor.insertSpaces",
 } as const);
 
 // helper function to manage configuration state, DO NOT try to set/update
 // configuration inside test/suite without this.
 export type VsCodeConfiguration = { [key: string]: any };
-export async function updateConfig(documentUri: vscode.Uri,
-    newConfig: VsCodeConfiguration): Promise<VsCodeConfiguration> {
-	const oldConfig: VsCodeConfiguration = {};
-	const config = vscode.workspace.getConfiguration(undefined, documentUri);
+export async function updateConfig(
+  documentUri: vscode.Uri,
+  newConfig: VsCodeConfiguration
+): Promise<VsCodeConfiguration> {
+  const oldConfig: VsCodeConfiguration = {};
+  const config = vscode.workspace.getConfiguration(undefined, documentUri);
 
-	for (const configKey of Object.keys(newConfig)) {
-		oldConfig[configKey] = config.get(configKey);
-		await new Promise<void>((resolve, reject) =>
-			config.update(configKey, newConfig[configKey], vscode.ConfigurationTarget.Global)
-				.then(() => resolve(), reject));
-	}
-	return oldConfig;
+  for (const configKey of Object.keys(newConfig)) {
+    oldConfig[configKey] = config.get(configKey);
+    await new Promise<void>((resolve, reject) =>
+      config
+        .update(
+          configKey,
+          newConfig[configKey],
+          vscode.ConfigurationTarget.Global
+        )
+        .then(() => resolve(), reject)
+    );
+  }
+  return oldConfig;
 }
