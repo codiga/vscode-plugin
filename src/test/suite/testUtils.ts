@@ -108,7 +108,7 @@ export const Config = Object.freeze({
 
 // helper function to manage configuration state, DO NOT try to set/update
 // configuration inside test/suite without this.
-export type VsCodeConfiguration = { [key: string]: any };
+export type VsCodeConfiguration = { [key: string]: unknown };
 export async function updateConfig(
   documentUri: vscode.Uri,
   newConfig: VsCodeConfiguration
