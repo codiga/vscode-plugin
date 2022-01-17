@@ -167,8 +167,6 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage(
       "Codiga API keys not set, [click here](https://app.codiga.io/account/auth/vscode) to configure your API keys."
     );
-  } else {
-    console.log("keys value");
   }
 }
 
