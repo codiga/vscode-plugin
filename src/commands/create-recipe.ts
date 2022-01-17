@@ -13,7 +13,10 @@ export async function createRecipe(): Promise<void> {
     const selection = editor.selection;
     const text = editor.document.getText(selection);
     const language: Language = getLanguageForDocument(editor.document);
-    const code = Buffer.from(text, "utf8").toString("base64");
+    const base64 = Buffer.from(text, "utf8").toString("base64");
+    // we need to replace the `+` character when creating a recipe by %2B
+    // to make sure the URL parameters are correctly encoded.
+    const code = base64.replace(/\+/g, "%2B");
     const url = `https://app.codiga.io/assistant/recipe/create?code=${code}&language=${language}`;
     vscode.env.openExternal(vscode.Uri.parse(url));
   }
