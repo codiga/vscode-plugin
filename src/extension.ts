@@ -23,6 +23,8 @@ import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
 import { useRecipeCallback } from "./graphql-api/use-recipe";
+import { UriHandler } from "./utils/uriHandler";
+import { getUser } from "./graphql-api/user";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -105,9 +107,12 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Register the command to send recipe usage information
    */
-  vscode.commands.registerCommand("codiga.registerUsage", async (id: number) => {
-    await useRecipeCallback(id);
-  });
+  vscode.commands.registerCommand(
+    "codiga.registerUsage",
+    async (id: number) => {
+      await useRecipeCallback(id);
+    }
+  );
 
   /**
    * Register the learn more command, this is a command that is pushed
@@ -133,6 +138,8 @@ export async function activate(context: vscode.ExtensionContext) {
     )
   );
 
+  vscode.window.registerUriHandler(new UriHandler());
+
   allLanguages.forEach((lang) => {
     const codeCompletionProvider =
       vscode.languages.registerCompletionItemProvider(
@@ -150,6 +157,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(codeCompletionProvider);
   });
+
+  /**
+   * Finally, attempt to get the current user. If the current user
+   * does not show, we propose to configure the API keys.
+   */
+  const currentUser = await getUser();
+  if (!currentUser) {
+    vscode.window.showInformationMessage(
+      "Codiga API keys not set, [click here](https://app.codiga.io/account/auth/vscode) to configure your API keys."
+    );
+  }
 }
 
 // this method is called when your extension is deactivated
