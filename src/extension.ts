@@ -23,6 +23,7 @@ import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
 import { useRecipeCallback } from "./graphql-api/use-recipe";
+import { UriHandler } from "./utils/configurationUtils";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -36,12 +37,6 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   codigaStatusBar.command = "codiga.recipeExtended";
   context.subscriptions.push(codigaStatusBar);
-
-  // if (!user) {
-  //   vscode.window.showInformationMessage(
-  //     "Code Inspector: invalid API keys, configure your API keys"
-  //   );
-  // }
 
   const diagnotics = vscode.languages.createDiagnosticCollection(
     DIAGNOSTICS_COLLECTION_NAME
@@ -108,6 +103,29 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("codiga.registerUsage", async (id: number) => {
     await useRecipeCallback(id);
   });
+
+  // if (!user) {
+  //   vscode.window.showInformationMessage(
+  //     "Codiga: invalid API keys, configure your API keys"
+  //   );
+  // }
+  vscode.commands.registerCommand("codiga.setup", () => {
+    vscode.window.showInformationMessage('Codiga: invalid API keys, configure your API keys');
+  })
+
+  vscode.commands.registerCommand("", async () => {
+    // Create our new UriHandler
+		const uriHandler = new UriHandler();
+
+		// And register it with VS Code. You can only register a single UriHandler for your extension.
+		context.subscriptions.push(vscode.window.registerUriHandler(uriHandler));
+
+		// You don't have to get the Uri from the `vscode.env.asExternalUri` API but it will add a query
+		// parameter (ex: "windowId%3D14") that will help VS Code decide which window to redirect to.
+		// If this query parameter isn't specified, VS Code will pick the last windows that was focused.
+		const uri = await vscode.env.asExternalUri(vscode.Uri.parse(`${vscode.env.uriScheme}://codiga.auth`));
+		vscode.window.showInformationMessage(`Starting to handle Uris. Open ${uri} in your browser to test.`);
+  })
 
   /**
    * Register the learn more command, this is a command that is pushed

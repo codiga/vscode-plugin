@@ -41,7 +41,8 @@
     "vscode": "^1.57.0"
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:codiga.uriHandler"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -112,6 +113,11 @@
         "category": "Codiga",
         "command": "codiga.getAssociatedProject",
         "title": "Show associated project"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.uriHandler",
+        "title": "Handle Uri requests for setup"
       }
     ],
     "keybindings": [
