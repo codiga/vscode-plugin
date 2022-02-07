@@ -1,3 +1,6 @@
+[![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
+[![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
+
 # Codiga VS Code Extension
 
 Integrates Codiga analysis engine into VS Code. You can download it from the [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin) directly.
