@@ -62,6 +62,6 @@ If you do not want to open a ticket, you can also directly [contact us](https://
 
 ## Learn More
 
-- [Official Documentation](https://docs.codiga.io)
+- [Official Documentation](https://doc.codiga.io)
 - [List of all supported languages](https://doc.codiga.io/docs/faq/#what-languages-are-supported)
 - [Privacy Policy](https://www.codiga.io/privacy)
