@@ -1,7 +1,7 @@
 {
   "name": "vscode-plugin",
-  "displayName": "Codiga",
-  "description": "Analyze code for 12+ languages using a powerful static analysis engine.",
+  "displayName": "Codiga Code Snippets",
+  "description": "Create and share code snippets for 15+ languages",
   "publisher": "codiga",
   "license": "MIT",
   "author": "Xcoding Labs Inc",
@@ -36,7 +36,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.2.3",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.57.0"
   },
