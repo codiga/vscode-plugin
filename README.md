@@ -10,7 +10,9 @@ Create, use and share code snippets for any language:
 
 ## Find and Reuse Code Snippets
 
-Start the Coding Assistant using CMD + SHIFT + C (⌘⇧C) and search for a recipe.
+- Get all snippets by using `CMD` + `SHIFT` + `S` (`⌘⇧S`) and reuse them inline
+- Find code like Google using `CMD` + `SHIFT` + `C` (`⌘⇧C`) and search for a snippet
+- Import a snippet by typing its shortcut (e.g. `react.component` in JavaScript/Typescript or `requests.` in Python)
 
 ![Use of recipe in Python](images/use-recipe.gif)
 

@@ -1,10 +1,6 @@
 import { doQuery } from "./client";
 import { AssistantRecipe, Language } from "./types";
-import {
-  GET_RECIPES,
-  GET_RECIPES_BY_SHORTCUT,
-  GET_RECIPES_SEMANTIC,
-} from "./queries";
+import { GET_RECIPES_BY_SHORTCUT, GET_RECIPES_SEMANTIC } from "./queries";
 import { getUserFingerprint } from "../utils/configurationUtils";
 
 /**
@@ -23,8 +19,6 @@ export async function getRecipesForClient(
   language: Language,
   dependencies: string[]
 ): Promise<AssistantRecipe[]> {
-  // Convert array of parameters into k1=v1;k2=v2
-
   // Get the fingerprint from localstorage to initiate the request
   const userFingerprint = getUserFingerprint();
 

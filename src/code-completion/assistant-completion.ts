@@ -22,13 +22,11 @@ export async function providesCodeCompletion(
   // and if so then complete if `log`, `warn`, and `error`
   const line = document.lineAt(position);
   const lineText = line.text;
-
   if (
     !vscode.workspace.getConfiguration().get("codiga.codingAssistantCompletion")
   ) {
     return undefined;
   }
-
   if (lineText.charAt(position.character - 1) !== ".") {
     return undefined;
   }
@@ -39,6 +37,7 @@ export async function providesCodeCompletion(
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(document);
   const basename: string | undefined = getBasename(relativePath);
+
   const recipes: AssistantRecipe[] = await getRecipesForClientByShorcut(
     term,
     basename,
@@ -111,7 +110,7 @@ export async function providesCodeCompletion(
 
       snippetCompletion.additionalTextEdits = [
         vscode.TextEdit.insert(
-          new vscode.Position(startLineToInsertImports, 1),
+          new vscode.Position(startLineToInsertImports, 0),
           importsCode
         ),
       ];

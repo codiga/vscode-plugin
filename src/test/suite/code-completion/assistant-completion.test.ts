@@ -48,8 +48,8 @@ suite("assistant-completion.ts test", () => {
     originalConfig = await updateConfig(uri, configDefaults);
     // define the stub and mock
     getRecipeStub = sandbox
-      .stub(getRecipesApiCall, "getRecipesForClient")
-      .withArgs(["spawn", "thr"], "assistant-completion.rs", Language.Rust, []);
+      .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
+      .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCall)
       .expects("useRecipeCallback")
@@ -71,7 +71,7 @@ suite("assistant-completion.ts test", () => {
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
-    insertText(editor, "spawn thr");
+    insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
@@ -93,7 +93,7 @@ suite("assistant-completion.ts test", () => {
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
-    insertText(editor, "spawn thr");
+    insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
@@ -115,7 +115,7 @@ suite("assistant-completion.ts test", () => {
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
-    insertText(editor, "spawn thr");
+    insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
@@ -141,7 +141,7 @@ suite("assistant-completion.ts test", () => {
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
-    insertText(editor, "spawn thr");
+    insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 

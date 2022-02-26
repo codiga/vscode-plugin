@@ -70,7 +70,7 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           tags: [],
           code: code,
           imports: ["use std::thread;"],
-          shortcut: "",
+          shortcut: "spawn.thr",
           vscodeFormat: code,
         },
       ]);
