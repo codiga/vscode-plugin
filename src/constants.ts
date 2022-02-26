@@ -32,4 +32,4 @@ export const COMPOSER_FILE = "composer.json";
 export const REQUIREMENTS_FILE = "requirements.txt";
 export const GEMFILE_FILE = "Gemfile";
 
-export const AUTO_COMPLETION_CHARACTER_TRIGGER = [" ", ",", "."];
+export const AUTO_COMPLETION_CHARACTER_TRIGGER = ".";

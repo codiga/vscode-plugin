@@ -7,7 +7,10 @@ import {
   firstLineToImport,
 } from "../utils/fileUtils";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
-import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
+import {
+  getRecipesForClient,
+  getRecipesForClientByShorcut,
+} from "../graphql-api/get-recipes-for-client";
 import { getUser } from "../graphql-api/user";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
 import {
@@ -118,6 +121,7 @@ function addRecipeToEditor(
           lastLineAdded.length
         )
       );
+
       editBuilder.replace(replaceRange, decodedCode);
     });
   } else {
@@ -142,7 +146,7 @@ function addRecipeToEditor(
  * @param dependencies
  * @returns
  */
-async function updateQuickpickResults(
+async function fetchShortcuts(
   quickPickEditor: vscode.QuickPick<vscode.QuickPickItem>,
   statusBar: vscode.StatusBarItem,
   term: string | undefined,
@@ -153,12 +157,14 @@ async function updateQuickpickResults(
   /**
    * Start a request to get all recipes.
    */
-  const recipes = await getRecipesForClient(
-    term,
+  const recipesFromBackend = await getRecipesForClientByShorcut(
+    undefined,
     filename,
     language,
     dependencies
   );
+
+  const recipes = recipesFromBackend;
 
   if (!recipes) {
     statusBar.text = "Codiga: no result";
@@ -176,9 +182,9 @@ async function updateQuickpickResults(
 
   quickPickEditor.items = recipes.map((r) => {
     return {
-      label: r.name,
+      label: `${r.shortcut}: ${r.name}`,
       alwaysShow: true,
-      description: `(keywords: ${r.keywords.join(" ")})`,
+      description: r.description,
       recipe: r,
     };
   });
@@ -203,7 +209,7 @@ async function showUser(statusBar: vscode.StatusBarItem) {
  * Use a Codiga recipe. Main entry point of this command.
  * @returns
  */
-export async function useRecipe(
+export async function listShorcuts(
   statusBar: vscode.StatusBarItem
 ): Promise<void> {
   const editor = vscode.window.activeTextEditor;
@@ -228,7 +234,7 @@ export async function useRecipe(
   const initialPosition: vscode.Position = editor.selection.active;
 
   const quickPick = vscode.window.createQuickPick();
-  quickPick.title = "Codiga Coding Assistant";
+  quickPick.title = "Codiga Cheat Sheet";
   quickPick.placeholder = "Enter search terms";
   quickPick.items = [];
   quickPick.canSelectMany = false;
@@ -237,15 +243,6 @@ export async function useRecipe(
     if (latestRecipe) {
       deleteInsertedCode(editor, initialPosition, latestRecipe);
     }
-
-    await updateQuickpickResults(
-      quickPick,
-      statusBar,
-      text,
-      basename,
-      language,
-      dependencies
-    );
   });
 
   // when changing the selection, add the code to the editor.
@@ -297,7 +294,7 @@ export async function useRecipe(
     statusBar.hide();
   });
 
-  await updateQuickpickResults(
+  await fetchShortcuts(
     quickPick,
     statusBar,
     undefined,

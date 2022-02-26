@@ -119,6 +119,11 @@
         "command": "codiga.recipeUse",
         "key": "ctrl+alt+C",
         "mac": "shift+cmd+C"
+      },
+      {
+        "command": "codiga.listShortcuts",
+        "key": "ctrl+alt+S",
+        "mac": "shift+cmd+S"
       }
     ]
   },

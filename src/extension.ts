@@ -25,6 +25,7 @@ import { providesCodeCompletion } from "./code-completion/assistant-completion";
 import { useRecipeCallback } from "./graphql-api/use-recipe";
 import { UriHandler } from "./utils/uriHandler";
 import { getUser } from "./graphql-api/user";
+import { listShorcuts } from "./commands/list-shortcuts";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -89,10 +90,20 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Register the command to read a recipe.
    */
-
   vscode.commands.registerCommand("codiga.recipeUse", () => {
     useRecipe(codigaStatusBar);
   });
+
+  /**
+   * Register the command to list shortcuts
+   */
+  vscode.commands.registerCommand("codiga.listShortcuts", () => {
+    listShorcuts(codigaStatusBar);
+  });
+
+  /**
+   * Command to create a recipe
+   */
   vscode.commands.registerCommand("codiga.recipeCreate", () => {
     createRecipe();
   });
