@@ -36,7 +36,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.3.0",
+  "version": "0.3.1",
   "engines": {
     "vscode": "^1.57.0"
   },
@@ -119,6 +119,11 @@
         "command": "codiga.recipeUse",
         "key": "ctrl+alt+C",
         "mac": "shift+cmd+C"
+      },
+      {
+        "command": "codiga.listShortcuts",
+        "key": "ctrl+alt+S",
+        "mac": "shift+cmd+S"
       }
     ]
   },

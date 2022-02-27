@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
 import { getLanguageForDocument, getBasename } from "../utils/fileUtils";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
-import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
+import { getRecipesForClientByShorcut } from "../graphql-api/get-recipes-for-client";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
 import {
   addRecipeToEditor,
@@ -11,12 +11,7 @@ import {
   LatestRecipeHolder,
 } from "../utils/snippetUtils";
 import { showUser } from "../utils/StatusbarUtils";
-import { CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS } from "../constants";
 
-/**
- * Container to keep the latest recipe so that it can be updated
- * in the generic functions from this file.
- */
 const latestRecipeHolder: LatestRecipeHolder = {
   recipe: undefined,
 };
@@ -32,7 +27,7 @@ const latestRecipeHolder: LatestRecipeHolder = {
  * @param dependencies
  * @returns
  */
-async function updateQuickpickResults(
+async function fetchShortcuts(
   quickPickEditor: vscode.QuickPick<vscode.QuickPickItem>,
   statusBar: vscode.StatusBarItem,
   term: string | undefined,
@@ -43,12 +38,14 @@ async function updateQuickpickResults(
   /**
    * Start a request to get all recipes.
    */
-  const recipes = await getRecipesForClient(
-    term,
+  const recipesFromBackend = await getRecipesForClientByShorcut(
+    undefined,
     filename,
     language,
     dependencies
   );
+
+  const recipes = recipesFromBackend;
 
   if (!recipes) {
     statusBar.text = "Codiga: no result";
@@ -66,19 +63,20 @@ async function updateQuickpickResults(
 
   quickPickEditor.items = recipes.map((r) => {
     return {
-      label: r.name,
+      label: `${r.shortcut}: ${r.name}`,
       alwaysShow: true,
-      description: `(keywords: ${r.keywords.join(" ")})`,
+      description: r.description,
       recipe: r,
     };
   });
+  quickPickEditor.activeItems = [];
 }
 
 /**
  * Use a Codiga recipe. Main entry point of this command.
  * @returns
  */
-export async function useRecipe(
+export async function listShorcuts(
   statusBar: vscode.StatusBarItem
 ): Promise<void> {
   const editor = vscode.window.activeTextEditor;
@@ -102,55 +100,15 @@ export async function useRecipe(
   const initialPosition: vscode.Position = editor.selection.active;
 
   const quickPick = vscode.window.createQuickPick();
-  quickPick.title = "Codiga Coding Assistant";
+  quickPick.title = "Codiga Cheat Sheet";
   quickPick.placeholder = "Enter search terms";
   quickPick.items = [];
-
-  quickPick.activeItems = [];
   quickPick.canSelectMany = false;
   quickPick.matchOnDescription = true;
-
-  // Timestamp of the last request change. This is used to avoid hammering
-  // the backend with too many requests.
-  let lastChangeUpdateRequestInMs = new Date().getTime();
-
   quickPick.onDidChangeValue(async (text) => {
-    quickPick.items = [];
-    quickPick.activeItems = [];
-    quickPick.busy = true;
-    const latestRecipe = latestRecipeHolder.recipe;
-    if (latestRecipe) {
-      await deleteInsertedCode(editor, initialPosition, latestRecipe);
+    if (latestRecipeHolder.recipe) {
+      deleteInsertedCode(editor, initialPosition, latestRecipeHolder.recipe);
     }
-
-    // put the last request update change as the current one
-    lastChangeUpdateRequestInMs = new Date().getTime();
-    const thisRequestChangeInMs = lastChangeUpdateRequestInMs;
-
-    /**
-     * Wait for CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS and
-     * check the current request is the latest one.
-     */
-    const shouldUpdate = await new Promise((r) =>
-      setTimeout(() => {
-        r(lastChangeUpdateRequestInMs === thisRequestChangeInMs);
-      }, CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS)
-    );
-
-    // if not the latest request, there is another one in flight
-    if (!shouldUpdate) {
-      return;
-    }
-
-    await updateQuickpickResults(
-      quickPick,
-      statusBar,
-      text && text.length > 0 ? text : undefined,
-      basename,
-      language,
-      dependencies
-    );
-    quickPick.busy = false;
   });
 
   // when changing the selection, add the code to the editor.
@@ -159,53 +117,32 @@ export async function useRecipe(
     if (selected.length > 0) {
       const firstRecipe: any = selected[0];
       const recipe = firstRecipe.recipe;
-
       const latestRecipe = latestRecipeHolder.recipe;
 
       if (latestRecipe) {
         deleteInsertedCode(editor, initialPosition, latestRecipe);
       }
       /**
-       * Make sure this is the same as the last recipe and insert it.
+       * If we select the same recipe, insert it as a snippet
        */
       if (latestRecipe && recipe.id === latestRecipe.id) {
         quickPick.dispose();
         statusBar.hide();
-
         insertSnippet(editor, initialPosition, recipe, language);
-        await useRecipeCallback(latestRecipe.id);
+      } else {
+        insertSnippet(editor, initialPosition, recipe, language);
       }
+      await useRecipeCallback(recipe.id);
     }
   });
 
   /**
    * We change the recipe shown as the user changes the selection
    */
-  quickPick.onDidChangeActive(async (e: any) => {
-    /**
-     * If there is no selected element and a previous
-     * recipe inserted, we should remove it.
-     */
-    if (e.length === 0 && latestRecipeHolder.recipe) {
-      await deleteInsertedCode(
-        editor,
-        initialPosition,
-        latestRecipeHolder.recipe
-      );
-      latestRecipeHolder.recipe = undefined;
-    }
-
-    /**
-     * If something is shown add it to the editor.
-     */
+  quickPick.onDidChangeActive((e: any) => {
     if (e.length > 0) {
       const recipe = e[0].recipe;
-      await addRecipeToEditor(
-        editor,
-        initialPosition,
-        recipe,
-        latestRecipeHolder
-      );
+      addRecipeToEditor(editor, initialPosition, recipe, latestRecipeHolder);
     }
   });
 
@@ -220,16 +157,18 @@ export async function useRecipe(
     statusBar.hide();
   });
 
-  /**
-   * Initial request: show all the existing recipes
-   */
-  await updateQuickpickResults(
+  quickPick.busy = true;
+
+  await fetchShortcuts(
     quickPick,
     statusBar,
-    undefined, // no  term to start with
+    undefined,
     basename,
     language,
     dependencies
   );
+
+  quickPick.busy = false;
+
   quickPick.show();
 }

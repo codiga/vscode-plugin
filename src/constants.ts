@@ -4,6 +4,12 @@ export const POLLING_INTERVAL_MILLISECONDS = 200;
 export const POLLING_DEADLINE_MILLISECONDS = 10000;
 export const TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS = 1500;
 
+export const CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS = 200;
+
+export const MESSAGE_STARTUP_SHOW_SHORTCUTS = "View Shortcuts";
+export const MESSAGE_STARTUP_SHOW_SNIPPETS = "Search Snippets";
+export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show again";
+
 export const STATUS_ERROR = "Error";
 export const STATUS_DONE = "Done";
 
@@ -32,4 +38,4 @@ export const COMPOSER_FILE = "composer.json";
 export const REQUIREMENTS_FILE = "requirements.txt";
 export const GEMFILE_FILE = "Gemfile";
 
-export const AUTO_COMPLETION_CHARACTER_TRIGGER = [" ", ",", "."];
+export const AUTO_COMPLETION_CHARACTER_TRIGGER = ".";

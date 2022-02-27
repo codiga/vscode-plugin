@@ -25,23 +25,28 @@ export function adaptIndentation(code: string, indentation: number): string {
 export function getCurrentIndentationForDocument(
   document: vscode.TextDocument,
   position: vscode.Position
-): number {
-  const line = document.lineAt(position.line);
+): number | undefined {
+  try {
+    const line = document.lineAt(position.line);
 
-  if (!line) {
-    return 0;
-  }
-
-  const lineText = line.text;
-
-  let nspaces = 0;
-  for (let i = 0; i < lineText.length; i = i + 1) {
-    if (lineText.charAt(i) !== " ") {
-      break;
+    if (!line) {
+      return 0;
     }
-    nspaces = nspaces + 1;
+
+    const lineText = line.text;
+
+    let nspaces = 0;
+    for (let i = 0; i < lineText.length; i = i + 1) {
+      if (lineText.charAt(i) !== " ") {
+        break;
+      }
+      nspaces = nspaces + 1;
+    }
+    return nspaces;
+  } catch (e) {
+    console.debug(e);
+    return undefined;
   }
-  return nspaces;
 }
 
 /**
@@ -53,7 +58,7 @@ export function getCurrentIndentationForDocument(
 export function getCurrentIndentation(
   editor: vscode.TextEditor,
   position: vscode.Position
-): number {
+): number | undefined {
   if (!editor) {
     return 0;
   }
@@ -69,6 +74,6 @@ export function getCurrentIndentation(
  * @param code
  * @returns
  */
- export function decodeIndent (code: string) {
-  return code.replace(/&\[CODIGA_INDENT\]/g, '\t');
+export function decodeIndent(code: string) {
+  return code.replace(/&\[CODIGA_INDENT\]/g, "\t");
 }

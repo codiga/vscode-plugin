@@ -51,8 +51,6 @@ export function doQuery(
   const query = client
     .request(graphqlQuery, variables, generateHeaders())
     .catch((e) => {
-      console.error("exception");
-      console.error(e);
       return undefined;
     });
   return query;

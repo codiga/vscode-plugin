@@ -1,6 +1,6 @@
 import { doQuery } from "./client";
 import { AssistantRecipe, Language } from "./types";
-import { GET_RECIPES } from "./queries";
+import { GET_RECIPES_BY_SHORTCUT, GET_RECIPES_SEMANTIC } from "./queries";
 import { getUserFingerprint } from "../utils/configurationUtils";
 
 /**
@@ -14,7 +14,39 @@ import { getUserFingerprint } from "../utils/configurationUtils";
  */
 
 export async function getRecipesForClient(
-  keywords: string[],
+  term: string | undefined,
+  filename: string | undefined,
+  language: Language,
+  dependencies: string[]
+): Promise<AssistantRecipe[]> {
+  // Get the fingerprint from localstorage to initiate the request
+  const userFingerprint = getUserFingerprint();
+
+  const variables: Record<
+    string,
+    string | undefined | number | null | string[]
+  > = {
+    language: language,
+    term: term,
+    howmany: 10,
+    skip: 0,
+    dependencies: dependencies,
+    filename: filename,
+    fingerprint: userFingerprint,
+    parameters: null,
+  };
+
+  const recipes = await doQuery(GET_RECIPES_SEMANTIC, variables);
+
+  if (!recipes) {
+    return [];
+  }
+
+  return recipes.assistantRecipesSemanticSearch;
+}
+
+export async function getRecipesForClientByShorcut(
+  term: string | undefined,
   filename: string | undefined,
   language: Language,
   dependencies: string[]
@@ -29,18 +61,17 @@ export async function getRecipesForClient(
     string | undefined | number | null | string[]
   > = {
     language: language,
-    keywords: keywords,
+    term: term,
     dependencies: dependencies,
     filename: filename,
     fingerprint: userFingerprint,
     parameters: null,
   };
 
-  const recipes = await doQuery(GET_RECIPES, variables);
-
+  const recipes = await doQuery(GET_RECIPES_BY_SHORTCUT, variables);
   if (!recipes) {
     return [];
   }
 
-  return recipes.getRecipesForClient;
+  return recipes.getRecipesForClientByShortcut;
 }

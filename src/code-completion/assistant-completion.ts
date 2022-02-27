@@ -10,8 +10,9 @@ import {
   decodeIndent,
 } from "../utils/indentationUtils";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
-import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
+import { getRecipesForClientByShorcut } from "../graphql-api/get-recipes-for-client";
 import { DIAGNOSTIC_CODE } from "../constants";
+import { getSearchTerm } from "../utils/textUtils";
 
 export async function providesCodeCompletion(
   document: vscode.TextDocument,
@@ -21,51 +22,24 @@ export async function providesCodeCompletion(
   // and if so then complete if `log`, `warn`, and `error`
   const line = document.lineAt(position);
   const lineText = line.text;
-
   if (
     !vscode.workspace.getConfiguration().get("codiga.codingAssistantCompletion")
   ) {
     return undefined;
   }
-
-  /**
-   * Do not trigger if we are in the middle of some code
-   */
-  if (
-    lineText.includes(")") ||
-    lineText.includes("(") ||
-    lineText.includes(".") ||
-    lineText.includes(";")
-  ) {
+  if (lineText.charAt(position.character - 1) !== ".") {
     return undefined;
   }
 
-  /**
-   * if we are before the end of the line, we are triggered only if there are only space after the cursor.
-   * so if we are on a line and there are non-space characers after us, we do not trigger
-   * a request.
-   */
-  if (lineText.length > position.character) {
-    for (let i = position.character - 1; i < lineText.length; i++) {
-      const c = lineText.charAt(i);
-      if (c !== " ") {
-        return undefined;
-      }
-    }
-  }
-
-  const keywords = lineText.split(" ").filter((v) => v.length > 0);
+  const term = getSearchTerm(lineText, position.character - 1);
   const path = document.uri.path;
-  if (keywords.length === 0) {
-    return undefined;
-  }
-
   const dependencies: string[] = await getDependencies(document);
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(document);
   const basename: string | undefined = getBasename(relativePath);
-  const recipes: AssistantRecipe[] = await getRecipesForClient(
-    keywords,
+
+  const recipes: AssistantRecipe[] = await getRecipesForClientByShorcut(
+    term,
     basename,
     language,
     dependencies
@@ -76,25 +50,22 @@ export async function providesCodeCompletion(
     position
   );
 
+  if (currentIdentation === undefined) {
+    return undefined;
+  }
+
   const insertionPositionStart = new vscode.Position(
     position.line,
     currentIdentation
   );
 
   return recipes.map((r) => {
-    const decodeFromBase64 = Buffer.from(r.vscodeFormat || "", "base64").toString(
-      "utf8"
-    );
+    const decodeFromBase64 = Buffer.from(
+      r.vscodeFormat || "",
+      "base64"
+    ).toString("utf8");
 
     const decodedCode = decodeIndent(decodeFromBase64);
-
-    const importsCode = r.imports
-      .filter((i) => !hasImport(document, i))
-      .join("\n");
-    const importsCodeFinal =
-      importsCode.length > 0 ? importsCode + "\n" : importsCode;
-
-    const decodedCodeWithImport = importsCodeFinal + decodedCode;
 
     // add the shortcut to the list of keywords used to trigger the completion.
     const keywords = r.keywords;
@@ -102,25 +73,54 @@ export async function providesCodeCompletion(
       keywords.push(r.shortcut);
     }
 
-    const title = `${r.name} (${r.keywords.join(" ")})`;
+    const title = `${r.shortcut}: ${r.name}`;
     const snippetCompletion = new vscode.CompletionItem(title);
+
+    /**
+     * If there is a description, we add it to the snippet. If not, we just
+     * show the code.
+     */
     if (r.description) {
       snippetCompletion.documentation = new vscode.MarkdownString(
-        `${r.description}\n### Code\n \`\`\`python\n${decodedCode}\n\`\`\``
+        `${
+          r.description
+        }\n### Code\n \`\`\`${r.language.toLocaleLowerCase()}\n${decodedCode}\n\`\`\``
+      );
+    } else {
+      snippetCompletion.documentation = new vscode.MarkdownString(
+        `\`\`\`${r.language.toLocaleLowerCase()}\n${decodedCode}\n\`\`\``
       );
     }
     snippetCompletion.detail = DIAGNOSTIC_CODE;
     const insertingRange = new vscode.Range(insertionPositionStart, position);
     snippetCompletion.range = insertingRange;
-    snippetCompletion.command =  {
+
+    /**
+     * Register this recipe as used
+     */
+    snippetCompletion.command = {
       arguments: [r.id],
       command: "codiga.registerUsage",
-      title: "Codiga Register Usage"
+      title: "Codiga Register Usage",
     };
 
-    snippetCompletion.insertText = new vscode.SnippetString(
-      decodedCodeWithImport
-    );
+    /**
+     * If there is any import to add, we import it
+     */
+    const importsToUse = r.imports.filter((i) => !hasImport(document, i));
+    if (importsToUse.length > 0) {
+      const importsCode = importsToUse.join("\n") + "\n";
+      const startLineToInsertImports = 0;
+
+      snippetCompletion.additionalTextEdits = [
+        vscode.TextEdit.insert(
+          new vscode.Position(startLineToInsertImports, 0),
+          importsCode
+        ),
+      ];
+    }
+
+    snippetCompletion.insertText = new vscode.SnippetString(decodedCode);
 
     return snippetCompletion;
   });

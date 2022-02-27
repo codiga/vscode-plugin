@@ -79,3 +79,65 @@ export const GET_RECIPES: string = gql`
     }
   }
 `;
+
+export const GET_RECIPES_SEMANTIC: string = gql`
+  query assistantRecipesSemanticSearch(
+    $term: String
+    $language: LanguageEnumeration!
+    $howmany: Long!
+    $skip: Long!
+  ) {
+    assistantRecipesSemanticSearch(
+      term: $term
+      languages: [$language]
+      howmany: $howmany
+      skip: $skip
+    ) {
+      id
+      name
+      description
+      isPublic
+      keywords
+      tags
+      code
+      imports
+      shortcut
+      language
+      creationTimestampMs
+      vscodeFormat
+    }
+  }
+`;
+
+export const GET_RECIPES_BY_SHORTCUT: string = gql`
+  query getRecipesForClientByShortcut(
+    $term: String
+    $fingerprint: String
+    $dependencies: [String!]!
+    $parameters: String
+    $language: LanguageEnumeration!
+    $filename: String
+  ) {
+    getRecipesForClientByShortcut(
+      term: $term
+      fingerprint: $fingerprint
+      dependencies: $dependencies
+      parameters: $parameters
+      language: $language
+      filename: $filename
+    ) {
+      id
+      name
+      description
+      isPublic
+      keywords
+      tags
+      code
+      imports
+      shortcut
+      language
+      creationTimestampMs
+      vscodeFormat
+    }
+  }
+`;
