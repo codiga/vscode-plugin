@@ -186,7 +186,7 @@ export async function useRecipe(
      * If there is no selected element and a previous
      * recipe inserted, we should remove it.
      */
-    if (e.length == 0 && latestRecipeHolder.recipe) {
+    if (e.length === 0 && latestRecipeHolder.recipe) {
       await deleteInsertedCode(
         editor,
         initialPosition,
