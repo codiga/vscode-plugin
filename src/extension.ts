@@ -8,6 +8,9 @@ import {
   IGNORE_VIOLATION_COMMAND,
   LEARN_MORE_COMMAND,
   AUTO_COMPLETION_CHARACTER_TRIGGER,
+  MESSAGE_STARTUP_SHOW_SHORTCUTS,
+  MESSAGE_STARTUP_SHOW_SNIPPETS,
+  MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
 } from "./constants";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { testApi } from "./commands/test-api";
@@ -178,6 +181,36 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage(
       "Codiga API keys not set, [click here](https://app.codiga.io/account/auth/vscode) to configure your API keys."
     );
+  }
+
+  /**
+   * Show a startup message for user to be familiar with the extension.
+   */
+  const configuration = vscode.workspace.getConfiguration("launch");
+  const shouldNotShowStartupMessage =
+    configuration.get("codiga.showStartupMessage") !== undefined &&
+    configuration.get("codiga.showStartupMessage") === false;
+
+  if (!shouldNotShowStartupMessage) {
+    vscode.window
+      .showInformationMessage(
+        "👋 use ⌘ + SHIFT + S for all shortcuts\n⌘ + SHIFT + C to search snippets.",
+        MESSAGE_STARTUP_SHOW_SHORTCUTS,
+        MESSAGE_STARTUP_SHOW_SNIPPETS,
+        MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN
+      )
+      .then((btn) => {
+        if (btn === MESSAGE_STARTUP_SHOW_SHORTCUTS) {
+          vscode.commands.executeCommand("codiga.listShortcuts");
+        }
+        if (btn === MESSAGE_STARTUP_SHOW_SNIPPETS) {
+          vscode.commands.executeCommand("codiga.recipeUse");
+        }
+        if (btn === MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN) {
+          console.log("update config");
+          configuration.update("codiga.showStartupMessage", false);
+        }
+      });
   }
 }
 
