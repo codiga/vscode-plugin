@@ -50,6 +50,10 @@ export async function providesCodeCompletion(
     position
   );
 
+  if (currentIdentation === undefined) {
+    return undefined;
+  }
+
   const insertionPositionStart = new vscode.Position(
     position.line,
     currentIdentation

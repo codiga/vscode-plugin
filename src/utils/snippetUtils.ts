@@ -42,17 +42,22 @@ export const insertSnippet = (
  * @param recipe
  * @returns
  */
-export const deleteInsertedCode = (
+export const deleteInsertedCode = async (
   editor: vscode.TextEditor,
   initialPosition: vscode.Position,
   recipe: AssistantRecipe | undefined
-): void => {
+): Promise<void> => {
   if (!recipe) {
     return;
   }
 
   const currentIdentation = getCurrentIndentation(editor, initialPosition);
-  editor.edit((editBuilder) => {
+
+  if (currentIdentation === undefined) {
+    return;
+  }
+
+  await editor.edit((editBuilder) => {
     const previousDecodeFromBase64 = Buffer.from(
       recipe.vscodeFormat || "",
       "base64"
@@ -82,13 +87,18 @@ export const deleteInsertedCode = (
  * @param initialPosition
  * @param recipe
  */
-export const addRecipeToEditor = (
+export const addRecipeToEditor = async (
   editor: vscode.TextEditor,
   initialPosition: vscode.Position,
   recipe: AssistantRecipe,
   latestRecipeHolder: LatestRecipeHolder
-): void => {
+): Promise<void> => {
   const currentIdentation = getCurrentIndentation(editor, initialPosition);
+
+  if (currentIdentation === undefined) {
+    return;
+  }
+
   const encodedCode = recipe.vscodeFormat;
   const decodeFromBase64 = Buffer.from(encodedCode, "base64").toString("utf8");
   const decodedCode = adaptIndentation(
@@ -97,7 +107,7 @@ export const addRecipeToEditor = (
   );
   const latestRecipe = latestRecipeHolder.recipe;
 
-  editor.edit((editBuilder) => {
+  await editor.edit((editBuilder) => {
     /**
      * If a recipe was previously inserted, remove it.
      */
@@ -112,13 +122,6 @@ export const addRecipeToEditor = (
       );
       const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
       const lastLineAdded = previousCodeAddedLines.pop() || "";
-      const replaceRange = new vscode.Range(
-        initialPosition,
-        new vscode.Position(
-          initialPosition.line + previousCodeAddedLines.length,
-          lastLineAdded.length
-        )
-      );
 
       editBuilder.delete(
         new vscode.Range(
@@ -130,6 +133,7 @@ export const addRecipeToEditor = (
         )
       );
     }
+
     editBuilder.insert(initialPosition, decodedCode);
     latestRecipeHolder.recipe = recipe;
   });

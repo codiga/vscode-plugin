@@ -146,10 +146,6 @@ export async function listShorcuts(
     }
   });
 
-  // quickPick.onDidAccept((e) => {
-  //   console.log("accept");
-  // });
-
   // when hiding, if a recipe was selected, send a callback to
   // notify we want to use it.
   quickPick.onDidHide(async () => {
@@ -161,6 +157,8 @@ export async function listShorcuts(
     statusBar.hide();
   });
 
+  quickPick.busy = true;
+
   await fetchShortcuts(
     quickPick,
     statusBar,
@@ -169,5 +167,8 @@ export async function listShorcuts(
     language,
     dependencies
   );
+
+  quickPick.busy = false;
+
   quickPick.show();
 }

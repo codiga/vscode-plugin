@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import { getUser } from "../graphql-api/user";
 
 /**
- * Show the user logged in in the status bar.
+ * Show the user logged in in the status bar. It's used by the coding
+ * assistant contextual window.
  */
 export const showUser = async (
   statusBar: vscode.StatusBarItem

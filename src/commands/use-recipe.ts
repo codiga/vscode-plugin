@@ -11,6 +11,7 @@ import {
   LatestRecipeHolder,
 } from "../utils/snippetUtils";
 import { showUser } from "../utils/StatusbarUtils";
+import { CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS } from "../constants";
 
 /**
  * Container to keep the latest recipe so that it can be updated
@@ -71,7 +72,6 @@ async function updateQuickpickResults(
       recipe: r,
     };
   });
-  quickPickEditor.activeItems = [];
 }
 
 /**
@@ -105,22 +105,52 @@ export async function useRecipe(
   quickPick.title = "Codiga Coding Assistant";
   quickPick.placeholder = "Enter search terms";
   quickPick.items = [];
+
+  quickPick.activeItems = [];
   quickPick.canSelectMany = false;
   quickPick.matchOnDescription = true;
+
+  // Timestamp of the last request change. This is used to avoid hammering
+  // the backend with too many requests.
+  let lastChangeUpdateRequestInMs = new Date().getTime();
+
   quickPick.onDidChangeValue(async (text) => {
+    quickPick.items = [];
+    quickPick.activeItems = [];
+    quickPick.busy = true;
     const latestRecipe = latestRecipeHolder.recipe;
     if (latestRecipe) {
-      deleteInsertedCode(editor, initialPosition, latestRecipe);
+      await deleteInsertedCode(editor, initialPosition, latestRecipe);
+    }
+
+    // put the last request update change as the current one
+    lastChangeUpdateRequestInMs = new Date().getTime();
+    const thisRequestChangeInMs = lastChangeUpdateRequestInMs;
+
+    /**
+     * Wait for CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS and
+     * check the current request is the latest one.
+     */
+    const shouldUpdate = await new Promise((r) =>
+      setTimeout(() => {
+        r(lastChangeUpdateRequestInMs === thisRequestChangeInMs);
+      }, CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS)
+    );
+
+    // if not the latest request, there is another one in flight
+    if (!shouldUpdate) {
+      return;
     }
 
     await updateQuickpickResults(
       quickPick,
       statusBar,
-      text,
+      text && text.length > 0 ? text : undefined,
       basename,
       language,
       dependencies
     );
+    quickPick.busy = false;
   });
 
   // when changing the selection, add the code to the editor.
@@ -136,7 +166,7 @@ export async function useRecipe(
         deleteInsertedCode(editor, initialPosition, latestRecipe);
       }
       /**
-       * If we select the same recipe, insert it as a snippet
+       * Make sure this is the same as the last recipe and insert it.
        */
       if (latestRecipe && recipe.id === latestRecipe.id) {
         quickPick.dispose();
@@ -144,8 +174,6 @@ export async function useRecipe(
 
         insertSnippet(editor, initialPosition, recipe, language);
         await useRecipeCallback(latestRecipe.id);
-      } else {
-        insertSnippet(editor, initialPosition, recipe, language);
       }
     }
   });
@@ -153,16 +181,33 @@ export async function useRecipe(
   /**
    * We change the recipe shown as the user changes the selection
    */
-  quickPick.onDidChangeActive((e: any) => {
+  quickPick.onDidChangeActive(async (e: any) => {
+    /**
+     * If there is no selected element and a previous
+     * recipe inserted, we should remove it.
+     */
+    if (e.length == 0 && latestRecipeHolder.recipe) {
+      await deleteInsertedCode(
+        editor,
+        initialPosition,
+        latestRecipeHolder.recipe
+      );
+      latestRecipeHolder.recipe = undefined;
+    }
+
+    /**
+     * If something is shown add it to the editor.
+     */
     if (e.length > 0) {
       const recipe = e[0].recipe;
-      addRecipeToEditor(editor, initialPosition, recipe, latestRecipeHolder);
+      await addRecipeToEditor(
+        editor,
+        initialPosition,
+        recipe,
+        latestRecipeHolder
+      );
     }
   });
-
-  // quickPick.onDidAccept((e) => {
-  //   console.log("accept");
-  // });
 
   // when hiding, if a recipe was selected, send a callback to
   // notify we want to use it.
@@ -175,10 +220,13 @@ export async function useRecipe(
     statusBar.hide();
   });
 
+  /**
+   * Initial request: show all the existing recipes
+   */
   await updateQuickpickResults(
     quickPick,
     statusBar,
-    undefined,
+    undefined, // no  term to start with
     basename,
     language,
     dependencies
