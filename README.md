@@ -1,3 +1,5 @@
+[![Slack](https://img.shields.io/badge/Slack-@codigahq.svg?logo=slack)](https://join.slack.com/t/codigahq/shared_invite/zt-9hvmfwie-9BUVFwZDwvpIGlkHv2mzYQ)
+[![Twitter](https://img.shields.io/badge/Twitter-getcodiga-blue?logo=twitter&logoColor=blue&color=blue)](https://twitter.com/getcodiga)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/installs-short/codiga.vscode-plugin.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
 [![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 [![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
