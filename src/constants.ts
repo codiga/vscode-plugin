@@ -6,9 +6,9 @@ export const TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS = 1500;
 
 export const CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS = 200;
 
-export const MESSAGE_STARTUP_SHOW_SHORTCUTS = "Shortcut";
-export const MESSAGE_STARTUP_SHOW_SNIPPETS = "Snippets";
-export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show";
+export const MESSAGE_STARTUP_SHOW_SHORTCUTS = "View Shortcuts";
+export const MESSAGE_STARTUP_SHOW_SNIPPETS = "Search Snippets";
+export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show again";
 
 export const STATUS_ERROR = "Error";
 export const STATUS_DONE = "Done";

@@ -212,7 +212,6 @@ export async function refreshDiagnostics(
   const language: Language = getLanguageForFile(relativePath);
 
   if (!isAnalysisEnabled()) {
-    console.debug("analysis disabled;");
     return;
   }
   if (language === Language.Unknown) {
