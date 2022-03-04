@@ -11,6 +11,8 @@ import {
   MESSAGE_STARTUP_SHOW_SHORTCUTS,
   MESSAGE_STARTUP_SHOW_SNIPPETS,
   MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
+  STARTUP_MESSAGE_MACOS,
+  STARTUP_MESSAGE_WINDOWS,
 } from "./constants";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { testApi } from "./commands/test-api";
@@ -192,9 +194,13 @@ export async function activate(context: vscode.ExtensionContext) {
     configuration.get("codiga.showStartupMessage") === false;
 
   if (!shouldNotShowStartupMessage) {
+    const startupMessage =
+      process.platform === "darwin"
+        ? STARTUP_MESSAGE_MACOS
+        : STARTUP_MESSAGE_WINDOWS;
     vscode.window
       .showInformationMessage(
-        "👋 use ⌘ + SHIFT + S for all shortcuts\n⌘ + SHIFT + C to search snippets.",
+        startupMessage,
         MESSAGE_STARTUP_SHOW_SHORTCUTS,
         MESSAGE_STARTUP_SHOW_SNIPPETS,
         MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN

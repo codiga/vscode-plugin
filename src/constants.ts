@@ -39,3 +39,8 @@ export const REQUIREMENTS_FILE = "requirements.txt";
 export const GEMFILE_FILE = "Gemfile";
 
 export const AUTO_COMPLETION_CHARACTER_TRIGGER = ".";
+
+export const STARTUP_MESSAGE_MACOS =
+  "👋 use ⌘ + SHIFT + S for all shortcuts and ⌘ + SHIFT + C to search snippets.";
+export const STARTUP_MESSAGE_WINDOWS =
+  "👋 use CTRL + ALT + S for all shortcuts and CTRL + ALT + C to search snippets.";
