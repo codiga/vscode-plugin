@@ -31,7 +31,6 @@ import { useRecipeCallback } from "./graphql-api/use-recipe";
 import { UriHandler } from "./utils/uriHandler";
 import { getUser } from "./graphql-api/user";
 import { listShorcuts } from "./commands/list-shortcuts";
-import { platform } from "os";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
