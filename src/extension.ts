@@ -11,6 +11,8 @@ import {
   MESSAGE_STARTUP_SHOW_SHORTCUTS,
   MESSAGE_STARTUP_SHOW_SNIPPETS,
   MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
+  STARTUP_MESSAGE_MACOS,
+  STARTUP_MESSAGE_WINDOWS,
 } from "./constants";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { testApi } from "./commands/test-api";
@@ -29,6 +31,7 @@ import { useRecipeCallback } from "./graphql-api/use-recipe";
 import { UriHandler } from "./utils/uriHandler";
 import { getUser } from "./graphql-api/user";
 import { listShorcuts } from "./commands/list-shortcuts";
+import { platform } from "os";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -192,9 +195,13 @@ export async function activate(context: vscode.ExtensionContext) {
     configuration.get("codiga.showStartupMessage") === false;
 
   if (!shouldNotShowStartupMessage) {
+    const startupMessage =
+      process.platform === "darwin"
+        ? STARTUP_MESSAGE_MACOS
+        : STARTUP_MESSAGE_WINDOWS;
     vscode.window
       .showInformationMessage(
-        "👋 use ⌘ + SHIFT + S for all shortcuts\n⌘ + SHIFT + C to search snippets.",
+        startupMessage,
         MESSAGE_STARTUP_SHOW_SHORTCUTS,
         MESSAGE_STARTUP_SHOW_SNIPPETS,
         MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN
