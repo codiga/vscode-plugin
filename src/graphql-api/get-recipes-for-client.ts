@@ -1,6 +1,10 @@
 import { doQuery } from "./client";
 import { AssistantRecipe, Language } from "./types";
-import { GET_RECIPES_BY_SHORTCUT, GET_RECIPES_SEMANTIC } from "./queries";
+import {
+  GET_RECIPES_BY_SHORTCUT,
+  GET_RECIPES_BY_SHORTCUT_LAST_TIMESTAMP,
+  GET_RECIPES_SEMANTIC,
+} from "./queries";
 import { getUserFingerprint } from "../utils/configurationUtils";
 
 /**
@@ -74,4 +78,33 @@ export async function getRecipesForClientByShorcut(
   }
 
   return recipes.getRecipesForClientByShortcut;
+}
+
+export async function getRecipesForClientByShorcutLastTimestamp(
+  language: Language,
+  dependencies: string[]
+): Promise<number | undefined> {
+  // Convert array of parameters into k1=v1;k2=v2
+
+  // Get the fingerprint from localstorage to initiate the request
+  const userFingerprint = getUserFingerprint();
+
+  const variables: Record<
+    string,
+    string | undefined | number | null | string[]
+  > = {
+    language: language,
+    dependencies: dependencies,
+    fingerprint: userFingerprint,
+  };
+
+  const lastTimestamp = await doQuery(
+    GET_RECIPES_BY_SHORTCUT_LAST_TIMESTAMP,
+    variables
+  );
+  if (!lastTimestamp) {
+    return undefined;
+  }
+
+  return lastTimestamp.getRecipesForClientByShortcutLastTimestamp;
 }
