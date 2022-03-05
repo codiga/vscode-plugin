@@ -31,6 +31,11 @@ import { useRecipeCallback } from "./graphql-api/use-recipe";
 import { UriHandler } from "./utils/uriHandler";
 import { getUser } from "./graphql-api/user";
 import { listShorcuts } from "./commands/list-shortcuts";
+import {
+  disableShortcutsPolling,
+  enableShortcutsPolling,
+  fetchPeriodicShortcuts,
+} from "./graphql-api/shortcut-cache";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -218,7 +223,14 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
   }
+  enableShortcutsPolling();
+  fetchPeriodicShortcuts();
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  /**
+   * Disable shortcut polling
+   */
+  disableShortcutsPolling();
+}

@@ -40,6 +40,9 @@ export const GEMFILE_FILE = "Gemfile";
 
 export const AUTO_COMPLETION_CHARACTER_TRIGGER = ".";
 
+// 10 seconds
+export const CODING_ASSISTANT_SHORTCUTS_POLLING_MS = 10000;
+
 export const STARTUP_MESSAGE_MACOS =
   "👋 use ⌘ + SHIFT + S for all shortcuts and ⌘ + SHIFT + C to search snippets.";
 export const STARTUP_MESSAGE_WINDOWS =

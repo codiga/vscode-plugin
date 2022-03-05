@@ -13,6 +13,7 @@ import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getRecipesForClientByShorcut } from "../graphql-api/get-recipes-for-client";
 import { DIAGNOSTIC_CODE } from "../constants";
 import { getSearchTerm } from "../utils/textUtils";
+import { getShortcutCache } from "../graphql-api/shortcut-cache";
 
 export async function providesCodeCompletion(
   document: vscode.TextDocument,
@@ -38,12 +39,30 @@ export async function providesCodeCompletion(
   const language: Language = getLanguageForDocument(document);
   const basename: string | undefined = getBasename(relativePath);
 
-  const recipes: AssistantRecipe[] = await getRecipesForClientByShorcut(
-    term,
-    basename,
-    language,
-    dependencies
-  );
+  if (!term) {
+    return undefined;
+  }
+
+  let recipes: AssistantRecipe[] = [];
+  const recipesFromCache = getShortcutCache(basename, language, dependencies);
+
+  /**
+   * If we find recipes from the cache, get them and filter
+   * using the one that start with the given term.
+   * Otherwise, we fetch using the API.
+   */
+  if (recipesFromCache) {
+    recipes = recipesFromCache.filter(
+      (r) => r.shortcut && r.shortcut.startsWith(term)
+    );
+  } else {
+    recipes = await getRecipesForClientByShorcut(
+      term,
+      basename,
+      language,
+      dependencies
+    );
+  }
 
   const currentIdentation = getCurrentIndentationForDocument(
     document,

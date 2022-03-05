@@ -141,3 +141,17 @@ export const GET_RECIPES_BY_SHORTCUT: string = gql`
     }
   }
 `;
+
+export const GET_RECIPES_BY_SHORTCUT_LAST_TIMESTAMP: string = gql`
+  query getRecipesForClientByShortcutLastTimestamp(
+    $fingerprint: String
+    $dependencies: [String!]!
+    $language: LanguageEnumeration!
+  ) {
+    getRecipesForClientByShortcutLastTimestamp(
+      fingerprint: $fingerprint
+      dependencies: $dependencies
+      language: $language
+    )
+  }
+`;
