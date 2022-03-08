@@ -42,6 +42,8 @@ export const AUTO_COMPLETION_CHARACTER_TRIGGER = ".";
 
 // 10 seconds
 export const CODING_ASSISTANT_SHORTCUTS_POLLING_MS = 10000;
+// 10 minutes
+export const CODING_ASSISTANT_MAX_TIME_IN_CACHE_MS = 600000;
 
 export const STARTUP_MESSAGE_MACOS =
   "👋 use ⌘ + SHIFT + S for all shortcuts and ⌘ + SHIFT + C to search snippets.";

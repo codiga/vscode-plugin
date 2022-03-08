@@ -35,6 +35,7 @@ import {
   disableShortcutsPolling,
   enableShortcutsPolling,
   fetchPeriodicShortcuts,
+  fetchShortcuts,
 } from "./graphql-api/shortcut-cache";
 
 // this method is called when your extension is activated
@@ -49,12 +50,6 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   codigaStatusBar.command = "codiga.recipeExtended";
   context.subscriptions.push(codigaStatusBar);
-
-  // if (!user) {
-  //   vscode.window.showInformationMessage(
-  //     "Code Inspector: invalid API keys, configure your API keys"
-  //   );
-  // }
 
   const diagnotics = vscode.languages.createDiagnosticCollection(
     DIAGNOSTICS_COLLECTION_NAME
@@ -225,6 +220,19 @@ export async function activate(context: vscode.ExtensionContext) {
   }
   enableShortcutsPolling();
   fetchPeriodicShortcuts();
+
+  /**
+   * Whenever we open a document, we attempt to fetch the shortcuts
+   * right when the document is open.
+   */
+  vscode.workspace.onDidOpenTextDocument(async () => {
+    try {
+      await fetchShortcuts();
+    } catch (e) {
+      console.debug("Error when trying to fetch shortcuts");
+      console.debug(e);
+    }
+  });
 }
 
 // this method is called when your extension is deactivated
