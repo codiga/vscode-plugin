@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
-import { CODING_ASSISTANT_SHORTCUTS_POLLING_MS } from "../constants";
+import {
+  CODING_ASSISTANT_MAX_TIME_IN_CACHE_MS,
+  CODING_ASSISTANT_SHORTCUTS_POLLING_MS,
+} from "../constants";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
 import {
@@ -21,6 +24,7 @@ export interface ShortcutCacheKey {
 
 export interface ShortcutCacheValue {
   lastUpdateTimestampMs: number;
+  lastAccessTimestampMs: number;
   values: AssistantRecipe[];
 }
 
@@ -71,12 +75,45 @@ export const enableShortcutsPolling = () => {
   enablePeriodicPolling = true;
 };
 
+export const garbageCollection = (
+  cacheToCollect: Map<string, ShortcutCacheValue>
+) => {
+  const nowMs = Date.now();
+  const keysToCollect = [];
+
+  /**
+   * First, look at the keys we need to collect/remove
+   * from the cache.
+   */
+  for (const key of cacheToCollect.keys()) {
+    const cacheValue = cacheToCollect.get(key);
+    if (cacheToCollect.has(key) && cacheValue) {
+      /**
+       * Was the data in the cache long enough?
+       */
+      if (
+        cacheValue.lastAccessTimestampMs <
+        nowMs - CODING_ASSISTANT_MAX_TIME_IN_CACHE_MS
+      ) {
+        keysToCollect.push(key);
+      }
+    }
+  }
+
+  /**
+   * Remove the data from the cache.
+   */
+  keysToCollect.forEach((key) => {
+    cacheToCollect.delete(key);
+  });
+};
+
 /**
  * Fetch all shortcuts. This function is periodically
  * called using polling.
  * @returns
  */
-const fetchShortcuts = async () => {
+export const fetchShortcuts = async () => {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
@@ -110,16 +147,30 @@ const fetchShortcuts = async () => {
     return;
   }
 
+  const nowTimestampMs = Date.now();
+
   /**
    * We should fetch if and only if
    *  - there was no data before
    *  - there are new recipes available by shortcut
    */
-
   const cacheKeyString = JSON.stringify(cacheKey);
   const shouldFetch =
     !cache.has(cacheKeyString) ||
     cache.get(cacheKeyString)?.lastUpdateTimestampMs !== lastTimestamp;
+
+  /**
+   * If we should not fetch and there is data in the cache,
+   * update the last access time so that the data is not marked
+   * to be garbage collected.
+   */
+  if (!shouldFetch && cache.has(cacheKeyString)) {
+    const currentValue = cache.get(cacheKeyString);
+    if (currentValue) {
+      currentValue.lastAccessTimestampMs = nowTimestampMs;
+      cache.set(cacheKeyString, currentValue);
+    }
+  }
 
   if (shouldFetch) {
     const recipes = await getRecipesForClientByShorcut(
@@ -131,6 +182,7 @@ const fetchShortcuts = async () => {
     // associated the new timestamp with the cache value
     const cacheValue: ShortcutCacheValue = {
       lastUpdateTimestampMs: lastTimestamp,
+      lastAccessTimestampMs: nowTimestampMs,
       values: recipes,
     };
     // need to stringify since we take a string as a key
@@ -139,11 +191,17 @@ const fetchShortcuts = async () => {
   }
 };
 
+/**
+ * Until periodic polling is enable, execute
+ * the polling function and wait for the next
+ * execution.
+ */
 export const fetchPeriodicShortcuts = async () => {
   if (enablePeriodicPolling) {
     await fetchShortcuts().catch((e) => {
       console.error("error while fetching shortcuts");
     });
+    garbageCollection(cache);
     setTimeout(fetchPeriodicShortcuts, CODING_ASSISTANT_SHORTCUTS_POLLING_MS);
   }
 };
