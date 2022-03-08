@@ -12,7 +12,7 @@ import {
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getRecipesForClientByShorcut } from "../graphql-api/get-recipes-for-client";
 import { DIAGNOSTIC_CODE } from "../constants";
-import { getSearchTerm } from "../utils/textUtils";
+import { getSearchTerm, removeStartingSlash } from "../utils/textUtils";
 import { getShortcutCache } from "../graphql-api/shortcut-cache";
 
 export async function providesCodeCompletion(
@@ -32,16 +32,25 @@ export async function providesCodeCompletion(
     return undefined;
   }
 
-  const term = getSearchTerm(lineText, position.character - 1);
+  const rawTerm = getSearchTerm(lineText, position.character - 1);
   const path = document.uri.path;
   const dependencies: string[] = await getDependencies(document);
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(document);
   const basename: string | undefined = getBasename(relativePath);
 
-  if (!term) {
+  if (!rawTerm) {
     return undefined;
   }
+
+  /**
+   * Handling starting slash ('/')
+   *   - if the slash is added, the search term should be without the starting slash
+   *   - we should know if there is a trailing slash and adapt the title later for it so it is selected.
+   */
+  const term = removeStartingSlash(rawTerm);
+
+  const hasStartingSlash = rawTerm.startsWith("/");
 
   let recipes: AssistantRecipe[] = [];
   const recipesFromCache = getShortcutCache(basename, language, dependencies);
@@ -53,7 +62,7 @@ export async function providesCodeCompletion(
    */
   if (recipesFromCache) {
     recipes = recipesFromCache.filter(
-      (r) => r.shortcut && r.shortcut.startsWith(term)
+      (r) => r.shortcut && r.shortcut.startsWith(term.toLowerCase())
     );
   } else {
     recipes = await getRecipesForClientByShorcut(
@@ -86,13 +95,11 @@ export async function providesCodeCompletion(
 
     const decodedCode = decodeIndent(decodeFromBase64);
 
-    // add the shortcut to the list of keywords used to trigger the completion.
-    const keywords = r.keywords;
-    if (r.shortcut && r.shortcut.length > 0) {
-      keywords.push(r.shortcut);
-    }
-
-    const title = `${r.shortcut}: ${r.name}`;
+    /**
+     * If the user puts a '/', we add it to the title to match the user input.
+     */
+    const shortcutForTitle = hasStartingSlash ? `/${r.shortcut}` : r.shortcut;
+    const title = `${shortcutForTitle}: ${r.name}`;
     const snippetCompletion = new vscode.CompletionItem(title);
 
     /**
