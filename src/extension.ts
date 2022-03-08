@@ -225,7 +225,7 @@ export async function activate(context: vscode.ExtensionContext) {
    * Whenever we open a document, we attempt to fetch the shortcuts
    * right when the document is open.
    */
-  vscode.workspace.onDidOpenTextDocument(async (e) => {
+  vscode.workspace.onDidOpenTextDocument(async () => {
     try {
       await fetchShortcuts();
     } catch (e) {
