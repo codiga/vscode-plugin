@@ -134,8 +134,12 @@ export async function useRecipe(
     quickPick.items = [];
     quickPick.activeItems = [];
     quickPick.busy = true;
+    console.log("plop");
     if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+      console.log("delete");
+      console.log(latestRecipeHolder.insertedRange);
       await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
+      resetRecipeHolder(latestRecipeHolder);
     }
 
     // put the last request update change as the current one
@@ -210,6 +214,7 @@ export async function useRecipe(
     ) {
       await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
       latestRecipeHolder.recipe = undefined;
+      resetRecipeHolder(latestRecipeHolder);
     }
 
     /**

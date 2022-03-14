@@ -6,11 +6,13 @@
 [![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 [![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 
-Create, use and share code snippets for any language:
+## Quick Start
 
-- Find code snippets for 15+ languages using Coding Assistant
-- Create public or private code snippets from your IDE
-- Share private code snippets with your team
+Install the extension and type `.` or `/` in your IDE to list all available snippets for your project. Accept a snippet using either Enter ↩ or Tab ↹. Go through the snippet variables usign the Tab key.
+
+![Use of recipe in Python](images/vscode-read-file.gif)
+
+**Note**: snippets are suggested based on your environment: language, libraries used and filename (e.g. especially for YML files).
 
 ## Find and Reuse Code Snippets
 
