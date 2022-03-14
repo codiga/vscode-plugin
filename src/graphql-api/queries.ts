@@ -76,6 +76,7 @@ export const GET_RECIPES: string = gql`
       language
       creationTimestampMs
       vscodeFormat
+      presentableFormat
     }
   }
 `;
@@ -105,6 +106,7 @@ export const GET_RECIPES_SEMANTIC: string = gql`
       language
       creationTimestampMs
       vscodeFormat
+      presentableFormat
     }
   }
 `;

@@ -214,6 +214,7 @@ export async function useRecipe(
      */
     if (e.length > 0) {
       const recipe = e[0].recipe;
+
       await addRecipeToEditor(
         editor,
         initialPosition,
