@@ -22,6 +22,21 @@ const latestRecipeHolder: LatestRecipeHolder = {
 };
 
 /**
+ * Show the list of keywords to show in the list of all recipes
+ * @param keywords
+ */
+const keywordsString = (recipe: AssistantRecipe): string => {
+  if (recipe.keywords.length > 0) {
+    return `(keywords: ${recipe.keywords.join(" ")})`;
+  }
+  if (recipe.shortcut && recipe.shortcut.length > 0) {
+    return `(shortcut: ${recipe.shortcut})`;
+  }
+
+  return "";
+};
+
+/**
  * Update the quickpick results by doing a GraphQL query and showing
  * the results.
  * @param quickPickEditor
@@ -68,7 +83,7 @@ async function updateQuickpickResults(
     return {
       label: r.name,
       alwaysShow: true,
-      description: `(keywords: ${r.keywords.join(" ")})`,
+      description: keywordsString(r),
       recipe: r,
     };
   });
@@ -97,7 +112,6 @@ export async function useRecipe(
   const path = doc.uri.path;
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(doc);
-  const basename: string | undefined = getBasename(relativePath);
   const dependencies: string[] = await getDependencies(doc);
   const initialPosition: vscode.Position = editor.selection.active;
 
@@ -146,7 +160,7 @@ export async function useRecipe(
       quickPick,
       statusBar,
       text && text.length > 0 ? text : undefined,
-      basename,
+      relativePath,
       language,
       dependencies
     );
@@ -227,7 +241,7 @@ export async function useRecipe(
     quickPick,
     statusBar,
     undefined, // no  term to start with
-    basename,
+    relativePath,
     language,
     dependencies
   );
