@@ -232,7 +232,6 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidOpenTextDocument(async () => {
     try {
       await fetchShortcuts();
-      vscode.workspace;
     } catch (e) {
       console.debug("Error when trying to fetch shortcuts");
       console.debug(e);
