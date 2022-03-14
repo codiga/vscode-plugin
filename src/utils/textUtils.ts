@@ -57,8 +57,8 @@ export const removeStartingSlashOrDot = (term: string): string => {
  * @returns
  */
 export const shouldSkipSuggestions = (
-  line: String,
-  element: String,
+  line: string,
+  element: string,
   language: Language
 ): boolean => {
   if (!line) {
