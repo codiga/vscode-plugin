@@ -134,10 +134,7 @@ export async function useRecipe(
     quickPick.items = [];
     quickPick.activeItems = [];
     quickPick.busy = true;
-    console.log("plop");
     if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
-      console.log("delete");
-      console.log(latestRecipeHolder.insertedRange);
       await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
       resetRecipeHolder(latestRecipeHolder);
     }
