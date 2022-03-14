@@ -214,7 +214,6 @@ export async function activate(context: vscode.ExtensionContext) {
           vscode.commands.executeCommand("codiga.recipeUse");
         }
         if (btn === MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN) {
-          console.log("update config");
           configuration.update(
             "showWelcomeMessage",
             false,
