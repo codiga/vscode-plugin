@@ -9,6 +9,7 @@ import {
   deleteInsertedCode,
   insertSnippet,
   LatestRecipeHolder,
+  resetRecipeHolder,
 } from "../utils/snippetUtils";
 import { showUser } from "../utils/StatusbarUtils";
 import { CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS } from "../constants";
@@ -19,6 +20,7 @@ import { CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS } from "../constant
  */
 const latestRecipeHolder: LatestRecipeHolder = {
   recipe: undefined,
+  insertedRange: undefined,
 };
 
 /**
@@ -132,9 +134,8 @@ export async function useRecipe(
     quickPick.items = [];
     quickPick.activeItems = [];
     quickPick.busy = true;
-    const latestRecipe = latestRecipeHolder.recipe;
-    if (latestRecipe) {
-      await deleteInsertedCode(editor, initialPosition, latestRecipe);
+    if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+      await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
     }
 
     // put the last request update change as the current one
@@ -176,8 +177,8 @@ export async function useRecipe(
 
       const latestRecipe = latestRecipeHolder.recipe;
 
-      if (latestRecipe) {
-        deleteInsertedCode(editor, initialPosition, latestRecipe);
+      if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+        deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
       }
       /**
        * Make sure this is the same as the last recipe and insert it.
@@ -186,9 +187,11 @@ export async function useRecipe(
         quickPick.dispose();
         statusBar.hide();
 
-        insertSnippet(editor, initialPosition, recipe, language);
+        await insertSnippet(editor, initialPosition, recipe, language);
         await useRecipeCallback(latestRecipe.id);
       }
+
+      resetRecipeHolder(latestRecipeHolder);
     }
   });
 
@@ -200,12 +203,12 @@ export async function useRecipe(
      * If there is no selected element and a previous
      * recipe inserted, we should remove it.
      */
-    if (e.length === 0 && latestRecipeHolder.recipe) {
-      await deleteInsertedCode(
-        editor,
-        initialPosition,
-        latestRecipeHolder.recipe
-      );
+    if (
+      e.length === 0 &&
+      latestRecipeHolder &&
+      latestRecipeHolder.insertedRange
+    ) {
+      await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
       latestRecipeHolder.recipe = undefined;
     }
 
@@ -227,10 +230,10 @@ export async function useRecipe(
   // when hiding, if a recipe was selected, send a callback to
   // notify we want to use it.
   quickPick.onDidHide(async () => {
-    const latestRecipe = latestRecipeHolder.recipe;
-    if (latestRecipe) {
-      deleteInsertedCode(editor, initialPosition, latestRecipe);
+    if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+      deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
     }
+    resetRecipeHolder(latestRecipeHolder);
     quickPick.dispose();
     statusBar.hide();
   });

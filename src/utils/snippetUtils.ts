@@ -9,16 +9,30 @@ import {
   getCurrentIndentation,
 } from "./indentationUtils";
 
+/**
+ * Utility class to hold what has been already added in the editor.
+ */
 export interface LatestRecipeHolder {
   recipe: AssistantRecipe | undefined;
+  insertedRange: vscode.Range | undefined;
 }
 
-export const insertSnippet = (
+/**
+ * Reset the values of the recipe holder with undefined. It should
+ * be called when we dismissed the coding assistant features (close window, etc.)
+ * @param recipeHolder
+ */
+export const resetRecipeHolder = (recipeHolder: LatestRecipeHolder) => {
+  recipeHolder.insertedRange = undefined;
+  recipeHolder.recipe = undefined;
+};
+
+export const insertSnippet = async (
   editor: vscode.TextEditor,
   initialPosition: vscode.Position,
   recipe: AssistantRecipe,
   language: Language
-): void => {
+): Promise<void> => {
   const decodeFromBase64 = Buffer.from(recipe.vscodeFormat, "base64").toString(
     "utf8"
   );
@@ -27,31 +41,31 @@ export const insertSnippet = (
 
   /**
    * Filter imports that really need to be added.
+   *   1. Refine the imports based on what the editor already has
+   *   2. Check if they are already in the editor.
    */
   const filteredImports = filterImports(
     recipe.imports,
     language,
     editor.document
-  );
+  ).filter((i) => !hasImport(editor.document, i));
 
   /**
    * Insert the imports at the top of the file.
    */
-  for (const importStatement of filteredImports) {
-    if (!hasImport(editor.document, importStatement)) {
-      const snippetString = new vscode.SnippetString(importStatement + "\n");
-      const line = firstLineToImport(editor.document, language);
-      const position = new vscode.Position(line, 0);
-      editor.insertSnippet(snippetString, position);
-    }
-  }
+  await filteredImports.forEach(async (importStatement) => {
+    const snippetString = new vscode.SnippetString(importStatement + "\n");
+    const line = firstLineToImport(editor.document, language);
+    const position = new vscode.Position(line, 0);
+    await editor.insertSnippet(snippetString, position);
+  });
 
   /**
    * For each import we have insert, we also need to add another line
    * and compute the final position. We just offset the lines.
    */
   const finalPosition = new vscode.Position(
-    initialPosition.line + filterImports.length,
+    initialPosition.line + filteredImports.length,
     initialPosition.character
   );
 
@@ -59,46 +73,21 @@ export const insertSnippet = (
 };
 
 /**
- * Delete code that was previously added into the editor
- * @param editor
- * @param initialPosition
- * @param recipe
+ * Delete code that was previously added into the editor.
+ * @param editor: the current editor
+ * @param range: the range to delete
  * @returns
  */
 export const deleteInsertedCode = async (
   editor: vscode.TextEditor,
-  initialPosition: vscode.Position,
-  recipe: AssistantRecipe | undefined
+  range: vscode.Range
 ): Promise<void> => {
-  if (!recipe) {
-    return;
-  }
-
-  const currentIdentation = getCurrentIndentation(editor, initialPosition);
-
-  if (currentIdentation === undefined) {
+  if (!range) {
     return;
   }
 
   await editor.edit((editBuilder) => {
-    const previousDecodeFromBase64 = Buffer.from(
-      recipe.presentableFormat || "",
-      "base64"
-    ).toString("utf8");
-    const previousRecipeDecodedCode = adaptIndentation(
-      decodeIndent(previousDecodeFromBase64),
-      currentIdentation
-    );
-    const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
-    const lastLineAdded = previousCodeAddedLines.pop() || "";
-    const deleteRange = new vscode.Range(
-      initialPosition,
-      new vscode.Position(
-        initialPosition.line + previousCodeAddedLines.length,
-        lastLineAdded.length
-      )
-    );
-    editBuilder.delete(deleteRange);
+    editBuilder.delete(range);
   });
 };
 
@@ -127,39 +116,40 @@ export const addRecipeToEditor = async (
     decodeIndent(decodeFromBase64),
     currentIdentation
   );
-
-  const latestRecipe = latestRecipeHolder.recipe;
+  const decodedCodeLines = decodedCode.split("\n");
 
   await editor.edit((editBuilder) => {
     /**
      * If a recipe was previously inserted, remove it.
      */
-    if (latestRecipe) {
-      const previousDecodeFromBase64 = Buffer.from(
-        latestRecipe?.presentableFormat || "",
-        "base64"
-      ).toString("utf8");
-      const previousRecipeDecodedCode = adaptIndentation(
-        decodeIndent(previousDecodeFromBase64),
-        currentIdentation
-      );
-
-      const previousCodeAddedLines = previousRecipeDecodedCode.split("\n");
-      const lastLineAdded = previousCodeAddedLines.pop() || "";
-      editBuilder.delete(
-        new vscode.Range(
-          initialPosition,
-          new vscode.Position(
-            initialPosition.line + previousCodeAddedLines.length,
-            previousCodeAddedLines.length > 1
-              ? lastLineAdded.length
-              : lastLineAdded.length + currentIdentation
-          )
-        )
-      );
+    if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+      editBuilder.delete(latestRecipeHolder.insertedRange);
     }
 
     editBuilder.insert(initialPosition, decodedCode);
+
+    // Get the last inserted line
+    const lastInsertedCodeLine =
+      decodedCodeLines.length > 0
+        ? decodedCodeLines[decodedCodeLines.length - 1]
+        : "";
+
+    /**
+     * Compute the end position:
+     *  - For the line, we take the number of lines from the inserted code
+     *  - For the character position
+     *    - If the code has only one line, it was not idented by adaptIndentation() and
+     *      we need to add the indentation
+     *    - If the code has more than one line, we take the length of the last insert code line.
+     */
+    const endPosition = new vscode.Position(
+      initialPosition.line + decodedCodeLines.length - 1,
+      decodedCodeLines.length === 1
+        ? lastInsertedCodeLine.length + currentIdentation
+        : lastInsertedCodeLine.length
+    );
+    const insertionRange = new vscode.Range(initialPosition, endPosition);
     latestRecipeHolder.recipe = recipe;
+    latestRecipeHolder.insertedRange = insertionRange;
   });
 };
