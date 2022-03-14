@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.6]
+
+- Trigger all recipes by typing `.` or `/`
+- Fix bugs to stop showing welcome message if click on "Not show again"
+- Show presentable format in the suggestion box
+
 ## [0.1.2]
 
 - New API Token format

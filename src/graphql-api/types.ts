@@ -25,6 +25,7 @@ export interface AssistantRecipe {
   imports: string[];
   shortcut: string;
   vscodeFormat: string;
+  presentableFormat: string;
 }
 
 export interface FileAnalysis {

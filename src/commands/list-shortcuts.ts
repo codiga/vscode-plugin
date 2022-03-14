@@ -95,7 +95,6 @@ export async function listShorcuts(
   const path = doc.uri.path;
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(doc);
-  const basename: string | undefined = getBasename(relativePath);
   const dependencies: string[] = await getDependencies(doc);
   const initialPosition: vscode.Position = editor.selection.active;
 
@@ -163,7 +162,7 @@ export async function listShorcuts(
     quickPick,
     statusBar,
     undefined,
-    basename,
+    relativePath,
     language,
     dependencies
   );

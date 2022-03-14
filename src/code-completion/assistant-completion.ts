@@ -1,10 +1,6 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import {
-  getBasename,
-  getLanguageForDocument,
-  hasImport,
-} from "../utils/fileUtils";
+import { getLanguageForDocument, hasImport } from "../utils/fileUtils";
 import {
   getCurrentIndentationForDocument,
   decodeIndent,
@@ -12,8 +8,55 @@ import {
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getRecipesForClientByShorcut } from "../graphql-api/get-recipes-for-client";
 import { DIAGNOSTIC_CODE } from "../constants";
-import { getSearchTerm, removeStartingSlash } from "../utils/textUtils";
+import {
+  getSearchTerm,
+  removeStartingSlashOrDot,
+  shouldSkipSuggestions,
+} from "../utils/textUtils";
 import { getShortcutCache } from "../graphql-api/shortcut-cache";
+import { filterImports } from "../utils/dependencies/filter-dependencies";
+
+/**
+ * Get the recipes. We first attempt to get them from the cache if there
+ * is anything in the cache. Otherwise, we get them by making an API
+ * query.
+ *
+ * @param term - the search term
+ * @param filename - the filename we are looking for
+ * @param language - the language we are using
+ * @param dependencies - list of dependencies
+ * @returns
+ */
+const getRecipes = async (
+  term: string | undefined,
+  filename: string | undefined,
+  language: Language,
+  dependencies: string[]
+): Promise<AssistantRecipe[]> => {
+  const recipesFromCache = getShortcutCache(filename, language, dependencies);
+
+  /**
+   * If we find recipes from the cache, get them and filter
+   * using the one that start with the given term.
+   * Otherwise, we fetch using the API.
+   */
+  if (recipesFromCache) {
+    return recipesFromCache.filter((r) => {
+      if (term) {
+        return r.shortcut && r.shortcut.startsWith(term.toLowerCase());
+      } else {
+        return r.shortcut !== null;
+      }
+    });
+  } else {
+    return await getRecipesForClientByShorcut(
+      term,
+      filename,
+      language,
+      dependencies
+    );
+  }
+};
 
 export async function providesCodeCompletion(
   document: vscode.TextDocument,
@@ -23,12 +66,9 @@ export async function providesCodeCompletion(
   // and if so then complete if `log`, `warn`, and `error`
   const line = document.lineAt(position);
   const lineText = line.text;
-  if (
-    !vscode.workspace.getConfiguration().get("codiga.codingAssistantCompletion")
-  ) {
-    return undefined;
-  }
-  if (lineText.charAt(position.character - 1) !== ".") {
+
+  const currentCharacter = lineText.charAt(position.character - 1);
+  if (currentCharacter !== "." && currentCharacter !== "/") {
     return undefined;
   }
 
@@ -37,41 +77,38 @@ export async function providesCodeCompletion(
   const dependencies: string[] = await getDependencies(document);
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(document);
-  const basename: string | undefined = getBasename(relativePath);
+  let recipes: AssistantRecipe[] = [];
 
   if (!rawTerm) {
     return undefined;
   }
 
   /**
-   * Handling starting slash ('/')
-   *   - if the slash is added, the search term should be without the starting slash
-   *   - we should know if there is a trailing slash and adapt the title later for it so it is selected.
+   * If we should skip suggestions, just return and suggest nothing.
    */
-  const term = removeStartingSlash(rawTerm);
-
-  const hasStartingSlash = rawTerm.startsWith("/");
-
-  let recipes: AssistantRecipe[] = [];
-  const recipesFromCache = getShortcutCache(basename, language, dependencies);
+  if (shouldSkipSuggestions(lineText, rawTerm, language)) {
+    return undefined;
+  }
 
   /**
-   * If we find recipes from the cache, get them and filter
-   * using the one that start with the given term.
-   * Otherwise, we fetch using the API.
+   * If the rawTerm (what the user wrote) is / or . we should show
+   * all recipes. And not do a search.
    */
-  if (recipesFromCache) {
-    recipes = recipesFromCache.filter(
-      (r) => r.shortcut && r.shortcut.startsWith(term.toLowerCase())
-    );
+  if (rawTerm === "/" || rawTerm === ".") {
+    recipes = await getRecipes(undefined, relativePath, language, dependencies);
   } else {
-    recipes = await getRecipesForClientByShorcut(
-      term,
-      basename,
-      language,
-      dependencies
-    );
+    /**
+     * Handling starting slash ('/')
+     *   - if the slash or dot is added, the search term should be without the starting slash
+     *   - we should know if there is a trailing slash and adapt the title later for it so it is selected.
+     */
+    const term = removeStartingSlashOrDot(rawTerm);
+
+    recipes = await getRecipes(term, relativePath, language, dependencies);
   }
+
+  const hasStartingSlash = rawTerm.startsWith("/");
+  const hasStartingDot = rawTerm.startsWith(".");
 
   const currentIdentation = getCurrentIndentationForDocument(
     document,
@@ -88,17 +125,26 @@ export async function providesCodeCompletion(
   );
 
   return recipes.map((r) => {
-    const decodeFromBase64 = Buffer.from(
+    const decodeVscodeFormatFromBase64 = Buffer.from(
       r.vscodeFormat || "",
       "base64"
     ).toString("utf8");
 
-    const decodedCode = decodeIndent(decodeFromBase64);
+    const decodePresentableFormatFromBase64 = Buffer.from(
+      r.presentableFormat || "",
+      "base64"
+    ).toString("utf8");
+
+    const vscodeFormatCode = decodeIndent(decodeVscodeFormatFromBase64);
 
     /**
      * If the user puts a '/', we add it to the title to match the user input.
      */
-    const shortcutForTitle = hasStartingSlash ? `/${r.shortcut}` : r.shortcut;
+    const shortcutForTitle = hasStartingSlash
+      ? `/${r.shortcut}`
+      : hasStartingDot
+      ? `.${r.shortcut}`
+      : r.shortcut;
     const title = `${shortcutForTitle}: ${r.name}`;
     const snippetCompletion = new vscode.CompletionItem(title);
 
@@ -110,11 +156,11 @@ export async function providesCodeCompletion(
       snippetCompletion.documentation = new vscode.MarkdownString(
         `${
           r.description
-        }\n### Code\n \`\`\`${r.language.toLocaleLowerCase()}\n${decodedCode}\n\`\`\``
+        }\n### Code\n \`\`\`${r.language.toLocaleLowerCase()}\n${decodePresentableFormatFromBase64}\n\`\`\``
       );
     } else {
       snippetCompletion.documentation = new vscode.MarkdownString(
-        `\`\`\`${r.language.toLocaleLowerCase()}\n${decodedCode}\n\`\`\``
+        `\`\`\`${r.language.toLocaleLowerCase()}\n${decodePresentableFormatFromBase64}\n\`\`\``
       );
     }
     snippetCompletion.detail = DIAGNOSTIC_CODE;
@@ -133,7 +179,9 @@ export async function providesCodeCompletion(
     /**
      * If there is any import to add, we import it
      */
-    const importsToUse = r.imports.filter((i) => !hasImport(document, i));
+    const importsToUse = filterImports(r.imports, language, document).filter(
+      (i) => !hasImport(document, i)
+    );
     if (importsToUse.length > 0) {
       const importsCode = importsToUse.join("\n") + "\n";
       const startLineToInsertImports = 0;
@@ -146,7 +194,7 @@ export async function providesCodeCompletion(
       ];
     }
 
-    snippetCompletion.insertText = new vscode.SnippetString(decodedCode);
+    snippetCompletion.insertText = new vscode.SnippetString(vscodeFormatCode);
 
     return snippetCompletion;
   });

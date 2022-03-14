@@ -38,7 +38,7 @@ export const COMPOSER_FILE = "composer.json";
 export const REQUIREMENTS_FILE = "requirements.txt";
 export const GEMFILE_FILE = "Gemfile";
 
-export const AUTO_COMPLETION_CHARACTER_TRIGGER = ".";
+export const AUTO_COMPLETION_CHARACTER_TRIGGER = "./";
 
 // 10 seconds
 export const CODING_ASSISTANT_SHORTCUTS_POLLING_MS = 10000;
@@ -46,6 +46,6 @@ export const CODING_ASSISTANT_SHORTCUTS_POLLING_MS = 10000;
 export const CODING_ASSISTANT_MAX_TIME_IN_CACHE_MS = 600000;
 
 export const STARTUP_MESSAGE_MACOS =
-  "👋 use ⌘ + SHIFT + S for all shortcuts and ⌘ + SHIFT + C to search snippets.";
+  "👋 type / or . in your editor to look for snippets or use ⌘ + SHIFT + S for all shortcuts and ⌘ + SHIFT + C to search snippets.";
 export const STARTUP_MESSAGE_WINDOWS =
-  "👋 use CTRL + ALT + S for all shortcuts and CTRL + ALT + C to search snippets.";
+  "👋 type / or . in your editor to look for snippets or use CTRL + ALT + S for all shortcuts and CTRL + ALT + C to search snippets.";

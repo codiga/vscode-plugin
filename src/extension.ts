@@ -188,10 +188,11 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Show a startup message for user to be familiar with the extension.
    */
-  const configuration = vscode.workspace.getConfiguration("launch");
+  const configuration = vscode.workspace.getConfiguration("codiga");
   const shouldNotShowStartupMessage =
-    configuration.get("codiga.showStartupMessage") !== undefined &&
-    configuration.get("codiga.showStartupMessage") === false;
+    !vscode.window.activeTextEditor ||
+    (configuration.get("showWelcomeMessage") !== undefined &&
+      configuration.get("showWelcomeMessage") === false);
 
   if (!shouldNotShowStartupMessage) {
     const startupMessage =
@@ -213,8 +214,11 @@ export async function activate(context: vscode.ExtensionContext) {
           vscode.commands.executeCommand("codiga.recipeUse");
         }
         if (btn === MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN) {
-          console.log("update config");
-          configuration.update("codiga.showStartupMessage", false);
+          configuration.update(
+            "showWelcomeMessage",
+            false,
+            vscode.ConfigurationTarget.Global
+          );
         }
       });
   }
