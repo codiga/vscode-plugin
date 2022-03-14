@@ -72,6 +72,7 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           imports: ["use std::thread;"],
           shortcut: "spawn.thr",
           vscodeFormat: code,
+          presentableFormat: code,
         },
       ]);
     } else {

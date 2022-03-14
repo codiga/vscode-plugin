@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 import { AssistantRecipe, Language } from "../graphql-api/types";
+import { filterImports } from "./dependencies/filter-dependencies";
 import { firstLineToImport, hasImport } from "./fileUtils";
 import {
   adaptIndentation,
@@ -25,7 +26,11 @@ export const insertSnippet = (
   const snippet = new vscode.SnippetString(decodedCode);
   editor.insertSnippet(snippet, initialPosition);
 
-  for (const importStatement of recipe.imports) {
+  for (const importStatement of filterImports(
+    recipe.imports,
+    language,
+    editor.document
+  )) {
     if (!hasImport(editor.document, importStatement)) {
       const snippetString = new vscode.SnippetString(importStatement + "\n");
       const line = firstLineToImport(editor.document, language);

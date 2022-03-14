@@ -37,3 +37,19 @@ export async function readPackageFile(
   }
   return result;
 }
+
+/**
+ * Filter all Javascript/Typescript imports and only returns the one that
+ * makes sense.
+ * @param initialImports
+ * @param initialCode
+ */
+export const filterJavascriptImports = (
+  initialImports: string[],
+  initialCode: string
+): string[] => {
+  const importsInitialCode = initialCode
+    .split("\n")
+    .filter((v) => v.startsWith("import"));
+  return initialImports;
+};

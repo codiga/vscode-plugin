@@ -138,6 +138,7 @@ export const GET_RECIPES_BY_SHORTCUT: string = gql`
       language
       creationTimestampMs
       vscodeFormat
+      presentableFormat
     }
   }
 `;
