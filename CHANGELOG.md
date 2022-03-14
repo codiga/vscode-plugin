@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.3.7]
+
+- Fix bug when removing recipes from Coding Assistant suggestions
+
 ## [0.3.6]
 
 - Trigger all recipes by typing `.` or `/`

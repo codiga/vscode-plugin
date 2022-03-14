@@ -9,11 +9,13 @@ import {
   deleteInsertedCode,
   insertSnippet,
   LatestRecipeHolder,
+  resetRecipeHolder,
 } from "../utils/snippetUtils";
 import { showUser } from "../utils/StatusbarUtils";
 
 const latestRecipeHolder: LatestRecipeHolder = {
   recipe: undefined,
+  insertedRange: undefined,
 };
 
 /**
@@ -105,8 +107,8 @@ export async function listShorcuts(
   quickPick.canSelectMany = false;
   quickPick.matchOnDescription = true;
   quickPick.onDidChangeValue(async (text) => {
-    if (latestRecipeHolder.recipe) {
-      deleteInsertedCode(editor, initialPosition, latestRecipeHolder.recipe);
+    if (latestRecipeHolder.insertedRange) {
+      deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
     }
   });
 
@@ -118,8 +120,8 @@ export async function listShorcuts(
       const recipe = firstRecipe.recipe;
       const latestRecipe = latestRecipeHolder.recipe;
 
-      if (latestRecipe) {
-        deleteInsertedCode(editor, initialPosition, latestRecipe);
+      if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+        deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
       }
       /**
        * If we select the same recipe, insert it as a snippet
@@ -127,11 +129,12 @@ export async function listShorcuts(
       if (latestRecipe && recipe.id === latestRecipe.id) {
         quickPick.dispose();
         statusBar.hide();
-        insertSnippet(editor, initialPosition, recipe, language);
+        await insertSnippet(editor, initialPosition, recipe, language);
       } else {
-        insertSnippet(editor, initialPosition, recipe, language);
+        await insertSnippet(editor, initialPosition, recipe, language);
       }
       await useRecipeCallback(recipe.id);
+      resetRecipeHolder(latestRecipeHolder);
     }
   });
 
@@ -148,10 +151,10 @@ export async function listShorcuts(
   // when hiding, if a recipe was selected, send a callback to
   // notify we want to use it.
   quickPick.onDidHide(async () => {
-    const latestRecipe = latestRecipeHolder.recipe;
-    if (latestRecipe) {
-      deleteInsertedCode(editor, initialPosition, latestRecipe);
+    if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
+      deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
     }
+    resetRecipeHolder(latestRecipeHolder);
     quickPick.dispose();
     statusBar.hide();
   });
