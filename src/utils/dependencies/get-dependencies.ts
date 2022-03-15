@@ -56,7 +56,9 @@ export async function getDependenciesFromProject(
       filename
     );
     if (fs.existsSync(potentialDependencyFile.path)) {
-      return await functionToExecute(potentialDependencyFile);
+      return await functionToExecute(potentialDependencyFile).catch((e) => {
+        return [];
+      });
     }
     parts.pop();
   }
