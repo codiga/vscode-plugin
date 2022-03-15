@@ -74,8 +74,7 @@ export async function getDependencies(
   document: vscode.TextDocument
 ): Promise<string[]> {
   const language: Language = getLanguageForDocument(document);
-  console.log("dependencies get ");
-  console.log(language);
+
   switch (language) {
     case Language.Javascript: {
       return await getDependenciesFromProject(
