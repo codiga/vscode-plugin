@@ -80,7 +80,7 @@ export const insertSnippet = async (
  */
 export const deleteInsertedCode = async (
   editor: vscode.TextEditor,
-  range: vscode.Range
+  range: vscode.Range | undefined
 ): Promise<void> => {
   if (!range) {
     return;
@@ -124,9 +124,8 @@ export const addRecipeToEditor = async (
      */
     if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
       editBuilder.delete(latestRecipeHolder.insertedRange);
+      resetRecipeHolder(latestRecipeHolder);
     }
-
-    editBuilder.insert(initialPosition, decodedCode);
 
     // Get the last inserted line
     const lastInsertedCodeLine =
@@ -151,5 +150,7 @@ export const addRecipeToEditor = async (
     const insertionRange = new vscode.Range(initialPosition, endPosition);
     latestRecipeHolder.recipe = recipe;
     latestRecipeHolder.insertedRange = insertionRange;
+
+    editBuilder.insert(initialPosition, decodedCode);
   });
 };

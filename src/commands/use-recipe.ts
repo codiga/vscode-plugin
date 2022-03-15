@@ -24,6 +24,12 @@ const latestRecipeHolder: LatestRecipeHolder = {
 };
 
 /**
+ * Keeping track if there is any value that is changing, which
+ * means we are doing some requests to the backend.
+ */
+let isChangingValue = false;
+
+/**
  * Show the list of keywords to show in the list of all recipes
  * @param keywords
  */
@@ -120,6 +126,7 @@ export async function useRecipe(
   const quickPick = vscode.window.createQuickPick();
   quickPick.title = "Codiga Coding Assistant";
   quickPick.placeholder = "Enter search terms";
+  quickPick.ignoreFocusOut = true;
   quickPick.items = [];
 
   quickPick.activeItems = [];
@@ -131,13 +138,13 @@ export async function useRecipe(
   let lastChangeUpdateRequestInMs = new Date().getTime();
 
   quickPick.onDidChangeValue(async (text) => {
+    isChangingValue = true;
     quickPick.items = [];
     quickPick.activeItems = [];
     quickPick.busy = true;
-    if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
-      await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
-      resetRecipeHolder(latestRecipeHolder);
-    }
+
+    await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
+    resetRecipeHolder(latestRecipeHolder);
 
     // put the last request update change as the current one
     lastChangeUpdateRequestInMs = new Date().getTime();
@@ -153,6 +160,9 @@ export async function useRecipe(
       }, CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS)
     );
 
+    await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
+    resetRecipeHolder(latestRecipeHolder);
+
     // if not the latest request, there is another one in flight
     if (!shouldUpdate) {
       return;
@@ -166,7 +176,10 @@ export async function useRecipe(
       language,
       dependencies
     );
+    await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
+    resetRecipeHolder(latestRecipeHolder);
     quickPick.busy = false;
+    isChangingValue = false;
   });
 
   // when changing the selection, add the code to the editor.
@@ -178,9 +191,8 @@ export async function useRecipe(
 
       const latestRecipe = latestRecipeHolder.recipe;
 
-      if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
-        deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
-      }
+      await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
+      resetRecipeHolder(latestRecipeHolder);
       /**
        * Make sure this is the same as the last recipe and insert it.
        */
@@ -191,8 +203,6 @@ export async function useRecipe(
         await insertSnippet(editor, initialPosition, recipe, language);
         await useRecipeCallback(latestRecipe.id);
       }
-
-      resetRecipeHolder(latestRecipeHolder);
     }
   });
 
@@ -204,14 +214,15 @@ export async function useRecipe(
      * If there is no selected element and a previous
      * recipe inserted, we should remove it.
      */
-    if (
-      e.length === 0 &&
-      latestRecipeHolder &&
-      latestRecipeHolder.insertedRange
-    ) {
-      await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
-      latestRecipeHolder.recipe = undefined;
-      resetRecipeHolder(latestRecipeHolder);
+    await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
+    resetRecipeHolder(latestRecipeHolder);
+
+    /**
+     * If the value is being changed (request on the backend, etc)
+     * we should not add any recipe.
+     */
+    if (isChangingValue) {
+      return;
     }
 
     /**
@@ -219,7 +230,6 @@ export async function useRecipe(
      */
     if (e.length > 0) {
       const recipe = e[0].recipe;
-
       await addRecipeToEditor(
         editor,
         initialPosition,
@@ -232,9 +242,7 @@ export async function useRecipe(
   // when hiding, if a recipe was selected, send a callback to
   // notify we want to use it.
   quickPick.onDidHide(async () => {
-    if (latestRecipeHolder && latestRecipeHolder.insertedRange) {
-      deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
-    }
+    await deleteInsertedCode(editor, latestRecipeHolder.insertedRange);
     resetRecipeHolder(latestRecipeHolder);
     quickPick.dispose();
     statusBar.hide();
@@ -251,5 +259,7 @@ export async function useRecipe(
     language,
     dependencies
   );
+
+  isChangingValue = false;
   quickPick.show();
 }
