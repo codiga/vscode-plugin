@@ -42,7 +42,7 @@ export async function getDependenciesFromProject(
   const pathParths = documentPath.replace(workspacePath, "");
 
   // Let's have each directory for the parts.
-  let parts: string[] | undefined = pathParths.split("/");
+  const parts: string[] | undefined = pathParths.split("/");
 
   // Let's remove the filename from the parts
   parts.pop();
@@ -57,6 +57,8 @@ export async function getDependenciesFromProject(
     );
     if (fs.existsSync(potentialDependencyFile.path)) {
       return await functionToExecute(potentialDependencyFile).catch((e) => {
+        console.debug("Codiga - error when fetching dependencies");
+        console.debug(e);
         return [];
       });
     }
