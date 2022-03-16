@@ -27,7 +27,6 @@ export async function getDependenciesFromProject(
   functionToExecute: (fileUri: vscode.Uri) => Promise<string[]>
 ): Promise<string[]> {
   const workspaceFolders = vscode.workspace.workspaceFolders;
-
   if (!workspaceFolders || workspaceFolders.length < 1) {
     return [];
   }
@@ -55,7 +54,7 @@ export async function getDependenciesFromProject(
       filePath,
       filename
     );
-    if (fs.existsSync(potentialDependencyFile.path)) {
+    if (fs.existsSync(potentialDependencyFile.fsPath)) {
       return await functionToExecute(potentialDependencyFile).catch((e) => {
         console.debug("Codiga - error when fetching dependencies");
         console.debug(e);

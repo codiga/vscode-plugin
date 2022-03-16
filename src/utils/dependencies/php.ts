@@ -13,7 +13,7 @@ export async function readComposerFile(
 ): Promise<string[]> {
   const result: string[] = [];
 
-  if (!fs.existsSync(packageFileUri.path)) {
+  if (!fs.existsSync(packageFileUri.fsPath)) {
     return [];
   }
 

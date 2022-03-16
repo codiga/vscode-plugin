@@ -14,7 +14,7 @@ export async function readRequirementsFile(
   const result: string[] = [];
   const re = /\s*([\w\d\-_]+)/;
 
-  if (!fs.existsSync(packageFileUri.path)) {
+  if (!fs.existsSync(packageFileUri.fsPath)) {
     return [];
   }
 

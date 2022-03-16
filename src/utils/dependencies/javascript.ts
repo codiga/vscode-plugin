@@ -12,7 +12,7 @@ export async function readPackageFile(
   packageFileUri: vscode.Uri
 ): Promise<string[]> {
   const result: string[] = [];
-  if (!fs.existsSync(packageFileUri.path)) {
+  if (!fs.existsSync(packageFileUri.fsPath)) {
     return [];
   }
 
