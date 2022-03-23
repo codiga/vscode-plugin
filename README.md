@@ -8,7 +8,7 @@
 
 ## Quick Start
 
-Install the extension and type `.` or `/` in your IDE to list all available snippets for your project. Accept a snippet using either Enter ↩ or Tab ↹. Go through the snippet variables usign the Tab key.
+Install the extension and type `.` or `/` in your IDE to list all available snippets for your project. Accept a snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
 
 ![Use of recipe in Python](images/vscode-read-file.gif)
 
