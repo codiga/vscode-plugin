@@ -194,8 +194,8 @@ suite("assistant-completion.ts test", () => {
     assert.ok(usedRecipeMock.verify());
 
     assert.strictEqual(
-      documentTransformed,
-      documentPythonRecipeImportsAfterCommentsExpected
+      documentTransformed.replace("\r\n", "\n"),
+      documentPythonRecipeImportsAfterCommentsExpected.replace("\r\n", "\n")
     );
   });
 
@@ -220,8 +220,8 @@ suite("assistant-completion.ts test", () => {
     assert.ok(usedRecipeMock.verify());
 
     assert.strictEqual(
-      documentTransformed,
-      documentJavaRecipeImportsAfterPackageExpected
+      documentTransformed.replace("\r\n", "\n"),
+      documentJavaRecipeImportsAfterPackageExpected.replace("\r\n", "\n")
     );
   });
 
@@ -243,8 +243,8 @@ suite("assistant-completion.ts test", () => {
     assert.ok(usedRecipeMock.verify());
 
     assert.strictEqual(
-      documentTransformed,
-      documentJavaRecipeImportsBetweenCommentsExpected
+      documentTransformed.replace("\r\n", "\n"),
+      documentJavaRecipeImportsBetweenCommentsExpected.replace("\r\n", "\n")
     );
   });
 });
