@@ -204,7 +204,7 @@ suite("assistant-completion.ts test", () => {
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
-    insertText(editor, `/*\n* Comment example\n*/\n`);
+    insertText(editor, `/*\n* Comment example\n*/\n\npackage number;\n`);
     await wait(500);
     insertText(editor, "java.");
     await autoComplete();

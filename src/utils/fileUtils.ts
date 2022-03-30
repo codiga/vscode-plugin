@@ -93,6 +93,48 @@ export function hasImport(
 
 /**
  * Get the first line to import an import/library statement
+ * in a given document for Python
+ * @param document
+ * @returns
+ */
+export function firstLineToImportPython(lines: string[]): number {
+  let lineNumber = 0;
+
+  for (const line of lines) {
+    if (line.startsWith("#") || line.startsWith("import")) {
+      lineNumber = lineNumber + 1;
+    } else {
+      return lineNumber;
+    }
+  }
+
+  return lineNumber;
+}
+
+export function firstLineToImportJavaLike(lines: string[]): number {
+  let lineNumber = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (
+      line.includes("/*") ||
+      line.startsWith("import") ||
+      line.includes("*/") ||
+      line.includes("*") ||
+      line.includes("package ")
+    ) {
+      lineNumber = i + 1;
+    } else if(line.trim() !== ""){
+      return lineNumber;
+    }
+  }
+
+  return lineNumber;
+}
+
+/**
+ * Get the first line to import an import/library statement
  * in a given document.
  * @param document
  * @param language
@@ -104,28 +146,24 @@ export function firstLineToImport(
 ): number {
   const documentText = document.getText();
   const lines = documentText.split("\n");
-  let lineNumber = 0;
 
-  for (const line of lines) {
-    if (language === Language.Python) {
-      if (line.startsWith("#") || line.startsWith("import")) {
-        lineNumber = lineNumber + 1;
-      }
-    }
-    if (language === Language.Javascript || language === Language.Typescript || language === Language.Java) {
-      if (
-        line.includes("/*") ||
-        line.startsWith("import") ||
-        line.includes("*/") ||
-        line.includes("*")
-      ) {
-        lineNumber = lineNumber + 1;
-      }
-    }
+  if (language === Language.Python) {
+    return firstLineToImportPython(lines);
   }
-  return lineNumber;
+
+  if (
+    language === Language.Javascript ||
+    language === Language.Typescript ||
+    language === Language.Java
+  ) {
+    return firstLineToImportJavaLike(lines);
+  }
+
+  return 0;
 }
 
-export function insertIndentSize (size: number, tabSize: number) {
-  return Array(size / tabSize).fill('\t').join('');
+export function insertIndentSize(size: number, tabSize: number) {
+  return Array(size / tabSize)
+    .fill("\t")
+    .join("");
 }

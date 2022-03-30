@@ -44,6 +44,8 @@ export const documentRecipeIndentExpectedWithTabs = decodeIndent(
 export const documentJavaRecipeImportsAfterCommentsExpected = `/*
 * Comment example
 */
+
+package number;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
