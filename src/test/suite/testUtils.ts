@@ -56,7 +56,7 @@ try {
     Desktop.getDesktop().browse(new URI(url));
 } catch (IOException | URISyntaxException e1) {
     e1.printStackTrace();
-}`.replace(/\n/g, os.EOL);;
+}`.replace(/\n/g, os.EOL);
 
 export const documentJavaRecipeImportsBetweenCommentsExpected = `/*
 * Comment example
@@ -76,7 +76,7 @@ try {
 export const documentPythonRecipeImportsAfterCommentsExpected = `# First
 # Second
 import requests
-requests.get("codiga.io")`.replace(/\n/g, os.EOL);;
+requests.get("codiga.io")`.replace(/\n/g, os.EOL);
 
 export const pythonRecipe = "cmVxdWVzdHMuZ2V0KCJjb2RpZ2EuaW8iKQ==";
 export const javaRecipe =
