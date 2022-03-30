@@ -106,13 +106,13 @@ export function firstLineToImport(
   const lines = documentText.split("\n");
   let lineNumber = 0;
 
-  for (const line in lines) {
+  for (let line of lines) {
     if (language === Language.Python) {
       if (line.startsWith("#") || line.startsWith("import")) {
         lineNumber = lineNumber + 1;
       }
     }
-    if (language === Language.Javascript || language === Language.Typescript) {
+    if (language === Language.Javascript || language === Language.Typescript || language === Language.Java) {
       if (
         line.includes("/*") ||
         line.startsWith("import") ||
