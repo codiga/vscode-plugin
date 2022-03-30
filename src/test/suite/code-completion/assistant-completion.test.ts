@@ -194,8 +194,10 @@ suite("assistant-completion.ts test", () => {
     assert.ok(usedRecipeMock.verify());
 
     assert.strictEqual(
-      documentTransformed.replace("\r\n", "\n"),
-      documentPythonRecipeImportsAfterCommentsExpected.replace("\r\n", "\n")
+      documentTransformed,
+      documentPythonRecipeImportsAfterCommentsExpected,
+      new vscode.SnippetString(documentPythonRecipeImportsAfterCommentsExpected)
+        .value
     );
   });
 
@@ -220,8 +222,9 @@ suite("assistant-completion.ts test", () => {
     assert.ok(usedRecipeMock.verify());
 
     assert.strictEqual(
-      documentTransformed.replace("\r\n", "\n"),
-      documentJavaRecipeImportsAfterPackageExpected.replace("\r\n", "\n")
+      documentTransformed,
+      new vscode.SnippetString(documentJavaRecipeImportsAfterPackageExpected)
+        .value
     );
   });
 
@@ -243,8 +246,9 @@ suite("assistant-completion.ts test", () => {
     assert.ok(usedRecipeMock.verify());
 
     assert.strictEqual(
-      documentTransformed.replace("\r\n", "\n"),
-      documentJavaRecipeImportsBetweenCommentsExpected.replace("\r\n", "\n")
+      documentTransformed,
+      new vscode.SnippetString(documentJavaRecipeImportsBetweenCommentsExpected)
+        .value
     );
   });
 });
