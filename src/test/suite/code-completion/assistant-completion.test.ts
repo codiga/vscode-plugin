@@ -21,17 +21,40 @@ import {
   Config,
   VsCodeConfiguration,
   updateConfig,
+  pythonRecipe,
+  mockRecipePython,
+  documentPythonRecipeImportsAfterCommentsExpected,
+  mockRecipeJava,
+  javaRecipe,
+  documentJavaRecipeImportsAfterPackageExpected,
+  documentJavaRecipeImportsBetweenCommentsExpected,
 } from "../testUtils";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
 suite("assistant-completion.ts test", () => {
   const uri = testDataUri("assistant-completion.rs");
+  const pythonUri = testDataUri("assistant-completion.py");
+  const javaUri = testDataUri("assistant-completion.java");
 
   // a sandbox is required so we stubs and mocks are not mixed with other test suites
   const sandbox = sinon.createSandbox();
   // stub and mock two api calls required for this test suite
-  let getRecipeStub: sinon.SinonStub;
+  const getRustRecipeStub: () => sinon.SinonStub = () =>
+    sandbox
+      .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
+      .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
+
+  const getPythonRecipeStub: () => sinon.SinonStub = () =>
+    sandbox
+      .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
+      .withArgs("requests.", "assistant-completion.py", Language.Python, []);
+
+  const getJavaRecipeStub: () => sinon.SinonStub = () =>
+    sandbox
+      .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
+      .withArgs("java.", "assistant-completion.java", Language.Java, []);
+
   let usedRecipeMock: sinon.SinonExpectation;
 
   // these are the first state values for the settings we want to change and restore
@@ -47,9 +70,7 @@ suite("assistant-completion.ts test", () => {
     // always start with a freezed config
     originalConfig = await updateConfig(uri, configDefaults);
     // define the stub and mock
-    getRecipeStub = sandbox
-      .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
-      .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
+
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCall)
       .expects("useRecipeCallback")
@@ -65,7 +86,7 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test insert suggestion from completion widget works", async () => {
-    getRecipeStub.returns(mockRecipe(recipeForUser));
+    getRustRecipeStub().returns(mockRecipe(recipeForUser));
 
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document);
@@ -83,7 +104,7 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test recipe indentation in recipe insertion with four indentation spaces", async () => {
-    getRecipeStub.returns(mockRecipe(recipeWithIndentVariable));
+    getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     await updateConfig(uri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: true,
@@ -109,7 +130,7 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test recipe indentation in recipe insertion with two indentation spaces", async () => {
-    getRecipeStub.returns(mockRecipe(recipeWithIndentVariable));
+    getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
 
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document);
@@ -131,7 +152,7 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test recipe indentation in recipe insertion tab indentation", async () => {
-    getRecipeStub.returns(mockRecipe(recipeWithIndentVariable));
+    getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     await updateConfig(uri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: false,
@@ -152,6 +173,82 @@ suite("assistant-completion.ts test", () => {
     assert.ok(
       documentTransformed ===
         new vscode.SnippetString(documentRecipeIndentExpectedWithTabs).value
+    );
+  });
+
+  test("test imports are added after first comments in Python", async () => {
+    getPythonRecipeStub().returns(mockRecipePython(pythonRecipe));
+
+    const document = await vscode.workspace.openTextDocument(pythonUri);
+    const editor = await vscode.window.showTextDocument(document);
+    await wait(500);
+    insertText(editor, "# First\n# Second\n");
+    await wait(500);
+    insertText(editor, "requests.");
+    await autoComplete();
+    const documentTransformed = editor?.document.getText();
+
+    await wait(500);
+    await closeFile();
+
+    assert.ok(usedRecipeMock.verify());
+
+    assert.strictEqual(
+      documentTransformed,
+      documentPythonRecipeImportsAfterCommentsExpected,
+      new vscode.SnippetString(documentPythonRecipeImportsAfterCommentsExpected)
+        .value
+    );
+  });
+
+  test("test imports are added after first comments and package in Java", async () => {
+    getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
+
+    const document = await vscode.workspace.openTextDocument(javaUri);
+    const editor = await vscode.window.showTextDocument(document);
+    await wait(500);
+    insertText(
+      editor,
+      `/*\n* Comment example\n*/\n\n// comment 2\n\npackage number;\n`
+    );
+    await wait(500);
+    insertText(editor, "java.");
+    await autoComplete();
+    const documentTransformed = editor?.document.getText();
+
+    await wait(500);
+    await closeFile();
+
+    assert.ok(usedRecipeMock.verify());
+
+    assert.strictEqual(
+      documentTransformed,
+      new vscode.SnippetString(documentJavaRecipeImportsAfterPackageExpected)
+        .value
+    );
+  });
+
+  test("test imports are added after first comments and before next comment in Java", async () => {
+    getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
+
+    const document = await vscode.workspace.openTextDocument(javaUri);
+    const editor = await vscode.window.showTextDocument(document);
+    await wait(500);
+    insertText(editor, `/*\n* Comment example\n*/\n\n// comment 2\n`);
+    await wait(500);
+    insertText(editor, "java.");
+    await autoComplete();
+    const documentTransformed = editor?.document.getText();
+
+    await wait(500);
+    await closeFile();
+
+    assert.ok(usedRecipeMock.verify());
+
+    assert.strictEqual(
+      documentTransformed,
+      new vscode.SnippetString(documentJavaRecipeImportsBetweenCommentsExpected)
+        .value
     );
   });
 });

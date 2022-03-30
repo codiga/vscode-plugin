@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import { getLanguageForDocument, hasImport } from "../utils/fileUtils";
+import { firstLineToImport, getLanguageForDocument, hasImport } from "../utils/fileUtils";
 import {
   getCurrentIndentationForDocument,
   decodeIndent,
@@ -184,7 +184,7 @@ export async function providesCodeCompletion(
     );
     if (importsToUse.length > 0) {
       const importsCode = importsToUse.join("\n") + "\n";
-      const startLineToInsertImports = 0;
+      const startLineToInsertImports = firstLineToImport(document, language);
 
       snippetCompletion.additionalTextEdits = [
         vscode.TextEdit.insert(

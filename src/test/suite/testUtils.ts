@@ -41,6 +41,46 @@ export const documentRecipeIndentExpectedWithTabs = decodeIndent(
     "});"
 );
 
+export const documentJavaRecipeImportsAfterPackageExpected = `/*
+* Comment example
+*/
+
+// comment 2
+
+package number;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+try {
+    Desktop.getDesktop().browse(new URI(url));
+} catch (IOException | URISyntaxException e1) {
+    e1.printStackTrace();
+}`.replace(/\n/g, os.EOL);
+
+export const documentJavaRecipeImportsBetweenCommentsExpected = `/*
+* Comment example
+*/
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+// comment 2
+try {
+    Desktop.getDesktop().browse(new URI(url));
+} catch (IOException | URISyntaxException e1) {
+    e1.printStackTrace();
+}`.replace(/\n/g, os.EOL);
+
+export const documentPythonRecipeImportsAfterCommentsExpected = `# First
+# Second
+import requests
+requests.get("codiga.io")`.replace(/\n/g, os.EOL);
+
+export const pythonRecipe = "cmVxdWVzdHMuZ2V0KCJjb2RpZ2EuaW8iKQ==";
+export const javaRecipe =
+  "dHJ5IHsKICAgIERlc2t0b3AuZ2V0RGVza3RvcCgpLmJyb3dzZShuZXcgVVJJKHVybCkpOwp9IGNhdGNoIChJT0V4Y2VwdGlvbiB8IFVSSVN5bnRheEV4Y2VwdGlvbiBlMSkgewogICAgZTEucHJpbnRTdGFja1RyYWNlKCk7Cn0=";
 export const recipeWithIndentVariable =
   "dGhyZWFkOjpzcGF3bihtb3ZlIHx8IHsKJltDT0RJR0FfSU5ERU5UXS8vIHRocmVhZCBjb2RlIGhlcmUKfSk7";
 export const recipeWithTransformVariables =
@@ -71,6 +111,58 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           code: code,
           imports: ["use std::thread;"],
           shortcut: "spawn.thr",
+          vscodeFormat: code,
+          presentableFormat: code,
+        },
+      ]);
+    } else {
+      reject("Empty code param");
+    }
+  });
+}
+
+export function mockRecipePython(code: string): Promise<AssistantRecipe[]> {
+  return new Promise<AssistantRecipe[]>((resolve, reject) => {
+    if (code !== "") {
+      resolve([
+        {
+          id: 42069,
+          name: "Runs HTTP GET request",
+          description: "Runs HTTP GET request",
+          language: "Python",
+          isPublic: true,
+          isGlobal: true,
+          keywords: ["requests"],
+          tags: [],
+          code: code,
+          imports: ["import requests"],
+          shortcut: "requests.get",
+          vscodeFormat: code,
+          presentableFormat: code,
+        },
+      ]);
+    } else {
+      reject("Empty code param");
+    }
+  });
+}
+
+export function mockRecipeJava(code: string): Promise<AssistantRecipe[]> {
+  return new Promise<AssistantRecipe[]>((resolve, reject) => {
+    if (code !== "") {
+      resolve([
+        {
+          id: 42069,
+          name: "Open url in desktop",
+          description: "Open url in desktop",
+          language: "Java",
+          isPublic: true,
+          isGlobal: true,
+          keywords: ["awt"],
+          tags: [],
+          code: code,
+          imports: ["import java.awt.*;", "import java.io.IOException;", "import java.net.URI;", "import java.net.URISyntaxException;"],
+          shortcut: "java.awt",
           vscodeFormat: code,
           presentableFormat: code,
         },

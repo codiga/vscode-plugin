@@ -93,6 +93,66 @@ export function hasImport(
 
 /**
  * Get the first line to import an import/library statement
+ * in a given document for Python
+ * @param document
+ * @returns
+ */
+export function firstLineToImportPython(lines: string[]): number {
+  let lineNumber = 0;
+
+  for (const line of lines) {
+    if (line.startsWith("#") || line.startsWith("import")) {
+      lineNumber = lineNumber + 1;
+    } else {
+      return lineNumber;
+    }
+  }
+
+  return lineNumber;
+}
+
+/**
+ * 
+ * There are different scenarios where we decide how to include imports
+ * 1) If there is no comment nor package they're inserted at the top of the file
+ * 2) If there is a comment at the top of the file it goes after that comment
+ * 3) If there is package definition, it goes after it
+ * 4) If there is one comment at the top and there is a space and there is another comment, it goes in between
+ * both, because next comment probably is part of the class or function (reason to have foundComment and spaceFound flags)
+ * @param lines this is the lines of code
+ * @returns line number where the imports should be added
+ */
+export function firstLineToImportJavaLike(lines: string[]): number {
+  let lineNumber = 0;
+  let foundComment = false;
+  let spaceFound = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (
+      line.includes("/*") ||
+      line.startsWith("import") ||
+      line.includes("*/") ||
+      line.includes("*") ||
+      line.includes("//") 
+    ) {
+      foundComment = true;
+    } else if(line.trim().startsWith("package ")){
+      return i + 1;
+    } else if(line.trim() === ""){
+      if(foundComment && !spaceFound){
+        lineNumber = i;
+        spaceFound=true;
+      }
+    }
+  }
+
+  return lineNumber;
+}
+
+/**
+ * Get the first line to import an import/library statement
  * in a given document.
  * @param document
  * @param language
@@ -104,28 +164,24 @@ export function firstLineToImport(
 ): number {
   const documentText = document.getText();
   const lines = documentText.split("\n");
-  let lineNumber = 0;
 
-  for (const line in lines) {
-    if (language === Language.Python) {
-      if (line.startsWith("#") || line.startsWith("import")) {
-        lineNumber = lineNumber + 1;
-      }
-    }
-    if (language === Language.Javascript || language === Language.Typescript) {
-      if (
-        line.includes("/*") ||
-        line.startsWith("import") ||
-        line.includes("*/") ||
-        line.includes("*")
-      ) {
-        lineNumber = lineNumber + 1;
-      }
-    }
+  if (language === Language.Python) {
+    return firstLineToImportPython(lines);
   }
-  return lineNumber;
+
+  if (
+    language === Language.Javascript ||
+    language === Language.Typescript ||
+    language === Language.Java
+  ) {
+    return firstLineToImportJavaLike(lines);
+  }
+
+  return 0;
 }
 
-export function insertIndentSize (size: number, tabSize: number) {
-  return Array(size / tabSize).fill('\t').join('');
+export function insertIndentSize(size: number, tabSize: number) {
+  return Array(size / tabSize)
+    .fill("\t")
+    .join("");
 }
