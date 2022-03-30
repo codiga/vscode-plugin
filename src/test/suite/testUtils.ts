@@ -41,15 +41,32 @@ export const documentRecipeIndentExpectedWithTabs = decodeIndent(
     "});"
 );
 
-export const documentJavaRecipeImportsAfterCommentsExpected = `/*
+export const documentJavaRecipeImportsAfterPackageExpected = `/*
 * Comment example
 */
+
+// comment 2
 
 package number;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+try {
+    Desktop.getDesktop().browse(new URI(url));
+} catch (IOException | URISyntaxException e1) {
+    e1.printStackTrace();
+}`;
+
+export const documentJavaRecipeImportsBetweenCommentsExpected = `/*
+* Comment example
+*/
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+// comment 2
 try {
     Desktop.getDesktop().browse(new URI(url));
 } catch (IOException | URISyntaxException e1) {

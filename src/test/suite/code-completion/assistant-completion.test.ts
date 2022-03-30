@@ -26,7 +26,8 @@ import {
   documentPythonRecipeImportsAfterCommentsExpected,
   mockRecipeJava,
   javaRecipe,
-  documentJavaRecipeImportsAfterCommentsExpected,
+  documentJavaRecipeImportsAfterPackageExpected,
+  documentJavaRecipeImportsBetweenCommentsExpected,
 } from "../testUtils";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
@@ -198,13 +199,16 @@ suite("assistant-completion.ts test", () => {
     );
   });
 
-  test("test imports are added after first comments in Java", async () => {
+  test("test imports are added after first comments and package in Java", async () => {
     getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
-    insertText(editor, `/*\n* Comment example\n*/\n\npackage number;\n`);
+    insertText(
+      editor,
+      `/*\n* Comment example\n*/\n\n// comment 2\n\npackage number;\n`
+    );
     await wait(500);
     insertText(editor, "java.");
     await autoComplete();
@@ -217,7 +221,30 @@ suite("assistant-completion.ts test", () => {
 
     assert.strictEqual(
       documentTransformed,
-      documentJavaRecipeImportsAfterCommentsExpected
+      documentJavaRecipeImportsAfterPackageExpected
+    );
+  });
+
+  test("test imports are added after first comments and before next comment in Java", async () => {
+    getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
+
+    const document = await vscode.workspace.openTextDocument(javaUri);
+    const editor = await vscode.window.showTextDocument(document);
+    await wait(500);
+    insertText(editor, `/*\n* Comment example\n*/\n\n// comment 2\n`);
+    await wait(500);
+    insertText(editor, "java.");
+    await autoComplete();
+    const documentTransformed = editor?.document.getText();
+
+    await wait(500);
+    await closeFile();
+
+    assert.ok(usedRecipeMock.verify());
+
+    assert.strictEqual(
+      documentTransformed,
+      documentJavaRecipeImportsBetweenCommentsExpected
     );
   });
 });
