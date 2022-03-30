@@ -44,12 +44,12 @@ suite("assistant-completion.ts test", () => {
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
 
-  let getPythonRecipeStub: () => sinon.SinonStub = () =>
+  const getPythonRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("requests.", "assistant-completion.py", Language.Python, []);
 
-  let getJavaRecipeStub: () => sinon.SinonStub = () =>
+  const getJavaRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("java.", "assistant-completion.java", Language.Java, []);
