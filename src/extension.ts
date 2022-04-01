@@ -130,12 +130,23 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   /**
-   * Register the command to send recipe usage information
+   * When selecting a code completion item from the recommended recipes
+   * we should save it to local storage so they're listed first on future calls
    */
   vscode.commands.registerCommand(
     "codiga.saveRecentlyUsedRecipe",
     async (shortcut: string, language: string) => {
       await saveRecentlyUsedItem(shortcut, language);
+    }
+  );
+
+  /**
+   * Register the command to send recipe usage information
+   */
+  vscode.commands.registerCommand(
+    "codiga.registerUsage",
+    async (id: number) => {
+      await useRecipeCallback(id);
     }
   );
 

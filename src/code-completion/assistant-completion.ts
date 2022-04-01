@@ -213,14 +213,15 @@ export async function providesCodeCompletion(
       arguments: [r.shortcut, language],
     };
 
-    /* This will include first the recipes that have been used in the past for a specific language
-     * we add "z" as a default so not used recipes are sorted after previously used recipes by alphanumeric
-     * precendence
+    /* This will suggest recipes that have been used more recently first, for this we use the timestamp
+     * stored in the local storage after selecting a suggested recipe and sort them.
+     * Because sortText sorts in ascendant order we have to convert timestamps so we sort in descendant order.
+     * We add "z" as a default so recipes that have not being used are sorted after previously used recipes by alphanumeric
+     * precendence.
      */
     const sortText = getFromLocalStorage(
       generateKeyForUsedRecipe(language, r.shortcut)
     );
-
     snippetCompletion.sortText = sortText
       ? Array.from(sortText).map((x) => {
           const xNumber = Number(x);

@@ -1,4 +1,3 @@
-import { PREFIX_RECENTLY_ADDED_RECIPE } from "../constants";
 import { setToLocalStorage } from "../utils/localStorage"
 import { generateKeyForUsedRecipe } from "../utils/snippetUtils";
 
