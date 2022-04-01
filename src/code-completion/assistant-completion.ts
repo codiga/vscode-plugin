@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import { firstLineToImport, getLanguageForDocument, hasImport } from "../utils/fileUtils";
+import {
+  firstLineToImport,
+  getLanguageForDocument,
+  hasImport,
+} from "../utils/fileUtils";
 import {
   getCurrentIndentationForDocument,
   decodeIndent,
@@ -15,6 +19,11 @@ import {
 } from "../utils/textUtils";
 import { getShortcutCache } from "../graphql-api/shortcut-cache";
 import { filterImports } from "../utils/dependencies/filter-dependencies";
+import {
+  getFromLocalStorage,
+  getKeysFromLocalStorage,
+} from "../utils/localStorage";
+import { generateKeyForUsedRecipe } from "../utils/snippetUtils";
 
 /**
  * Get the recipes. We first attempt to get them from the cache if there
@@ -146,7 +155,10 @@ export async function providesCodeCompletion(
       ? `.${r.shortcut}`
       : r.shortcut;
     const title = `${shortcutForTitle}: ${r.name}`;
-    const snippetCompletion = new vscode.CompletionItem(title);
+    const snippetCompletion = new vscode.CompletionItem(
+      title,
+      vscode.CompletionItemKind.Snippet
+    );
 
     /**
      * If there is a description, we add it to the snippet. If not, we just
@@ -195,6 +207,27 @@ export async function providesCodeCompletion(
     }
 
     snippetCompletion.insertText = new vscode.SnippetString(vscodeFormatCode);
+    snippetCompletion.command = {
+      command: "codiga.saveRecentlyUsedRecipe",
+      title: "Save recently used recipe",
+      arguments: [r.shortcut, language],
+    };
+
+    /* This will include first the recipes that have been used in the past for a specific language
+     * we add "z" as a default so not used recipes are sorted after previously used recipes by alphanumeric
+     * precendence
+     */
+    const sortText = getFromLocalStorage(
+      generateKeyForUsedRecipe(language, r.shortcut)
+    );
+
+    snippetCompletion.sortText = sortText
+      ? Array.from(sortText).map((x) => {
+          const xNumber = Number(x);
+
+          return (9 - xNumber).toString();
+        }).join("")
+      : "z";
 
     return snippetCompletion;
   });

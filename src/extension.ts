@@ -37,6 +37,8 @@ import {
   fetchPeriodicShortcuts,
   fetchShortcuts,
 } from "./graphql-api/shortcut-cache";
+import { saveRecentlyUsedItem } from "./commands/save-recently-used-recipe";
+import { removeRecentlyUsedRecipes } from "./commands/remove-recently-used-recipes";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -121,12 +123,19 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   /**
+   * Removes all recently used recipes in local storage 
+   */
+  vscode.commands.registerCommand("codiga.removeRecentlyUsedRecipes", () => {
+    removeRecentlyUsedRecipes();
+  });
+
+  /**
    * Register the command to send recipe usage information
    */
   vscode.commands.registerCommand(
-    "codiga.registerUsage",
-    async (id: number) => {
-      await useRecipeCallback(id);
+    "codiga.saveRecentlyUsedRecipe",
+    async (shortcut: string, language: string) => {
+      await saveRecentlyUsedItem(shortcut, language);
     }
   );
 
@@ -166,11 +175,11 @@ export async function activate(context: vscode.ExtensionContext) {
             position: vscode.Position
           ) {
             return await providesCodeCompletion(document, position);
-          },
+          }
         },
         ...AUTO_COMPLETION_CHARACTER_TRIGGER
       );
-
+      
     context.subscriptions.push(codeCompletionProvider);
   });
 

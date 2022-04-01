@@ -112,6 +112,11 @@
         "category": "Codiga",
         "command": "codiga.getAssociatedProject",
         "title": "Show associated project"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.removeRecentlyUsedRecipes",
+        "title": "Remove recently saved recipes"
       }
     ],
     "keybindings": [
