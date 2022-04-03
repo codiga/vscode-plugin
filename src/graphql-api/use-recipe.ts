@@ -25,7 +25,7 @@ export async function useRecipeCallback(
   // Get the fingerprint from localstorage to initiate the request
   const userFingerprint = getUserFingerprint();
 
-  if (shortcut && language) {
+  if(shortcut && language) {
     setToLocalStorage(
       generateKeyForUsedRecipe(language, shortcut),
       new Date().getTime().toString()
