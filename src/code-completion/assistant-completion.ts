@@ -21,7 +21,6 @@ import { getShortcutCache } from "../graphql-api/shortcut-cache";
 import { filterImports } from "../utils/dependencies/filter-dependencies";
 import {
   getFromLocalStorage,
-  getKeysFromLocalStorage,
 } from "../utils/localStorage";
 import { generateKeyForUsedRecipe } from "../utils/snippetUtils";
 
@@ -183,7 +182,7 @@ export async function providesCodeCompletion(
      * Register this recipe as used
      */
     snippetCompletion.command = {
-      arguments: [r.id],
+      arguments: [r.id, language,  r.shortcut],
       command: "codiga.registerUsage",
       title: "Codiga Register Usage",
     };
@@ -207,11 +206,7 @@ export async function providesCodeCompletion(
     }
 
     snippetCompletion.insertText = new vscode.SnippetString(vscodeFormatCode);
-    snippetCompletion.command = {
-      command: "codiga.saveRecentlyUsedRecipe",
-      title: "Save recently used recipe",
-      arguments: [r.shortcut, language],
-    };
+
 
     /* This will suggest recipes that have been used more recently first, for this we use the timestamp
      * stored in the local storage after selecting a suggested recipe and sort them.

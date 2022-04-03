@@ -1,5 +1,5 @@
 import { PREFIX_RECENTLY_ADDED_RECIPE } from "../constants";
-import { getKeysFromLocalStorage, removeFromLocalStorage, setToLocalStorage } from "../utils/localStorage"
+import { getKeysFromLocalStorage, removeFromLocalStorage } from "../utils/localStorage";
 
 export async function removeRecentlyUsedRecipes() {
     getKeysFromLocalStorage().forEach(key => {
