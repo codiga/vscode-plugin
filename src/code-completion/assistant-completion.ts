@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import { AssistantRecipe, Language } from "../graphql-api/types";
-import { firstLineToImport, getLanguageForDocument, hasImport } from "../utils/fileUtils";
+import {
+  firstLineToImport,
+  getLanguageForDocument,
+  hasImport,
+} from "../utils/fileUtils";
 import {
   getCurrentIndentationForDocument,
   decodeIndent,
@@ -15,6 +19,10 @@ import {
 } from "../utils/textUtils";
 import { getShortcutCache } from "../graphql-api/shortcut-cache";
 import { filterImports } from "../utils/dependencies/filter-dependencies";
+import {
+  getFromLocalStorage,
+} from "../utils/localStorage";
+import { generateKeyForUsedRecipe } from "../utils/snippetUtils";
 
 /**
  * Get the recipes. We first attempt to get them from the cache if there
@@ -146,7 +154,10 @@ export async function providesCodeCompletion(
       ? `.${r.shortcut}`
       : r.shortcut;
     const title = `${shortcutForTitle}: ${r.name}`;
-    const snippetCompletion = new vscode.CompletionItem(title);
+    const snippetCompletion = new vscode.CompletionItem(
+      title,
+      vscode.CompletionItemKind.Snippet
+    );
 
     /**
      * If there is a description, we add it to the snippet. If not, we just
@@ -171,7 +182,7 @@ export async function providesCodeCompletion(
      * Register this recipe as used
      */
     snippetCompletion.command = {
-      arguments: [r.id],
+      arguments: [r.id, language,  r.shortcut],
       command: "codiga.registerUsage",
       title: "Codiga Register Usage",
     };
@@ -195,6 +206,24 @@ export async function providesCodeCompletion(
     }
 
     snippetCompletion.insertText = new vscode.SnippetString(vscodeFormatCode);
+
+
+    /* This will suggest recipes that have been used more recently first, for this we use the timestamp
+     * stored in the local storage after selecting a suggested recipe and sort them.
+     * Because sortText sorts in ascendant order we have to convert timestamps so we sort in descendant order.
+     * We add "z" as a default so recipes that have not being used are sorted after previously used recipes by alphanumeric
+     * precendence.
+     */
+    const sortText = getFromLocalStorage(
+      generateKeyForUsedRecipe(language, r.shortcut)
+    );
+    snippetCompletion.sortText = sortText
+      ? Array.from(sortText).map((x) => {
+          const xNumber = Number(x);
+
+          return (9 - xNumber).toString();
+        }).join("")
+      : "z";
 
     return snippetCompletion;
   });

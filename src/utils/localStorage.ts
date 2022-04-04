@@ -29,3 +29,19 @@ export function getFromLocalStorage(key: string): string | undefined {
 export function setToLocalStorage(key: string, value: string): void {
   localStorage.update(key, value);
 }
+
+/**
+ * Removes the value of the local storage given the key
+ * @param key the key we want to remove
+ */
+ export function removeFromLocalStorage(key: string): void {
+  localStorage.update(key, undefined);
+}
+
+/**
+ * Gets all keys from local storage
+ * @returns all keys stored in local storage
+ */
+ export function getKeysFromLocalStorage(): readonly string[] {
+  return localStorage.keys();
+}

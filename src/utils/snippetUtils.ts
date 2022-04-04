@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { PREFIX_RECENTLY_ADDED_RECIPE } from "../constants";
 
 import { AssistantRecipe, Language } from "../graphql-api/types";
 import { filterImports } from "./dependencies/filter-dependencies";
@@ -154,3 +155,7 @@ export const addRecipeToEditor = async (
     editBuilder.insert(initialPosition, decodedCode);
   });
 };
+
+export function generateKeyForUsedRecipe(language: string, shortcut: string) {
+  return `${PREFIX_RECENTLY_ADDED_RECIPE}-${language}-${shortcut}`;
+}

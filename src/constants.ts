@@ -49,3 +49,6 @@ export const STARTUP_MESSAGE_MACOS =
   "👋 type / or . in your editor to look for snippets or use ⌘ + SHIFT + S for all shortcuts and ⌘ + SHIFT + C to search snippets.";
 export const STARTUP_MESSAGE_WINDOWS =
   "👋 type / or . in your editor to look for snippets or use CTRL + ALT + S for all shortcuts and CTRL + ALT + C to search snippets.";
+
+
+export const PREFIX_RECENTLY_ADDED_RECIPE = "recently-added-recipe";
