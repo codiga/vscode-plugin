@@ -4,7 +4,6 @@ import * as vscode from "vscode";
 
 import { initializeClient } from "./graphql-api/client";
 import {
-  LEARN_MORE_COMMAND,
   AUTO_COMPLETION_CHARACTER_TRIGGER,
   MESSAGE_STARTUP_SHOW_SHORTCUTS,
   MESSAGE_STARTUP_SHOW_SNIPPETS,
@@ -74,7 +73,7 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   /**
-   * Removes all recently used recipes in local storage 
+   * Removes all recently used recipes in local storage
    */
   vscode.commands.registerCommand("codiga.removeRecentlyUsedRecipes", () => {
     removeRecentlyUsedRecipes();
@@ -91,16 +90,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  /**
-   * Register the learn more command, this is a command that is pushed
-   * when we have a diagnostic being shown for a violation.
-   */
-  context.subscriptions.push(
-    vscode.commands.registerCommand(LEARN_MORE_COMMAND, (url) =>
-      vscode.env.openExternal(vscode.Uri.parse(url))
-    )
-  );
-
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
@@ -113,11 +102,11 @@ export async function activate(context: vscode.ExtensionContext) {
             position: vscode.Position
           ) {
             return await providesCodeCompletion(document, position);
-          }
+          },
         },
         ...AUTO_COMPLETION_CHARACTER_TRIGGER
       );
-      
+
     context.subscriptions.push(codeCompletionProvider);
   });
 
