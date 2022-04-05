@@ -1,8 +1,6 @@
-export const DIAGNOSTICS_COLLECTION_NAME = "codiga";
 export const GRAPHQL_ENDPOINT = "https://api.codiga.io/graphql";
 export const POLLING_INTERVAL_MILLISECONDS = 200;
 export const POLLING_DEADLINE_MILLISECONDS = 10000;
-export const TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS = 1500;
 
 export const CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS = 200;
 
@@ -16,7 +14,6 @@ export const STATUS_DONE = "Done";
 export const DIAGNOSTIC_CODE = "codiga";
 
 export const LEARN_MORE_COMMAND = "LearnMore";
-export const IGNORE_VIOLATION_COMMAND = "IgnoreViolation";
 
 export const ENGINE_ESLINT_APOLLO_CLIENT_ENABLED =
   "ENGINE_ESLINT_APOLLO_CLIENT_ENABLED=true";

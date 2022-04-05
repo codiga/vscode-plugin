@@ -12,7 +12,7 @@ Install the extension and type `.` or `/` in your IDE to list all available snip
 
 ![Use of recipe in Python](images/vscode-read-file.gif)
 
-**Note**: snippets are suggested based on your environment: language, libraries used and filename (e.g. especially for YML files).
+**Note**: snippets are suggested based on your environment: language, libraries used, and filename (e.g. especially for YML files).
 
 ## Find and Reuse Code Snippets
 

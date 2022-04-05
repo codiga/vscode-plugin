@@ -1,35 +1,6 @@
 import * as vscode from "vscode";
 import { getFromLocalStorage, setToLocalStorage } from "./localStorage";
 
-/**
- * Get the project current associated with the current workspace.
- * @returns either the associated project or undefined.
- */
-export function getAssociatedProjectIdentifier(): number | undefined {
-  if (vscode.window.activeTextEditor) {
-    const currentDocument = vscode.window.activeTextEditor.document;
-    const configuration = vscode.workspace.getConfiguration(
-      "",
-      currentDocument.uri
-    );
-
-    return configuration.get("codiga.associatedProject");
-  } else {
-    return undefined;
-  }
-}
-
-/**
- * Get the project current associated with the current workspace.
- * @returns either the associated project or undefined.
- */
-export function isAnalysisEnabled(): boolean {
-  return (
-    vscode.workspace.getConfiguration().get("codiga.codeAnalysisEnabled") ||
-    false
-  );
-}
-
 const generateRandomString = (length: number) => {
   // Declare all characters
   const chars =
