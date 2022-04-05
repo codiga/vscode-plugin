@@ -21,11 +21,6 @@
   "keywords": [
     "coding assistant",
     "snippets",
-    "linters",
-    "code analysis",
-    "code quality",
-    "technical debt",
-    "static code analysis",
     "PHP",
     "Python",
     "Ruby",
@@ -54,18 +49,6 @@
             "default": true,
             "description": "Show welcome messages and hints",
             "scope": "application"
-          },
-          "codiga.codeAnalysisEnabled": {
-            "type": "boolean",
-            "default": false,
-            "description": "Enable Codiga Code Analysis Engine",
-            "scope": "application"
-          },
-          "codiga.associatedProject": {
-            "type": "number",
-            "default": 0,
-            "description": "Associated project id from Codiga",
-            "scope": "resource"
           },
           "codiga.api.token": {
             "type": "string",
@@ -102,16 +85,6 @@
         "category": "Codiga",
         "command": "codiga.recipeCreate",
         "title": "Create Codiga Recipe"
-      },
-      {
-        "category": "Codiga",
-        "command": "codiga.configureAssociatedProject",
-        "title": "Configure Associated Project"
-      },
-      {
-        "category": "Codiga",
-        "command": "codiga.getAssociatedProject",
-        "title": "Show associated project"
       },
       {
         "category": "Codiga",

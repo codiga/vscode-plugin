@@ -3,8 +3,6 @@
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/installs-short/codiga.vscode-plugin.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
 [![Download](https://vsmarketplacebadge.apphb.com/downloads-short/codiga.vscode-plugin.svg)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
 [![Rating](https://vsmarketplacebadge.apphb.com/rating-short/codiga.vscode-plugin.svg)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
-[![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
-[![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 
 ## Quick Start
 
@@ -12,7 +10,7 @@ Install the extension and type `.` or `/` in your IDE to list all available snip
 
 ![Use of recipe in Python](images/vscode-read-file.gif)
 
-**Note**: snippets are suggested based on your environment: language, libraries used and filename (e.g. especially for YML files).
+**Note**: snippets are suggested based on your environment: language, libraries used, and filename (e.g. especially for YML files).
 
 ## Find and Reuse Code Snippets
 

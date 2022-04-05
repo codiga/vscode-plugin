@@ -1,17 +1,3 @@
-export interface FileAnalysisViolation {
-  id: number;
-  language: string;
-  description: string;
-  severity: number;
-  category: string;
-  filename: string;
-  line: number;
-  lineCount: number;
-  tool: string;
-  rule: string;
-  ruleUrl: string | undefined;
-}
-
 export interface AssistantRecipe {
   id: number;
   name: string;
@@ -27,27 +13,6 @@ export interface AssistantRecipe {
   vscodeFormat: string;
   presentableFormat: string;
 }
-
-export interface FileAnalysis {
-  identifier: number;
-  language: string;
-  status: string;
-  filename: number;
-  runningTimeSeconds: number;
-  violations: FileAnalysisViolation[];
-}
-
-export interface Repository {
-  kind: string;
-  url: string;
-}
-
-export interface Project {
-  id: number;
-  name: string;
-  repository: Repository | undefined;
-}
-
 export interface User {
   id: number;
   accountType: string;
