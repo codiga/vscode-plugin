@@ -30,12 +30,12 @@ export async function getRecipesForClient(
     string,
     string | undefined | number | null | string[]
   > = {
-    language: language,
-    term: term,
+    language,
+    term,
     howmany: 10,
     skip: 0,
-    dependencies: dependencies,
-    filename: filename,
+    dependencies,
+    filename,
     fingerprint: userFingerprint,
     parameters: null,
   };

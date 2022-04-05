@@ -37,6 +37,7 @@ import {
   fetchPeriodicShortcuts,
   fetchShortcuts,
 } from "./graphql-api/shortcut-cache";
+import inlineCompletionProvider from "./code-completion/inline-completion-provider";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -174,6 +175,13 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(codeCompletionProvider);
   });
 
+  /**
+   * Copilot-like code suggestions
+   */
+
+  const provider: vscode.InlineCompletionItemProvider<vscode.InlineCompletionItem> = inlineCompletionProvider;
+	vscode.languages.registerInlineCompletionItemProvider({ pattern: "**" }, provider);
+  
   /**
    * Finally, attempt to get the current user. If the current user
    * does not show, we propose to configure the API keys.

@@ -13,6 +13,9 @@
     "url": "https://github.com/codiga/vscode-plugin/issues"
   },
   "icon": "images/logo.png",
+  "enabledApiProposals": [
+    "inlineCompletions"
+  ],
   "categories": [
     "Linters",
     "Snippets",
@@ -160,6 +163,7 @@
   "dependencies": {
     "@types/sinon": "^10.0.11",
     "graphql": "^15.8.0",
-    "graphql-request": "^3.7.0"
+    "graphql-request": "^3.7.0",
+    "vscode-dts": "^0.3.3"
   }
 }
