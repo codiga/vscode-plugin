@@ -14,12 +14,8 @@ import {
   recipeWithTransformVariables,
   testDataUri,
 } from "../testUtils";
-import {
-  getFromLocalStorage,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from "../../../utils/localStorage";
 import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
+import * as localStorage from "../../../utils/localStorage";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
@@ -32,9 +28,9 @@ suite("variable transformation test", () => {
   let getRecipeStub: sinon.SinonStub;
   let usedRecipeMock: sinon.SinonExpectation;
 
-  // set default flag so documentation is not open while testing
-  let initialShowDocumentationFlag: string | undefined = undefined;
-  setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+  const localStorageStub = sandbox
+    .stub(localStorage, "getFromLocalStorage")
+    .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
 
   // this is executed before each test
   setup(() => {
@@ -43,10 +39,8 @@ suite("variable transformation test", () => {
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
 
-    try {
-      // set default flag so documentation is not open while testing
-      setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
-    } catch (e) {}
+    // this will prevent to redirect to the browse for documentation on plugin activation
+    localStorageStub.returns("true");
 
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCAll)

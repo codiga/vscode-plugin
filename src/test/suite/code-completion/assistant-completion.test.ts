@@ -29,11 +29,7 @@ import {
   documentJavaRecipeImportsAfterPackageExpected,
   documentJavaRecipeImportsBetweenCommentsExpected,
 } from "../testUtils";
-import {
-  getFromLocalStorage,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from "../../../utils/localStorage";
+import * as localStorage from "../../../utils/localStorage";
 import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
@@ -61,8 +57,12 @@ suite("assistant-completion.ts test", () => {
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("java.", "assistant-completion.java", Language.Java, []);
 
+  // mock local storage shown documentation key
+  const localStorageStub = sandbox
+    .stub(localStorage, "getFromLocalStorage")
+    .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
+
   let usedRecipeMock: sinon.SinonExpectation;
-  let initialShowDocumentationFlag: string | undefined = undefined;
 
   // these are the first state values for the settings we want to change and restore
   // in the following tests
@@ -76,12 +76,8 @@ suite("assistant-completion.ts test", () => {
   setup(async () => {
     // always start with a freezed config
     originalConfig = await updateConfig(uri, configDefaults);
+    localStorageStub.returns("true");
 
-    try {
-      // set default flag so documentation is not open while testing
-      setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
-    } catch (e) {}
-    
     // define the stub and mock
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCall)
