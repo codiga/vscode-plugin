@@ -77,9 +77,11 @@ suite("assistant-completion.ts test", () => {
     // always start with a freezed config
     originalConfig = await updateConfig(uri, configDefaults);
 
-    // set default flag so documentation is not open while testing
-    setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
-
+    try {
+      // set default flag so documentation is not open while testing
+      setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+    } catch (e) {}
+    
     // define the stub and mock
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCall)

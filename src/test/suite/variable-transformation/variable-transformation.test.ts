@@ -43,8 +43,10 @@ suite("variable transformation test", () => {
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
 
-    // set default flag so documentation is not open while testing
-    setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+    try {
+      // set default flag so documentation is not open while testing
+      setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+    } catch (e) {}
 
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCAll)
