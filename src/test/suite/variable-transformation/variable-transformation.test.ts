@@ -14,6 +14,12 @@ import {
   recipeWithTransformVariables,
   testDataUri,
 } from "../testUtils";
+import {
+  getFromLocalStorage,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from "../../../utils/localStorage";
+import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
@@ -26,12 +32,23 @@ suite("variable transformation test", () => {
   let getRecipeStub: sinon.SinonStub;
   let usedRecipeMock: sinon.SinonExpectation;
 
+  // set default flag so documentation is not open while testing
+  let initialShowDocumentationFlag: string | undefined = undefined;
+  setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+
   // this is executed before each test
   setup(() => {
     // define the stub and mock
     getRecipeStub = sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
+
+    // set default flag so documentation is not open while testing
+    initialShowDocumentationFlag = getFromLocalStorage(
+      VSCODE_DOCUMENTATION_SHOWN_KEY
+    );
+    setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCAll)
       .expects("useRecipeCallback")
@@ -41,6 +58,11 @@ suite("variable transformation test", () => {
 
   // this is executed after each test finishes
   teardown(() => {
+    // remove show documentation flag if it hasn't been set
+    if (!initialShowDocumentationFlag) {
+      removeFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY);
+    }
+
     // things get messy really quick, do not remove this step
     sandbox.restore();
   });

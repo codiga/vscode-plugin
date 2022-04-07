@@ -29,6 +29,12 @@ import {
   documentJavaRecipeImportsAfterPackageExpected,
   documentJavaRecipeImportsBetweenCommentsExpected,
 } from "../testUtils";
+import {
+  getFromLocalStorage,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from "../../../utils/localStorage";
+import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
@@ -56,6 +62,7 @@ suite("assistant-completion.ts test", () => {
       .withArgs("java.", "assistant-completion.java", Language.Java, []);
 
   let usedRecipeMock: sinon.SinonExpectation;
+  let initialShowDocumentationFlag: string | undefined = undefined;
 
   // these are the first state values for the settings we want to change and restore
   // in the following tests
@@ -69,8 +76,12 @@ suite("assistant-completion.ts test", () => {
   setup(async () => {
     // always start with a freezed config
     originalConfig = await updateConfig(uri, configDefaults);
-    // define the stub and mock
 
+    // set default flag so documentation is not open while testing
+    initialShowDocumentationFlag = getFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY);
+    setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+
+    // define the stub and mock
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCall)
       .expects("useRecipeCallback")
@@ -82,6 +93,12 @@ suite("assistant-completion.ts test", () => {
   teardown(async () => {
     // things get messy really quick, do not remove this step
     await updateConfig(uri, originalConfig);
+
+    // remove show documentation flag if it hasn't been set
+    if (!initialShowDocumentationFlag) {
+      removeFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY);
+    }
+
     sandbox.restore();
   });
 
