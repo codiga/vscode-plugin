@@ -10,9 +10,11 @@ import {
   MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
   STARTUP_MESSAGE_MACOS,
   STARTUP_MESSAGE_WINDOWS,
+  VSCODE_DOCUMENTATION_SHOWN_KEY,
+  VSCODE_DOCUMENTATION_URL,
 } from "./constants";
 import { testApi } from "./commands/test-api";
-import { initializeLocalStorage } from "./utils/localStorage";
+import { getFromLocalStorage, initializeLocalStorage, setToLocalStorage } from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
@@ -173,6 +175,16 @@ export async function activate(context: vscode.ExtensionContext) {
       console.debug(e);
     }
   });
+
+  /**
+   * Open the VSCode integration documentation only once after user installs it
+   * If there is a flag in the local storage it means the user was already redirected
+   * to the VSCode documentation
+   */
+  if(!getFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY)){
+    setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
+    vscode.env.openExternal(vscode.Uri.parse(VSCODE_DOCUMENTATION_URL));
+  }
 }
 
 // this method is called when your extension is deactivated

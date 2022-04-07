@@ -26,3 +26,8 @@ export const STARTUP_MESSAGE_WINDOWS =
   "👋 type / or . in your editor to look for snippets or use CTRL + ALT + S for all shortcuts and CTRL + ALT + C to search snippets.";
 
 export const PREFIX_RECENTLY_ADDED_RECIPE = "recently-added-recipe";
+
+
+// VSCode documentation
+export const VSCODE_DOCUMENTATION_SHOWN_KEY = "vs-code-documentation-shown";
+export const VSCODE_DOCUMENTATION_URL = "https://doc.codiga.io/docs/coding-assistant/coding-assistant-vscode/";
