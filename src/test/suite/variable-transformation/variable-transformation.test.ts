@@ -44,9 +44,6 @@ suite("variable transformation test", () => {
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
 
     // set default flag so documentation is not open while testing
-    initialShowDocumentationFlag = getFromLocalStorage(
-      VSCODE_DOCUMENTATION_SHOWN_KEY
-    );
     setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
 
     usedRecipeMock = sandbox
@@ -58,11 +55,6 @@ suite("variable transformation test", () => {
 
   // this is executed after each test finishes
   teardown(() => {
-    // remove show documentation flag if it hasn't been set
-    if (!initialShowDocumentationFlag) {
-      removeFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY);
-    }
-
     // things get messy really quick, do not remove this step
     sandbox.restore();
   });

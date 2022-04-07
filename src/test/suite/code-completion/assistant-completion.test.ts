@@ -78,7 +78,6 @@ suite("assistant-completion.ts test", () => {
     originalConfig = await updateConfig(uri, configDefaults);
 
     // set default flag so documentation is not open while testing
-    initialShowDocumentationFlag = getFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY);
     setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
 
     // define the stub and mock
@@ -93,11 +92,6 @@ suite("assistant-completion.ts test", () => {
   teardown(async () => {
     // things get messy really quick, do not remove this step
     await updateConfig(uri, originalConfig);
-
-    // remove show documentation flag if it hasn't been set
-    if (!initialShowDocumentationFlag) {
-      removeFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY);
-    }
 
     sandbox.restore();
   });
