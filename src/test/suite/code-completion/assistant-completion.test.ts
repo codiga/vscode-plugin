@@ -57,10 +57,11 @@ suite("assistant-completion.ts test", () => {
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("java.", "assistant-completion.java", Language.Java, []);
 
-  // mock local storage shown documentation key
+  // this will prevent to redirect to the browse for documentation on plugin activation
   const localStorageStub = sandbox
     .stub(localStorage, "getFromLocalStorage")
     .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
+  localStorageStub.returns("true");
 
   let usedRecipeMock: sinon.SinonExpectation;
 
@@ -76,7 +77,6 @@ suite("assistant-completion.ts test", () => {
   setup(async () => {
     // always start with a freezed config
     originalConfig = await updateConfig(uri, configDefaults);
-    localStorageStub.returns("true");
 
     // define the stub and mock
     usedRecipeMock = sandbox
@@ -90,7 +90,6 @@ suite("assistant-completion.ts test", () => {
   teardown(async () => {
     // things get messy really quick, do not remove this step
     await updateConfig(uri, originalConfig);
-
     sandbox.restore();
   });
 

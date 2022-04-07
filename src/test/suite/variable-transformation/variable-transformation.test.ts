@@ -28,19 +28,18 @@ suite("variable transformation test", () => {
   let getRecipeStub: sinon.SinonStub;
   let usedRecipeMock: sinon.SinonExpectation;
 
+  // this will prevent to redirect to the browse for documentation on plugin activation
   const localStorageStub = sandbox
     .stub(localStorage, "getFromLocalStorage")
     .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
-
+  localStorageStub.returns("true");
+  
   // this is executed before each test
   setup(() => {
     // define the stub and mock
     getRecipeStub = sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
-
-    // this will prevent to redirect to the browse for documentation on plugin activation
-    localStorageStub.returns("true");
 
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCAll)
