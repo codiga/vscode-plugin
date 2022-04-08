@@ -58,10 +58,9 @@ suite("assistant-completion.ts test", () => {
       .withArgs("java.", "assistant-completion.java", Language.Java, []);
 
   // this will prevent to redirect to the browse for documentation on plugin activation
-  const localStorageStub = sandbox
+  const localStorageStub: () => sinon.SinonStub = () => sandbox
     .stub(localStorage, "getFromLocalStorage")
     .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
-  localStorageStub.returns("true");
 
   let usedRecipeMock: sinon.SinonExpectation;
 
@@ -95,6 +94,7 @@ suite("assistant-completion.ts test", () => {
 
   test("test insert suggestion from completion widget works", async () => {
     getRustRecipeStub().returns(mockRecipe(recipeForUser));
+    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document);
@@ -113,6 +113,8 @@ suite("assistant-completion.ts test", () => {
 
   test("test recipe indentation in recipe insertion with four indentation spaces", async () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
+    localStorageStub().returns("true");
+
     await updateConfig(uri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: true,
@@ -139,6 +141,7 @@ suite("assistant-completion.ts test", () => {
 
   test("test recipe indentation in recipe insertion with two indentation spaces", async () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
+    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document);
@@ -161,6 +164,8 @@ suite("assistant-completion.ts test", () => {
 
   test("test recipe indentation in recipe insertion tab indentation", async () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
+    localStorageStub().returns("true");
+
     await updateConfig(uri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: false,
@@ -186,6 +191,7 @@ suite("assistant-completion.ts test", () => {
 
   test("test imports are added after first comments in Python", async () => {
     getPythonRecipeStub().returns(mockRecipePython(pythonRecipe));
+    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(pythonUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -211,6 +217,7 @@ suite("assistant-completion.ts test", () => {
 
   test("test imports are added after first comments and package in Java", async () => {
     getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
+    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -238,6 +245,7 @@ suite("assistant-completion.ts test", () => {
 
   test("test imports are added after first comments and before next comment in Java", async () => {
     getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
+    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
