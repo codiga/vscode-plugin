@@ -14,6 +14,8 @@ import {
   recipeWithTransformVariables,
   testDataUri,
 } from "../testUtils";
+import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
+import * as localStorage from "../../../utils/localStorage";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
@@ -26,12 +28,18 @@ suite("variable transformation test", () => {
   let getRecipeStub: sinon.SinonStub;
   let usedRecipeMock: sinon.SinonExpectation;
 
+  // this will prevent to redirect to the browse for documentation on plugin activation
+  const localStorageStub: () => sinon.SinonStub = () => sandbox
+    .stub(localStorage, "getFromLocalStorage")
+    .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
+
   // this is executed before each test
   setup(() => {
     // define the stub and mock
     getRecipeStub = sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
+
     usedRecipeMock = sandbox
       .mock(usedRecipeApiCAll)
       .expects("useRecipeCallback")
@@ -47,6 +55,7 @@ suite("variable transformation test", () => {
 
   test("detect transformation variables are not present", async () => {
     getRecipeStub.returns(mockRecipe(recipeWithTransformVariables));
+    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document);
