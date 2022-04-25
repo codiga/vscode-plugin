@@ -90,6 +90,11 @@
         "category": "Codiga",
         "command": "codiga.removeRecentlyUsedRecipes",
         "title": "Remove recently saved recipes"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.showWebview",
+        "title": "Codiga Assistant"
       }
     ],
     "keybindings": [
