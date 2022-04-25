@@ -33,7 +33,11 @@ import {
   fetchShortcuts,
 } from "./graphql-api/shortcut-cache";
 import { removeRecentlyUsedRecipes } from "./commands/remove-recently-used-recipes";
-import { showCodigaWebview, updateWebview } from "./commands/webview";
+import {
+  recordLastEditor,
+  showCodigaWebview,
+  updateWebview,
+} from "./commands/webview";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -188,8 +192,10 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Whenever we open a new document, we refresh the webview
    */
+  recordLastEditor();
   vscode.workspace.onDidOpenTextDocument(async () => {
     try {
+      recordLastEditor();
       await updateWebview();
     } catch (e) {
       console.debug("Error when trying to refresh the webview");

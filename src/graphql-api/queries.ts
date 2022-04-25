@@ -69,6 +69,14 @@ export const GET_RECIPES_SEMANTIC: string = gql`
       creationTimestampMs
       vscodeFormat
       presentableFormat
+      owner {
+        username
+        accountType
+      }
+      groups {
+        id
+        name
+      }
     }
   }
 `;
