@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 
 import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
-import { AssistantRecipe, Language } from "../graphql-api/types";
+import { AssistantRecipe, Language, User } from "../graphql-api/types";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
@@ -14,10 +14,10 @@ import {
   LatestRecipeHolder,
   resetRecipeHolder,
 } from "../utils/snippetUtils";
+import { getUser } from "../graphql-api/user";
 
 let panel: vscode.WebviewPanel | undefined = undefined;
 let lastActiveTextEditor: vscode.TextEditor | undefined = undefined;
-let lastPosition: vscode.Position | undefined = undefined;
 const latestRecipeHolder: LatestRecipeHolder = {
   recipe: undefined,
   insertedRange: undefined,
@@ -27,18 +27,18 @@ interface MessageFromWebview {
   command: string;
   term: string | undefined;
   snippet: AssistantRecipe | undefined;
+  onlyPublic: boolean | undefined;
+  onlyPrivate: boolean | undefined;
+  onlySubscribed: boolean | undefined;
 }
 
 export const recordLastEditor = (): void => {
   const currentEditor = vscode.window.activeTextEditor;
   const currentDocument = currentEditor?.document;
+  console.log("record new editor");
 
   if (currentDocument) {
-    const language = getLanguageForDocument(currentDocument);
-    if (language !== Language.Unknown) {
-      lastActiveTextEditor = currentEditor;
-      lastPosition = currentEditor.selection.active;
-    }
+    lastActiveTextEditor = currentEditor;
   }
 };
 
@@ -52,6 +52,8 @@ export async function showCodigaWebview(
   if (panel) {
     panel.reveal(vscode.ViewColumn.Beside);
   } else {
+    const currentUser = await getUser();
+
     panel = vscode.window.createWebviewPanel(
       "codiga",
       "Codiga",
@@ -68,6 +70,10 @@ export async function showCodigaWebview(
       }
     );
 
+    const user = await getUser();
+
+    panel.webview.html = getWebviewContent(user);
+
     // Get path to resource on disk
     // const showdownJsUri = panel.webview.asWebviewUri(
     //   vscode.Uri.file(
@@ -75,16 +81,17 @@ export async function showCodigaWebview(
     //   )
     // );
 
+    // Set up message receicing from the webview
     panel.webview.onDidReceiveMessage(async (message) => {
       await handleMessage(message);
     });
 
-    panel.webview.html = getWebviewContent();
-
+    // if the view closes, remove the panel.
     panel.onDidDispose(() => {
       panel = undefined;
     });
 
+    // update the webview
     await updateWebview();
   }
 }
@@ -93,11 +100,18 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
   console.log(`received ${message}`);
   if (message.command === "search") {
     const searchTerm = message.term?.length === 0 ? undefined : message.term;
-    updateWebview(searchTerm);
+    const onlyPublic = message.onlyPublic;
+    const onlyPrivate = message.onlyPrivate;
+    const onlySubscribed = message.onlySubscribed;
+    console.log(onlyPublic);
+    console.log(onlyPrivate);
+    console.log(onlySubscribed);
+
+    updateWebview(searchTerm, onlyPublic, onlyPrivate, onlySubscribed);
     return;
   }
   if (message.command === "insertSnippet") {
-    if (lastActiveTextEditor && lastPosition && message.snippet) {
+    if (lastActiveTextEditor && message.snippet) {
       await deleteInsertedCode(
         lastActiveTextEditor,
         latestRecipeHolder.insertedRange
@@ -141,7 +155,10 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
 };
 
 export const updateWebview = async (
-  term: string | undefined = undefined
+  term: string | undefined = undefined,
+  onlyPublic: boolean | undefined = undefined,
+  onlyPrivate: boolean | undefined = undefined,
+  onlySubscribed: boolean | undefined = undefined
 ): Promise<void> => {
   const editor = lastActiveTextEditor;
   if (!editor) {
@@ -158,14 +175,33 @@ export const updateWebview = async (
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(document);
 
+  if (panel && language === Language.Unknown) {
+    panel.webview.postMessage({
+      command: "pageChanged",
+      language: null,
+      languageString: null,
+      snippets: [],
+      resetSearch: true,
+    });
+    return;
+  }
+
   const snippets = await getRecipesForClient(
     term,
     relativePath,
     language,
-    dependencies
+    dependencies,
+    onlyPublic,
+    onlyPrivate,
+    onlySubscribed
   );
 
+  console.log(snippets.length);
+
   if (panel) {
+    /**
+     * if we do not have a search term, reset it on the page.
+     */
     const resetSearch = !term || term?.length === 0;
 
     panel.webview.postMessage({
@@ -178,7 +214,7 @@ export const updateWebview = async (
   }
 };
 
-const getWebviewContent = (): string => {
+const getWebviewContent = (user: User | undefined): string => {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -188,31 +224,81 @@ const getWebviewContent = (): string => {
     <title>Codiga</title>
 </head>
 <body>
-    <h1 id="language"></h1>
+    <h1 id="language">Codiga Loading</h1>
 
+    ${
+      user
+        ? '<div>Logged as: <a href="https://app.codiga.io">' +
+          user.username +
+          "</a></div>"
+        : '<div>not authenticated, <a href="https://app.codiga.io/account/auth/vscode">click here to authenticate</a></div>'
+    }
     <form id="form">
       <input type="text" id="search" />
       <input type="submit" id="submit" />
+
+      <br>
+      <input type="radio" id="snippetsPublicAndPrivate" name="snippetsPrivacy" value="publicPrivate" checked onchange="refreshPage();">
+      <label for="snippetsPublicAndPrivate">Show Public And Private Snippets</label><br>
+      <input type="radio" id="snippetsPublic" name="snippetsPrivacy" value="public" onchange="refreshPage();">
+      <label for="snippetsPublic">Public Snippets Only</label><br>
+      <input type="radio" id="snippetsPrivate" name="snippetsPrivacy" value="private" onchange="refreshPage();">
+      <label for="snippetsPrivate">Private Snippets only (created by me and shared with groups)</label>
+      <br>
+      <input type="checkbox" id="checkboxOnlySubscribed" name="onlySubscribed" value="true" onchange="refreshPage();">
+      <label for="checkboxOnlySubscribed">Subscribed Snippets Only</label>
     </form>
 
     <div id="snippets">
-
+      loading
     </div>
 
 
 
     <script>
+        const userSection = document.getElementById('user');
         const languageDiv = document.getElementById('language');
         const form = document.getElementById('form');
         const search = document.getElementById('search');
         const snippetsSection = document.getElementById('snippets');
         const vscode = acquireVsCodeApi();
-        form.onsubmit = (e) => {
-          e.preventDefault();
+        const submitButton = document.getElementById('submit');
+        const checkboxOnlySubscribed = document.getElementById('checkboxOnlySubscribed');
+        const snippetsPublicAndPrivate = document.getElementById('snippetsPublicAndPrivate');
+        const snippetsPublic = document.getElementById('snippetsPublic');
+        const snippetsPrivate = document.getElementById('snippetsPrivate');
+
+
+
+        const activateSearch= (enabled) => {
+          submitButton.disabled = !enabled;
+          snippetsPrivate.disabled = !enabled;
+          snippetsPublic.disabled = !enabled;
+          snippetsPublicAndPrivate.disabled = !enabled;
+          checkboxOnlySubscribed.disabled = !enabled;
+          form.hidden = !enabled;
+        };
+
+        const refreshPage = () => {
+          const onlyPublicCheckBoxValue = snippetsPublic.checked === true ? true : undefined;
+          const onlyPrivateCheckBoxValue = snippetsPrivate.checked === true ? true : undefined;
+          const onlySubscribedCheckboxValue = checkboxOnlySubscribed.checked;
+          
+          console.log(onlyPublicCheckBoxValue);
+          console.log(onlyPrivateCheckBoxValue);
+
           vscode.postMessage({
             command: 'search',
-            term: search.value
+            term: search.value,
+            onlyPublic: onlyPublicCheckBoxValue,
+            onlyPrivate: onlyPrivateCheckBoxValue,
+            onlySubscribed: onlySubscribedCheckboxValue
           }); 
+        };
+
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          refreshPage();
         };
 
         const insertSnippet = (snippetBase64) => {
@@ -224,29 +310,37 @@ const getWebviewContent = (): string => {
         };
 
         const addPreviewSnippet = (snippetBase64) => {
-          const snippet = atob(snippetBase64);
+          const snippet = JSON.parse(atob(snippetBase64));
+          const buttonId = "button-" + snippet.id;
+          const button = document.getElementById(buttonId);
+          button.innerText = "Insert Snippet";
           vscode.postMessage({
             command: 'addPreviewSnippet',
-            snippet: JSON.parse(snippet)
+            snippet: snippet
           }); 
         };
 
         const removePreviewSnippet = (snippetBase64) => {
-          const snippet = atob(snippetBase64);
+          const snippet = JSON.parse(atob(snippetBase64));
+          const buttonId = "button-" + snippet.id;
+          const button = document.getElementById(buttonId);
+          button.innerText = "Preview Snippet";
           vscode.postMessage({
             command: 'removePreviewSnippet',
-            snippet: JSON.parse(snippet)
+            snippet: snippet
           }); 
         };
 
         const showSnippets = (snippets) => {
           let newContent = '';
-          if (!snippets){
+          if (!snippets || snippets.length === 0){
+            snippetsSection.innerHTML = "<div>No Snippet found</div>";
             return;
           }
           snippets.forEach((s)=> {
             const decodedSnippet = atob(s.presentableFormat).replaceAll('\\n', '<br>').replaceAll(' ', '&nbsp;');
             const descriptionMarkdown = s.description;
+            const buttonId = "button-" + s.id;
 
 
             const snippetStringified = JSON.stringify(s);
@@ -281,11 +375,11 @@ const getWebviewContent = (): string => {
               newContent = newContent + "<a href=\\"https://app.codiga.io/assistant/recipe/"+s.id+"/view\\">See on Codiga</a>";
             }
             newContent = newContent + "\
-              <button type=\\"button\\" \
+              <button type=\\"button\\" id=\\""+buttonId+"\\"\
                       onclick=\\"insertSnippet(\\'"+snippetStringToBase64+"\\');\\"\
-                      onmouseenter=\\"addPreviewSnippet(\\'"+snippetStringToBase64+"\\');\\"\
-                      onmouseout=\\"removePreviewSnippet(\\'"+snippetStringToBase64+"\\');\\"\
-              >Insert Snippet</button> \
+                      // onmouseenter=\\"addPreviewSnippet(\\'"+snippetStringToBase64+"\\');\\"\
+                      // onmouseout=\\"removePreviewSnippet(\\'"+snippetStringToBase64+"\\');\\"\
+              >Preview Snippet</button> \
               <div>"+descriptionMarkdown+"</div>\
               <pre><code>"+decodedSnippet+"</code></pre> \
             </div>";
@@ -300,11 +394,19 @@ const getWebviewContent = (): string => {
 
             switch (message.command) {
                 case 'pageChanged':
+                    if(message.languageString === null) {
+                      languageDiv.textContent = "Language not supported";
+                      snippetsSection.innerHTML = "Codiga does not support this language at this time.";
+                      activateSearch(false);
+                      break;
+                    }
+
                     languageDiv.textContent = message.languageString;
                     if(message.resetSearch && message.resetSearch === true) {
                       search.value = '';
                     }
                     showSnippets(message.snippets);
+                    activateSearch(true);
                     break;
             }
         });
