@@ -66,13 +66,14 @@ export async function showCodigaWebview(
           vscode.Uri.file(
             path.join(context.extensionPath, "src", "webview", "highlightjs")
           ),
+          vscode.Uri.file(path.join(context.extensionPath, "webview")),
         ],
       }
     );
 
     const user = await getUser();
 
-    panel.webview.html = getWebviewContent(user);
+    panel.webview.html = getWebviewContent(user, context.extensionPath);
 
     // Get path to resource on disk
     // const showdownJsUri = panel.webview.asWebviewUri(
@@ -214,7 +215,38 @@ export const updateWebview = async (
   }
 };
 
-const getWebviewContent = (user: User | undefined): string => {
+const getWebviewContent = (
+  user: User | undefined,
+  extensionPath: string
+): string => {
+  const reactAppPathOnDisk = vscode.Uri.file(
+    path.join(extensionPath, "webview", "webview.js")
+  );
+  const reactAppUri = reactAppPathOnDisk.with({ scheme: "vscode-resource" });
+
+  return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Config View</title>
+        <meta http-equiv="Content-Security-Policy"
+                    content="default-src 'none';
+                             img-src https:;
+                             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
+                             style-src vscode-resource: 'unsafe-inline';">
+        <script>
+          window.acquireVsCodeApi = acquireVsCodeApi;
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script src="${reactAppUri}"></script>
+    </body>
+    </html>`;
+};
+
+const oldStuff = (user: User | undefined) => {
   return `
 <!DOCTYPE html>
 <html lang="en">
