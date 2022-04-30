@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import Webview from "./webview";
+import { Webview } from "./webview";
 
 declare global {
   interface Window {
