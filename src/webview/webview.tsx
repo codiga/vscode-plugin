@@ -19,7 +19,9 @@ export const Webview = (props: WebviewProps) => {
 
   useEffect(() => {
     window.addEventListener("message", (event) => {
+      console.log("received data");
       const message = event.data;
+      console.log(message.command);
 
       switch (message.command) {
         case "pageChanged":
@@ -67,6 +69,7 @@ export const Webview = (props: WebviewProps) => {
         user={user}
         setLoading={setLoading}
         isLoading={loading}
+        initialLoading={initialLoading}
       />
       <Snippets
         snippets={snippets}

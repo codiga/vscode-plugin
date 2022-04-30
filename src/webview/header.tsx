@@ -4,6 +4,7 @@ import {
   VSCodeTextField,
   VSCodeCheckbox,
   VSCodeRadio,
+  VSCodeLink,
 } from "@vscode/webview-ui-toolkit/react";
 
 import { useState } from "react";
@@ -16,6 +17,7 @@ interface HeaderProps {
   user: User | undefined;
   setLoading: (loading: boolean) => void;
   isLoading: boolean;
+  initialLoading: boolean;
 }
 
 export const Header = (props: HeaderProps) => {
@@ -45,10 +47,7 @@ export const Header = (props: HeaderProps) => {
     refreshPage();
   }, [searchPublic, searchPrivate, searchSubscribedOnly, term]);
 
-  var lastSearchTerm = "";
-
   const deBounceTerm = (term: string) => {
-    lastSearchTerm = term;
     clearTimeout(debounceTimeout);
     setDebounceTimeout(
       setTimeout(() => {
@@ -59,83 +58,133 @@ export const Header = (props: HeaderProps) => {
 
   return (
     <div className="header">
-      <h1>{props.language}</h1>
       {props.user !== undefined ? (
-        <div>Logged as {props.user.username}</div>
+        <div
+          style={{
+            float: "right",
+            marginTop: "0.5em",
+          }}
+        >
+          Logged as{" "}
+          <VSCodeLink href="https://app.codiga.io/account/profile">
+            {props.user.username}
+          </VSCodeLink>
+        </div>
       ) : (
-        <div>Not logged in</div>
+        <div
+          style={{
+            float: "right",
+            marginTop: "0.5em",
+          }}
+        >
+          Anonymous user (
+          <VSCodeLink href="https://app.codiga.io/account/auth/vscode">
+            log in
+          </VSCodeLink>
+          )
+        </div>
       )}
-      <form
-        id="form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          refreshPage();
-        }}
-      >
-        <VSCodeTextField
-          type="text"
-          id="search"
-          onInput={(e) => {
-            console.log("bla");
-            props.setLoading(true);
-            const newTerm = e.target.value;
-            deBounceTerm(newTerm);
-          }}
-        />
+      <h1>Code Snippets Search</h1>
 
-        <br />
-        <VSCodeRadio
-          type="radio"
-          id="snippetsPublicAndPrivate"
-          name="snippetsPrivacy"
-          checked={searchPublic === false && searchPrivate === false}
-          onClick={() => {
-            setSearchPrivate(false);
-            setSearchPublic(false);
-          }}
-        >
-          Show Public And Private Snippets
-        </VSCodeRadio>
-        <br />
-        <VSCodeRadio
-          type="radio"
-          id="snippetsPublic"
-          name="snippetsPrivacy"
-          checked={searchPublic}
-          onClick={() => {
-            setSearchPrivate(false);
-            setSearchPublic(!searchPublic);
-          }}
-        >
-          Public Snippets Only
-        </VSCodeRadio>
-        <br />
-        <VSCodeRadio
-          type="radio"
-          id="snippetsPrivate"
-          name="snippetsPrivacy"
-          checked={searchPrivate}
-          onClick={() => {
-            setSearchPrivate(!searchPrivate);
-            setSearchPublic(false);
-          }}
-        >
-          Private Snippets only (created by me and shared with groups)
-        </VSCodeRadio>
+      {props.initialLoading === false && (
+        <>
+          <div>
+            <VSCodeTextField
+              type="text"
+              id="search"
+              style={{
+                width: "100%",
+              }}
+              onInput={(e) => {
+                console.log("bla");
+                props.setLoading(true);
+                const newTerm = e.target.value;
+                deBounceTerm(newTerm);
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "left",
+            }}
+          >
+            <VSCodeRadio
+              type="radio"
+              id="snippetsPublicAndPrivate"
+              name="snippetsPrivacy"
+              style={{
+                minWidth: "50%",
+              }}
+              checked={searchPublic === false && searchPrivate === false}
+              onClick={() => {
+                setSearchPrivate(false);
+                setSearchPublic(false);
+              }}
+            >
+              Public + Private Snippets
+            </VSCodeRadio>
+            <VSCodeRadio
+              type="radio"
+              id="snippetsPublic"
+              name="snippetsPrivacy"
+              checked={searchPublic}
+              style={{
+                minWidth: "50%",
+              }}
+              disabled={props.user === undefined}
+              hoverText="bla"
+              onClick={() => {
+                setSearchPrivate(false);
+                setSearchPublic(!searchPublic);
+              }}
+            >
+              Public Snippets Only
+            </VSCodeRadio>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "left",
+            }}
+          >
+            <VSCodeRadio
+              type="radio"
+              id="snippetsPrivate"
+              name="snippetsPrivacy"
+              checked={searchPrivate}
+              disabled={props.user === undefined}
+              style={{
+                minWidth: "50%",
+              }}
+              onClick={() => {
+                setSearchPrivate(!searchPrivate);
+                setSearchPublic(false);
+              }}
+            >
+              Private Snippets only
+            </VSCodeRadio>
 
-        <br />
-        <VSCodeCheckbox
-          type="checkbox"
-          id="checkboxOnlySubscribed"
-          name="onlySubscribed"
-          checked={searchSubscribedOnly}
-          onClick={() => {
-            setSearchSubscribedOnly(!searchSubscribedOnly);
-          }}
-        >
-          Subscribed Snippets Only
-        </VSCodeCheckbox>
-      </form>
+            <VSCodeCheckbox
+              type="checkbox"
+              id="checkboxOnlySubscribed"
+              name="onlySubscribed"
+              checked={searchSubscribedOnly}
+              disabled={props.user === undefined}
+              style={{
+                minWidth: "50%",
+              }}
+              onClick={() => {
+                setSearchSubscribedOnly(!searchSubscribedOnly);
+              }}
+            >
+              Subscribed Snippets Only
+            </VSCodeCheckbox>
+          </div>
+        </>
+      )}
     </div>
   );
 };
