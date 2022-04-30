@@ -1,5 +1,11 @@
 import * as React from "react";
 import { Language, User } from "../graphql-api/types";
+import {
+  VSCodeTextField,
+  VSCodeCheckbox,
+  VSCodeRadio,
+} from "@vscode/webview-ui-toolkit/react";
+
 import { useState } from "react";
 import { useEffect } from "react";
 
@@ -18,6 +24,7 @@ export const Header = (props: HeaderProps) => {
   const [searchSubscribedOnly, setSearchSubscribedOnly] =
     useState<boolean>(false);
   const [term, setTerm] = useState<string>("");
+  const [debounceTimeout, setDebounceTimeout] = useState(null);
 
   const refreshPage = () => {
     console.log(searchPublic);
@@ -38,6 +45,18 @@ export const Header = (props: HeaderProps) => {
     refreshPage();
   }, [searchPublic, searchPrivate, searchSubscribedOnly, term]);
 
+  var lastSearchTerm = "";
+
+  const deBounceTerm = (term: string) => {
+    lastSearchTerm = term;
+    clearTimeout(debounceTimeout);
+    setDebounceTimeout(
+      setTimeout(() => {
+        setTerm(term);
+      }, 1000)
+    );
+  };
+
   return (
     <div className="header">
       <h1>{props.language}</h1>
@@ -53,66 +72,69 @@ export const Header = (props: HeaderProps) => {
           refreshPage();
         }}
       >
-        <input
+        <VSCodeTextField
           type="text"
           id="search"
-          onChange={(e) => {
-            setTerm(e.target.value);
+          onInput={(e) => {
+            console.log("bla");
+            props.setLoading(true);
+            const newTerm = e.target.value;
+            deBounceTerm(newTerm);
           }}
         />
-        <input type="submit" id="submit" />
 
         <br />
-        <input
+        <VSCodeRadio
           type="radio"
           id="snippetsPublicAndPrivate"
           name="snippetsPrivacy"
           checked={searchPublic === false && searchPrivate === false}
-          onChange={() => {
+          onClick={() => {
             setSearchPrivate(false);
             setSearchPublic(false);
           }}
-        />
-        <label htmlFor="snippetsPublicAndPrivate">
+        >
           Show Public And Private Snippets
-        </label>
+        </VSCodeRadio>
         <br />
-        <input
+        <VSCodeRadio
           type="radio"
           id="snippetsPublic"
           name="snippetsPrivacy"
           checked={searchPublic}
-          onChange={() => {
+          onClick={() => {
             setSearchPrivate(false);
             setSearchPublic(!searchPublic);
           }}
-        />
-        <label htmlFor="snippetsPublic">Public Snippets Only</label>
+        >
+          Public Snippets Only
+        </VSCodeRadio>
         <br />
-        <input
+        <VSCodeRadio
           type="radio"
           id="snippetsPrivate"
           name="snippetsPrivacy"
           checked={searchPrivate}
-          onChange={() => {
+          onClick={() => {
             setSearchPrivate(!searchPrivate);
             setSearchPublic(false);
           }}
-        />
-        <label htmlFor="snippetsPrivate">
+        >
           Private Snippets only (created by me and shared with groups)
-        </label>
+        </VSCodeRadio>
+
         <br />
-        <input
+        <VSCodeCheckbox
           type="checkbox"
           id="checkboxOnlySubscribed"
           name="onlySubscribed"
           checked={searchSubscribedOnly}
-          onChange={() => {
+          onClick={() => {
             setSearchSubscribedOnly(!searchSubscribedOnly);
           }}
-        />
-        <label htmlFor="checkboxOnlySubscribed">Subscribed Snippets Only</label>
+        >
+          Subscribed Snippets Only
+        </VSCodeCheckbox>
       </form>
     </div>
   );

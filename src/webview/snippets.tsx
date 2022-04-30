@@ -1,5 +1,11 @@
 import * as React from "react";
 import { useState } from "react";
+import {
+  VSCodeButton,
+  VSCodeProgressRing,
+  VSCodeTag,
+  VSCodeLink,
+} from "@vscode/webview-ui-toolkit/react";
 
 import { AssistantRecipe, Language } from "../graphql-api/types";
 
@@ -12,7 +18,17 @@ interface SnippetsProps {
 
 export const Snippets = (props: SnippetsProps) => {
   if (props.loading === true) {
-    return <div>Loading</div>;
+    return (
+      <div
+        style={{
+          padding: "2em",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <VSCodeProgressRing />
+      </div>
+    );
   }
   if (props.snippets.length === 0) {
     return <div>No snippets</div>;
@@ -42,8 +58,8 @@ export const Snippets = (props: SnippetsProps) => {
   const SnippetButton = (props: { snippet: AssistantRecipe }) => {
     const [buttonText, setButtonText] = useState<string>("Preview");
     return (
-      <button
-        style={{ width: "5em" }}
+      <VSCodeButton
+        style={{ minWidth: "10em" }}
         type="button"
         onClick={(e) => {
           e.preventDefault;
@@ -61,7 +77,7 @@ export const Snippets = (props: SnippetsProps) => {
         }}
       >
         {buttonText}
-      </button>
+      </VSCodeButton>
     );
   };
 
@@ -76,16 +92,18 @@ export const Snippets = (props: SnippetsProps) => {
           {snippet.shortcut && <pre>{snippet.shortcut}</pre>}
 
           {snippet.isPublic === true && (
-            <a href={`https://app.codiga.io/hub/recipe/${snippet.id}/view`}>
+            <VSCodeLink
+              href={`https://app.codiga.io/hub/recipe/${snippet.id}/view`}
+            >
               See on Codiga
-            </a>
+            </VSCodeLink>
           )}
           {snippet.isPublic === false && (
-            <a
+            <VSCodeLink
               href={`https://app.codiga.io/assistant/recipe/${snippet.id}/view`}
             >
               See on Codiga
-            </a>
+            </VSCodeLink>
           )}
           <SnippetButton snippet={snippet} />
 

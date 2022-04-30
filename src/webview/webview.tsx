@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Header } from "./header";
 import { Snippets } from "./snippets";
 import { Language, User } from "../graphql-api/types";
+import { VSCodeProgressRing } from "@vscode/webview-ui-toolkit/react";
 
 interface WebviewProps {
   vscodeApi: any;
@@ -14,6 +15,7 @@ export const Webview = (props: WebviewProps) => {
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [user, setUser] = useState<User | undefined>(undefined);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     window.addEventListener("message", (event) => {
@@ -21,6 +23,7 @@ export const Webview = (props: WebviewProps) => {
 
       switch (message.command) {
         case "pageChanged":
+          setInitialLoading(false);
           if (message.languageString === null) {
             setLanguage(Language.Unknown);
             setSearchEnabled(false);
@@ -40,6 +43,20 @@ export const Webview = (props: WebviewProps) => {
       }
     });
   });
+
+  if (initialLoading) {
+    return (
+      <div
+        style={{
+          padding: "2em",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <VSCodeProgressRing />
+      </div>
+    );
+  }
 
   return (
     <div className="container">

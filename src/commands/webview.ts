@@ -62,24 +62,22 @@ export async function showCodigaWebview(
         retainContextWhenHidden: true,
         localResourceRoots: [
           vscode.Uri.file(path.join(context.extensionPath, "src", "webview")),
-          vscode.Uri.file(
-            path.join(context.extensionPath, "src", "webview", "highlightjs")
-          ),
           vscode.Uri.file(path.join(context.extensionPath, "webview")),
         ],
       }
     );
 
+    const faviconUri = vscode.Uri.file(
+      path.join(context.extensionPath, "src", "webview", "favicon.svg")
+    );
+    panel.iconPath = {
+      dark: faviconUri,
+      light: faviconUri,
+    };
+
     const user = await getUser();
 
-    panel.webview.html = getWebviewContent(user, context.extensionPath);
-
-    // Get path to resource on disk
-    // const showdownJsUri = panel.webview.asWebviewUri(
-    //   vscode.Uri.file(
-    //     path.join(context.extensionPath, "src", "webview", "showdown.min.js")
-    //   )
-    // );
+    panel.webview.html = getWebviewContent(context.extensionPath);
 
     // Set up message receicing from the webview
     panel.webview.onDidReceiveMessage(async (message) => {
@@ -213,10 +211,7 @@ export const updateWebview = async (
   }
 };
 
-const getWebviewContent = (
-  user: User | undefined,
-  extensionPath: string
-): string => {
+const getWebviewContent = (extensionPath: string): string => {
   const reactAppPathOnDisk = vscode.Uri.file(
     path.join(extensionPath, "webview", "webview.js")
   );
@@ -227,7 +222,7 @@ const getWebviewContent = (
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Config View</title>
+        <title>Codiga</title>
         <meta http-equiv="Content-Security-Policy"
                     content="default-src 'none';
                              img-src https:;
