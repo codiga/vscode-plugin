@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Header } from "./header";
 import { Snippets } from "./snippets";
 import { Language, User } from "../graphql-api/types";
-import { VSCodeProgressRing } from "@vscode/webview-ui-toolkit/react";
 
 interface WebviewProps {
   vscodeApi: any;
