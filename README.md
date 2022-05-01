@@ -16,11 +16,11 @@ Install the extension and type `.` or `/` in your IDE to list all available snip
 
 ## Find and Reuse Code Snippets
 
-- Get all snippets by using `CTRL` + `ALT` + `S` (`CMD` + `SHIFT` + `S` - `⌘⇧S` on Mac) and reuse them inline
-- Find code like Google using `CTRL` + `ALT` + `C` (`CMD` + `SHIFT` + `C` - `⌘⇧C` on Mac) and search for a snippet
+- Get all snippets with a shortcut by using `CTRL` + `ALT` + `S` (`CMD` + `SHIFT` + `S` - `⌘⇧S` on Mac) and reuse them inline
+- Find snippets using an internal search engine using `CTRL` + `ALT` + `C` (`CMD` + `SHIFT` + `C` - `⌘⇧C` on Mac) and search for a snippet
 - Import a snippet by typing its shortcut (e.g. `react.component` in JavaScript/Typescript or `requests.` in Python)
 
-![Use of recipe in Python](images/use-recipe.gif)
+![Coding Assistant to find snippets](images/vscode-coding-assistant.gif)
 
 ## Create Code Snippets
 

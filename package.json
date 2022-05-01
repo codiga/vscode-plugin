@@ -99,7 +99,7 @@
     ],
     "keybindings": [
       {
-        "command": "codiga.recipeUse",
+        "command": "codiga.showWebview",
         "key": "ctrl+alt+C",
         "mac": "shift+cmd+C"
       },
