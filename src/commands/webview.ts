@@ -88,18 +88,22 @@ export async function showCodigaWebview(
     panel.onDidDispose(() => {
       panel = undefined;
     });
-
-    // update the webview
-    await updateWebview();
-
-    panel.webview.postMessage({
-      command: "user",
-      user: user,
-    });
   }
 }
 
 const handleMessage = async (message: MessageFromWebview): Promise<void> => {
+  if (message.command === "getUser") {
+    const user = await getUser();
+
+    if (panel) {
+      panel.webview.postMessage({
+        command: "user",
+        user: user,
+      });
+    }
+
+    return;
+  }
   if (message.command === "search") {
     const searchTerm = message.term?.length === 0 ? undefined : message.term;
     const onlyPublic = message.onlyPublic;

@@ -13,9 +13,13 @@ interface SnippetsProps {
   snippets: AssistantRecipe[];
   language: Language;
   loading: boolean;
+  initialLoading: boolean;
 }
 
 export const Snippets = (props: SnippetsProps) => {
+  if (props.initialLoading === true) {
+    return <div></div>;
+  }
   if (props.loading === true) {
     return (
       <div
@@ -61,6 +65,10 @@ export const Snippets = (props: SnippetsProps) => {
 
   const snippetBackgroundColor = getSnippetBackgroundColor(vsCodeThemeKind);
   const codeBackgroundColor = getCodeBackgroundColor(vsCodeThemeKind);
+
+  if (props.language === Language.Unknown) {
+    return <div>{`This language is not support by Codiga`}</div>;
+  }
 
   if (props.snippets.length === 0) {
     return <div>No snippets</div>;
@@ -112,7 +120,7 @@ export const Snippets = (props: SnippetsProps) => {
       </VSCodeButton>
     );
   };
-  console.log(snippetBackgroundColor);
+
   return (
     <>
       {props.snippets.map((snippet) => (

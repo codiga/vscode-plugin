@@ -19,24 +19,23 @@ export const Webview = (props: WebviewProps) => {
 
   useEffect(() => {
     window.addEventListener("message", (event) => {
-      console.log("received data");
       const message = event.data;
-      console.log(message.command);
 
       switch (message.command) {
         case "pageChanged":
           setInitialLoading(false);
+          setLoading(false);
           if (message.languageString === null) {
             setLanguage(Language.Unknown);
             setSearchEnabled(false);
             setSnippets([]);
+
             break;
           }
 
           setSnippets(message.snippets);
           setLanguage(message.languageString);
           setSearchEnabled(true);
-          setLoading(false);
           break;
 
         case "user":
@@ -44,21 +43,7 @@ export const Webview = (props: WebviewProps) => {
           break;
       }
     });
-  });
-
-  if (initialLoading) {
-    return (
-      <div
-        style={{
-          padding: "2em",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <VSCodeProgressRing />
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div className="container">
@@ -76,6 +61,7 @@ export const Webview = (props: WebviewProps) => {
         vsCodeApi={props.vscodeApi}
         language={language}
         loading={loading}
+        initialLoading={initialLoading}
       />
     </div>
   );

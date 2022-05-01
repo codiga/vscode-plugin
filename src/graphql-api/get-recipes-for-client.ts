@@ -47,7 +47,6 @@ export async function getRecipesForClient(
   };
 
   const recipes = await doQuery(GET_RECIPES_SEMANTIC, variables);
-  console.log(recipes);
 
   if (!recipes) {
     return [];
