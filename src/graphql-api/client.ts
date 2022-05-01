@@ -46,7 +46,10 @@ function generateHeaders(): Record<string, string> {
  */
 export function doQuery(
   graphqlQuery: string,
-  variables: Record<string, string | undefined | null | number | string[]> = {}
+  variables: Record<
+    string,
+    string | undefined | null | number | boolean | string[]
+  > = {}
 ) {
   const query = client
     .request(graphqlQuery, variables, generateHeaders())

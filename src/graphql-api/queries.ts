@@ -49,12 +49,18 @@ export const GET_RECIPES_SEMANTIC: string = gql`
     $language: LanguageEnumeration!
     $howmany: Long!
     $skip: Long!
+    $onlyPublic: Boolean
+    $onlyPrivate: Boolean
+    $onlySubscribed: Boolean
   ) {
     assistantRecipesSemanticSearch(
       term: $term
       languages: [$language]
       howmany: $howmany
       skip: $skip
+      onlyPublic: $onlyPublic
+      onlyPrivate: $onlyPrivate
+      onlySubscribed: $onlySubscribed
     ) {
       id
       name
@@ -69,6 +75,14 @@ export const GET_RECIPES_SEMANTIC: string = gql`
       creationTimestampMs
       vscodeFormat
       presentableFormat
+      owner {
+        username
+        accountType
+      }
+      groups {
+        id
+        name
+      }
     }
   }
 `;

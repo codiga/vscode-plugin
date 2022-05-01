@@ -90,6 +90,11 @@
         "category": "Codiga",
         "command": "codiga.removeRecentlyUsedRecipes",
         "title": "Remove recently saved recipes"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.showWebview",
+        "title": "Codiga Assistant"
       }
     ],
     "keybindings": [
@@ -106,8 +111,12 @@
     ]
   },
   "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "compile": "npm-run-all compile:*",
+    "compile:extension": "tsc -p ./",
+    "compile:webview": "webpack --mode development",
+    "watch:extension": "tsc -watch -p ./",
+    "watch:webview": "webpack --watch --mode development",
+    "watch": "npm-run-all -p watch:*",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "lint-fix": "eslint src --ext ts --fix",
@@ -123,6 +132,8 @@
     "@types/glob": "^7.2.0",
     "@types/mocha": "^8.2.3",
     "@types/node": "^14.18.12",
+    "@types/react": "^18.0.8",
+    "@types/react-dom": "^18.0.0",
     "@types/vscode": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
@@ -132,12 +143,18 @@
     "glob": "^7.2.0",
     "mocha": "^9.2.1",
     "sinon": "^12.0.1",
+    "ts-loader": "^9.2.9",
     "typescript": "^4.5.5",
-    "vsce": "^2.6.7"
+    "vsce": "^2.6.7",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   },
   "dependencies": {
     "@types/sinon": "^10.0.11",
+    "@vscode/webview-ui-toolkit": "^1.0.0",
     "graphql": "^15.8.0",
-    "graphql-request": "^3.7.0"
+    "graphql-request": "^3.7.0",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
   }
 }

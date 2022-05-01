@@ -14,6 +14,7 @@ jobs:
       with:
         node-version: 10.x
     - run: npm install
+    - run: npm install -g npm-run-all
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'
     - run: npm test

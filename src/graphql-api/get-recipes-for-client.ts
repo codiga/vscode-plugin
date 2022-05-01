@@ -21,14 +21,17 @@ export async function getRecipesForClient(
   term: string | undefined,
   filename: string | undefined,
   language: Language,
-  dependencies: string[]
+  dependencies: string[],
+  onlyPublic: boolean | undefined = undefined,
+  onlyPrivate: boolean | undefined = undefined,
+  onlySubscribed: boolean | undefined = undefined
 ): Promise<AssistantRecipe[]> {
   // Get the fingerprint from localstorage to initiate the request
   const userFingerprint = getUserFingerprint();
 
   const variables: Record<
     string,
-    string | undefined | number | null | string[]
+    string | undefined | number | null | string[] | boolean
   > = {
     language: language,
     term: term,
@@ -38,6 +41,9 @@ export async function getRecipesForClient(
     filename: filename,
     fingerprint: userFingerprint,
     parameters: null,
+    onlyPublic: onlyPublic,
+    onlyPrivate: onlyPrivate,
+    onlySubscribed: onlySubscribed,
   };
 
   const recipes = await doQuery(GET_RECIPES_SEMANTIC, variables);

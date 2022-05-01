@@ -14,7 +14,11 @@ import {
   VSCODE_DOCUMENTATION_URL,
 } from "./constants";
 import { testApi } from "./commands/test-api";
-import { getFromLocalStorage, initializeLocalStorage, setToLocalStorage } from "./utils/localStorage";
+import {
+  getFromLocalStorage,
+  initializeLocalStorage,
+  setToLocalStorage,
+} from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
@@ -29,6 +33,11 @@ import {
   fetchShortcuts,
 } from "./graphql-api/shortcut-cache";
 import { removeRecentlyUsedRecipes } from "./commands/remove-recently-used-recipes";
+import {
+  recordLastEditor,
+  showCodigaWebview,
+  updateWebview,
+} from "./commands/webview";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -79,6 +88,10 @@ export async function activate(context: vscode.ExtensionContext) {
    */
   vscode.commands.registerCommand("codiga.removeRecentlyUsedRecipes", () => {
     removeRecentlyUsedRecipes();
+  });
+
+  vscode.commands.registerCommand("codiga.showWebview", () => {
+    showCodigaWebview(context);
   });
 
   /**
@@ -177,11 +190,25 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   /**
+   * Whenever we open a new document, we refresh the webview
+   */
+  recordLastEditor();
+  vscode.workspace.onDidOpenTextDocument(async () => {
+    try {
+      recordLastEditor();
+      await updateWebview();
+    } catch (e) {
+      console.debug("Error when trying to refresh the webview");
+      console.debug(e);
+    }
+  });
+
+  /**
    * Open the VSCode integration documentation only once after user installs it
    * If there is a flag in the local storage it means the user was already redirected
    * to the VSCode documentation
    */
-  if(!getFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY)){
+  if (!getFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY)) {
     setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
     vscode.env.openExternal(vscode.Uri.parse(VSCODE_DOCUMENTATION_URL));
   }
