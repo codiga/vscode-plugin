@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 
 import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
-import { AssistantRecipe, Language, User } from "../graphql-api/types";
+import { AssistantRecipe, Language } from "../graphql-api/types";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
@@ -44,15 +44,9 @@ export const recordLastEditor = (): void => {
 export async function showCodigaWebview(
   context: vscode.ExtensionContext
 ): Promise<void> {
-  const columnToShowIn = vscode.window.activeTextEditor
-    ? vscode.window.activeTextEditor.viewColumn
-    : undefined;
-
   if (panel) {
     panel.reveal(vscode.ViewColumn.Beside);
   } else {
-    const currentUser = await getUser();
-
     panel = vscode.window.createWebviewPanel(
       "codiga",
       "Codiga",
@@ -74,8 +68,6 @@ export async function showCodigaWebview(
       dark: faviconUri,
       light: faviconUri,
     };
-
-    const user = await getUser();
 
     panel.webview.html = getWebviewContent(context.extensionPath);
 
