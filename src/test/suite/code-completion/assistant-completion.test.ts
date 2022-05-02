@@ -58,9 +58,10 @@ suite("assistant-completion.ts test", () => {
       .withArgs("java.", "assistant-completion.java", Language.Java, []);
 
   // this will prevent to redirect to the browse for documentation on plugin activation
-  const localStorageStub: () => sinon.SinonStub = () => sandbox
-    .stub(localStorage, "getFromLocalStorage")
-    .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
+  const localStorageStub: () => sinon.SinonStub = () =>
+    sandbox
+      .stub(localStorage, "getFromLocalStorage")
+      .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
 
   let usedRecipeMock: sinon.SinonExpectation;
 
@@ -103,6 +104,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -127,6 +129,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -150,6 +153,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -178,6 +182,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -201,6 +206,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "requests.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -230,6 +236,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -255,6 +262,8 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
