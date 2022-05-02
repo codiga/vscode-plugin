@@ -35,7 +35,7 @@ import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
 suite("assistant-completion.ts test", () => {
-  const uri = testDataUri("assistant-completion.rs");
+  const rustUri = testDataUri("assistant-completion.rs");
   const pythonUri = testDataUri("assistant-completion.py");
   const javaUri = testDataUri("assistant-completion.java");
 
@@ -45,13 +45,18 @@ suite("assistant-completion.ts test", () => {
   const getRustRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
-      .withArgs(sinon.match.any, "assistant-completion.rs", Language.Rust, []);
+      .withArgs(
+        sinon.match.in(["spawn.", undefined]),
+        "assistant-completion.rs",
+        Language.Rust,
+        []
+      );
 
   const getPythonRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs(
-        sinon.match.any,
+        sinon.match.in(["requests.", undefined]),
         "assistant-completion.py",
         Language.Python,
         []
@@ -61,7 +66,7 @@ suite("assistant-completion.ts test", () => {
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
       .withArgs(
-        sinon.match.any,
+        sinon.match.in(["java.", undefined]),
         "assistant-completion.java",
         Language.Java,
         []
@@ -86,7 +91,7 @@ suite("assistant-completion.ts test", () => {
   // stub and mock two api calls required for this test suite
   setup(async () => {
     // always start with a freezed config
-    originalConfig = await updateConfig(uri, configDefaults);
+    originalConfig = await updateConfig(rustUri, configDefaults);
 
     // define the stub and mock
     usedRecipeMock = sandbox
@@ -99,7 +104,7 @@ suite("assistant-completion.ts test", () => {
   // this is executed after each test finishes
   teardown(async () => {
     // things get messy really quick, do not remove this step
-    await updateConfig(uri, originalConfig);
+    await updateConfig(rustUri, originalConfig);
     sandbox.restore();
   });
 
@@ -107,7 +112,7 @@ suite("assistant-completion.ts test", () => {
     getRustRecipeStub().returns(mockRecipe(recipeForUser));
     localStorageStub().returns("true");
 
-    const document = await vscode.workspace.openTextDocument(uri);
+    const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
@@ -127,13 +132,13 @@ suite("assistant-completion.ts test", () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
-    await updateConfig(uri, {
+    const document = await vscode.workspace.openTextDocument(rustUri);
+    const editor = await vscode.window.showTextDocument(document);
+
+    await updateConfig(rustUri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: true,
     });
-
-    const document = await vscode.workspace.openTextDocument(uri);
-    const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
     insertText(editor, "spawn.");
@@ -156,7 +161,7 @@ suite("assistant-completion.ts test", () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
-    const document = await vscode.workspace.openTextDocument(uri);
+    const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
 
@@ -180,14 +185,14 @@ suite("assistant-completion.ts test", () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
-    await updateConfig(uri, {
+    const document = await vscode.workspace.openTextDocument(rustUri);
+    const editor = await vscode.window.showTextDocument(document);
+    await wait(500);
+
+    await updateConfig(rustUri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: false,
     });
-
-    const document = await vscode.workspace.openTextDocument(uri);
-    const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
 
     insertText(editor, "spawn.");
     await autoComplete();

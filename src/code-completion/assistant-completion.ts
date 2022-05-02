@@ -40,13 +40,15 @@ const getRecipes = async (
   dependencies: string[]
 ): Promise<AssistantRecipe[]> => {
   const recipesFromCache = getShortcutCache(filename, language, dependencies);
-
+  console.log("term");
+  console.log(term);
   /**
    * If we find recipes from the cache, get them and filter
    * using the one that start with the given term.
    * Otherwise, we fetch using the API.
    */
   if (recipesFromCache) {
+    console.log("hit from cache");
     return recipesFromCache.filter((r) => {
       if (term) {
         return r.shortcut && r.shortcut.startsWith(term.toLowerCase());
@@ -55,6 +57,7 @@ const getRecipes = async (
       }
     });
   } else {
+    console.log("hit from api");
     return await getRecipesForClientByShorcut(
       term,
       filename,
@@ -86,6 +89,9 @@ export async function providesCodeCompletion(
   const relativePath = vscode.workspace.asRelativePath(path);
   const language: Language = getLanguageForDocument(document);
   let recipes: AssistantRecipe[] = [];
+  console.log(language);
+  console.log(relativePath);
+  console.log(dependencies);
 
   if (!rawTerm) {
     console.log("No search term");
@@ -118,7 +124,11 @@ export async function providesCodeCompletion(
   }
 
   console.log("recipes");
-  console.log(recipes.length);
+  if (recipes) {
+    console.log(recipes.length);
+  } else {
+    console.log("No recipes");
+  }
 
   const hasStartingSlash = rawTerm.startsWith("/");
   const hasStartingDot = rawTerm.startsWith(".");
