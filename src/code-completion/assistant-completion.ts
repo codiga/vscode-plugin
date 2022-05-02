@@ -102,7 +102,6 @@ export async function providesCodeCompletion(
    * If we should skip suggestions, just return and suggest nothing.
    */
   if (shouldSkipSuggestions(lineText, rawTerm, language)) {
-    console.log("Should skip suggestions");
     return undefined;
   }
 
