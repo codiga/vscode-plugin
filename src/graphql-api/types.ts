@@ -1,3 +1,15 @@
+export interface AssistantRecipeOwner {
+  id: number;
+  username: string;
+  accountType: string;
+}
+
+export interface AssistantRecipeGroup {
+  id: number;
+  name: string;
+  type: string;
+}
+
 export interface AssistantRecipe {
   id: number;
   name: string;
@@ -8,10 +20,14 @@ export interface AssistantRecipe {
   keywords: string[];
   tags: string[];
   code: string;
+  upvotes: number;
+  downvotes: number;
   imports: string[];
   shortcut: string;
   vscodeFormat: string;
   presentableFormat: string;
+  owner: AssistantRecipeOwner;
+  groups: AssistantRecipeGroup[];
 }
 export interface User {
   id: number;

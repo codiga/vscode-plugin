@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { AssistantRecipe } from "../../graphql-api/types";
+import { AssistantRecipe, AssistantRecipeOwner } from "../../graphql-api/types";
 import { decodeIndent } from "../../utils/indentationUtils";
 import os = require("os");
 export const testDataFolderCodeCompletion = "/code-completion/testdata/";
@@ -113,6 +113,14 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           shortcut: "spawn.thr",
           vscodeFormat: code,
           presentableFormat: code,
+          upvotes: 10,
+          downvotes: 3,
+          owner: {
+            id: 42,
+            username: "foobar",
+            accountType: "GitHub",
+          },
+          groups: [],
         },
       ]);
     } else {
@@ -139,6 +147,14 @@ export function mockRecipePython(code: string): Promise<AssistantRecipe[]> {
           shortcut: "requests.get",
           vscodeFormat: code,
           presentableFormat: code,
+          upvotes: 10,
+          downvotes: 3,
+          owner: {
+            id: 42,
+            username: "foobar",
+            accountType: "GitHub",
+          },
+          groups: [],
         },
       ]);
     } else {
@@ -161,10 +177,23 @@ export function mockRecipeJava(code: string): Promise<AssistantRecipe[]> {
           keywords: ["awt"],
           tags: [],
           code: code,
-          imports: ["import java.awt.*;", "import java.io.IOException;", "import java.net.URI;", "import java.net.URISyntaxException;"],
+          imports: [
+            "import java.awt.*;",
+            "import java.io.IOException;",
+            "import java.net.URI;",
+            "import java.net.URISyntaxException;",
+          ],
           shortcut: "java.awt",
           vscodeFormat: code,
           presentableFormat: code,
+          upvotes: 10,
+          downvotes: 3,
+          owner: {
+            id: 42,
+            username: "foobar",
+            accountType: "GitHub",
+          },
+          groups: [],
         },
       ]);
     } else {

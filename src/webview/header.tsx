@@ -138,7 +138,6 @@ export const Header = (props: HeaderProps) => {
             }}
           >
             <VSCodeRadio
-              type="radio"
               id="snippetsPublicAndPrivate"
               name="snippetsPrivacy"
               disabled={props.language === Language.Unknown}
@@ -151,10 +150,9 @@ export const Header = (props: HeaderProps) => {
                 setSearchPublic(false);
               }}
             >
-              Public + Private Snippets
+              All Snippets
             </VSCodeRadio>
             <VSCodeRadio
-              type="radio"
               id="snippetsPublic"
               name="snippetsPrivacy"
               checked={searchPublic}
@@ -196,7 +194,7 @@ export const Header = (props: HeaderProps) => {
                 setSearchPublic(false);
               }}
             >
-              Private Snippets only
+              Private Snippets Only
             </VSCodeRadio>
 
             <VSCodeCheckbox
@@ -214,7 +212,7 @@ export const Header = (props: HeaderProps) => {
                 setSearchSubscribedOnly(!searchSubscribedOnly);
               }}
             >
-              Subscribed Snippets Only
+              Favorite Snippets Only
             </VSCodeCheckbox>
           </div>
         </>

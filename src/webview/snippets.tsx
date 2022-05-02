@@ -67,7 +67,9 @@ export const Snippets = (props: SnippetsProps) => {
   const codeBackgroundColor = getCodeBackgroundColor(vsCodeThemeKind);
 
   if (props.language === Language.Unknown) {
-    return <div>{`This language is not support by Codiga`}</div>;
+    return (
+      <div>{`This language is not support by Codiga. Select a window with a supported language.`}</div>
+    );
   }
 
   if (props.snippets.length === 0) {
@@ -153,6 +155,40 @@ export const Snippets = (props: SnippetsProps) => {
               gap: "1em 1em",
             }}
           >
+            {snippet.owner && snippet.owner.username && (
+              <p
+                style={{
+                  fontSize: "0.9em",
+                  fontWeight: "bold",
+                }}
+              >
+                Owner:{" "}
+                <a
+                  href={`https://app.codiga.io/hub/user/${snippet.owner.accountType.toLowerCase()}/${
+                    snippet.owner.username
+                  }`}
+                >
+                  {snippet.owner.username}
+                </a>
+              </p>
+            )}
+            {snippet.groups && snippet.groups.length > 0 && (
+              <p
+                style={{
+                  fontSize: "0.9em",
+                  fontWeight: "bold",
+                }}
+              >
+                Groups:{" "}
+                {snippet.groups.map((group) => (
+                  <a
+                    href={`https://app.codiga.io/assistant/group-sharing/recipes?group=${group.name}`}
+                  >
+                    {group.name}
+                  </a>
+                ))}
+              </p>
+            )}
             {snippet.isPublic === true && (
               <p
                 style={{
@@ -178,6 +214,7 @@ export const Snippets = (props: SnippetsProps) => {
                 style={{
                   display: "flex",
                   flexDirection: "row",
+                  marginLeft: "auto",
                 }}
               >
                 <p
