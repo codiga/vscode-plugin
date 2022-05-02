@@ -62,7 +62,7 @@ export async function showCodigaWebview(
     );
 
     const faviconUri = vscode.Uri.file(
-      path.join(context.extensionPath, "src", "webview", "favicon.svg")
+      path.join(context.extensionPath, "images", "favicon.svg")
     );
     panel.iconPath = {
       dark: faviconUri,

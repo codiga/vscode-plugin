@@ -67,7 +67,9 @@ export const Snippets = (props: SnippetsProps) => {
   const codeBackgroundColor = getCodeBackgroundColor(vsCodeThemeKind);
 
   if (props.language === Language.Unknown) {
-    return <div>{`This language is not support by Codiga`}</div>;
+    return (
+      <div>{`This language is not support by Codiga. Select a window with a supported language.`}</div>
+    );
   }
 
   if (props.snippets.length === 0) {
@@ -212,6 +214,7 @@ export const Snippets = (props: SnippetsProps) => {
                 style={{
                   display: "flex",
                   flexDirection: "row",
+                  marginLeft: "auto",
                 }}
               >
                 <p
