@@ -1,10 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { remark } from "remark";
-import html from "remark-html";
-import ReactDom from "react-dom";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 import {
   VSCodeButton,
   VSCodeProgressRing,
