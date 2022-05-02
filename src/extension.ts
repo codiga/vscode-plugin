@@ -108,6 +108,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
+    console.log(`register suggestion for ${lang}`);
     const codeCompletionProvider =
       vscode.languages.registerCompletionItemProvider(
         lang,

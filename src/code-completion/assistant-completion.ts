@@ -72,9 +72,11 @@ export async function providesCodeCompletion(
   // and if so then complete if `log`, `warn`, and `error`
   const line = document.lineAt(position);
   const lineText = line.text;
+  console.log("suggestion triggered");
 
   const currentCharacter = lineText.charAt(position.character - 1);
   if (currentCharacter !== "." && currentCharacter !== "/") {
+    console.log("Not a valid completion");
     return undefined;
   }
 
@@ -86,6 +88,7 @@ export async function providesCodeCompletion(
   let recipes: AssistantRecipe[] = [];
 
   if (!rawTerm) {
+    console.log("No search term");
     return undefined;
   }
 
@@ -93,6 +96,7 @@ export async function providesCodeCompletion(
    * If we should skip suggestions, just return and suggest nothing.
    */
   if (shouldSkipSuggestions(lineText, rawTerm, language)) {
+    console.log("Should skip suggestions");
     return undefined;
   }
 
@@ -114,7 +118,7 @@ export async function providesCodeCompletion(
   }
 
   console.log("recipes");
-  console.log(recipes);
+  console.log(recipes.length);
 
   const hasStartingSlash = rawTerm.startsWith("/");
   const hasStartingDot = rawTerm.startsWith(".");

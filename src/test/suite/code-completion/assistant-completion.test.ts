@@ -45,17 +45,27 @@ suite("assistant-completion.ts test", () => {
   const getRustRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
-      .withArgs("spawn.", "assistant-completion.rs", Language.Rust, []);
+      .withArgs(sinon.match.any, "assistant-completion.rs", Language.Rust, []);
 
   const getPythonRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
-      .withArgs("requests.", "assistant-completion.py", Language.Python, []);
+      .withArgs(
+        sinon.match.any,
+        "assistant-completion.py",
+        Language.Python,
+        []
+      );
 
   const getJavaRecipeStub: () => sinon.SinonStub = () =>
     sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
-      .withArgs("java.", "assistant-completion.java", Language.Java, []);
+      .withArgs(
+        sinon.match.any,
+        "assistant-completion.java",
+        Language.Java,
+        []
+      );
 
   // this will prevent to redirect to the browse for documentation on plugin activation
   const localStorageStub: () => sinon.SinonStub = () =>
@@ -104,6 +114,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -128,6 +139,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -151,6 +163,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -179,6 +192,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -202,6 +216,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "requests.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -231,6 +246,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -256,6 +272,7 @@ suite("assistant-completion.ts test", () => {
     insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
+    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
