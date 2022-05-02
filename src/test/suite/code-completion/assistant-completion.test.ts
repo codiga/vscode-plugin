@@ -86,7 +86,6 @@ suite("assistant-completion.ts test", () => {
     [Config.tabSize]: 2,
     [Config.insertSpaces]: true,
   });
-  let originalConfig: { [key: string]: unknown } = {};
 
   // stub and mock two api calls required for this test suite
   setup(async () => {
@@ -109,14 +108,13 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test insert suggestion from completion widget works", async () => {
-    const originalConfig = await updateConfig(rustUri, configDefaults);
-
     getRustRecipeStub().returns(mockRecipe(recipeForUser));
     localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
+    const originalConfig = await updateConfig(rustUri, configDefaults);
 
     insertText(editor, "spawn.");
     await autoComplete();
@@ -132,13 +130,12 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test recipe indentation in recipe insertion with four indentation spaces", async () => {
-    const originalConfig = await updateConfig(rustUri, configDefaults);
-
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
+    const originalConfig = await updateConfig(rustUri, configDefaults);
 
     await updateConfig(rustUri, {
       [Config.tabSize]: 4,
@@ -164,14 +161,13 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test recipe indentation in recipe insertion with two indentation spaces", async () => {
-    const originalConfig = await updateConfig(rustUri, configDefaults);
-
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
+    const originalConfig = await updateConfig(rustUri, configDefaults);
 
     insertText(editor, "spawn.");
     await autoComplete();
@@ -191,14 +187,13 @@ suite("assistant-completion.ts test", () => {
   });
 
   test("test recipe indentation in recipe insertion tab indentation", async () => {
-    const originalConfig = await updateConfig(rustUri, configDefaults);
-
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
+    const originalConfig = await updateConfig(rustUri, configDefaults);
 
     await updateConfig(rustUri, {
       [Config.tabSize]: 4,
@@ -228,6 +223,8 @@ suite("assistant-completion.ts test", () => {
     const document = await vscode.workspace.openTextDocument(pythonUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
+    const originalConfig = await updateConfig(pythonUri, configDefaults);
+
     insertText(editor, "# First\n# Second\n");
     await wait(500);
     insertText(editor, "requests.");
@@ -246,6 +243,7 @@ suite("assistant-completion.ts test", () => {
       new vscode.SnippetString(documentPythonRecipeImportsAfterCommentsExpected)
         .value
     );
+    await updateConfig(pythonUri, originalConfig);
   });
 
   test("test imports are added after first comments and package in Java", async () => {
@@ -255,6 +253,7 @@ suite("assistant-completion.ts test", () => {
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
+    const originalConfig = await updateConfig(pythonUri, configDefaults);
     insertText(
       editor,
       `/*\n* Comment example\n*/\n\n// comment 2\n\npackage number;\n`
@@ -275,6 +274,7 @@ suite("assistant-completion.ts test", () => {
       new vscode.SnippetString(documentJavaRecipeImportsAfterPackageExpected)
         .value
     );
+    await updateConfig(pythonUri, originalConfig);
   });
 
   test("test imports are added after first comments and before next comment in Java", async () => {
@@ -284,6 +284,8 @@ suite("assistant-completion.ts test", () => {
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
+    const originalConfig = await updateConfig(javaUri, configDefaults);
+
     insertText(editor, `/*\n* Comment example\n*/\n\n// comment 2\n`);
     await wait(500);
     insertText(editor, "java.");
@@ -301,5 +303,6 @@ suite("assistant-completion.ts test", () => {
       new vscode.SnippetString(documentJavaRecipeImportsBetweenCommentsExpected)
         .value
     );
+    await updateConfig(javaUri, originalConfig);
   });
 });
