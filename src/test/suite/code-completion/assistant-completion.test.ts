@@ -91,7 +91,7 @@ suite("assistant-completion.ts test", () => {
   // stub and mock two api calls required for this test suite
   setup(async () => {
     // always start with a freezed config
-    originalConfig = await updateConfig(rustUri, configDefaults);
+    // originalConfig = await updateConfig(rustUri, configDefaults);
 
     // define the stub and mock
     usedRecipeMock = sandbox
@@ -104,11 +104,13 @@ suite("assistant-completion.ts test", () => {
   // this is executed after each test finishes
   teardown(async () => {
     // things get messy really quick, do not remove this step
-    await updateConfig(rustUri, originalConfig);
+    // await updateConfig(rustUri, originalConfig);
     sandbox.restore();
   });
 
   test("test insert suggestion from completion widget works", async () => {
+    const originalConfig = await updateConfig(rustUri, configDefaults);
+
     getRustRecipeStub().returns(mockRecipe(recipeForUser));
     localStorageStub().returns("true");
 
@@ -126,9 +128,12 @@ suite("assistant-completion.ts test", () => {
 
     assert.ok(usedRecipeMock.verify());
     assert.strictEqual(documentTransformed, documentRecipeExpected);
+    await updateConfig(rustUri, originalConfig);
   });
 
   test("test recipe indentation in recipe insertion with four indentation spaces", async () => {
+    const originalConfig = await updateConfig(rustUri, configDefaults);
+
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
@@ -155,9 +160,12 @@ suite("assistant-completion.ts test", () => {
         new vscode.SnippetString(documentRecipeIndentExpectedWithFourSpaces)
           .value
     );
+    await updateConfig(rustUri, originalConfig);
   });
 
   test("test recipe indentation in recipe insertion with two indentation spaces", async () => {
+    const originalConfig = await updateConfig(rustUri, configDefaults);
+
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
@@ -179,9 +187,12 @@ suite("assistant-completion.ts test", () => {
         new vscode.SnippetString(documentRecipeIndentExpectedWithTwoSpaces)
           .value
     );
+    await updateConfig(rustUri, originalConfig);
   });
 
   test("test recipe indentation in recipe insertion tab indentation", async () => {
+    const originalConfig = await updateConfig(rustUri, configDefaults);
+
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
@@ -207,6 +218,7 @@ suite("assistant-completion.ts test", () => {
       documentTransformed ===
         new vscode.SnippetString(documentRecipeIndentExpectedWithTabs).value
     );
+    await updateConfig(rustUri, originalConfig);
   });
 
   test("test imports are added after first comments in Python", async () => {
