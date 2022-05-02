@@ -217,7 +217,10 @@ export function insertText(editor: vscode.TextEditor, code: string) {
 }
 
 export async function autoComplete() {
-  await vscode.commands.executeCommand("editor.action.triggerSuggest");
+  const suggestions = await vscode.commands.executeCommand(
+    "editor.action.triggerSuggest"
+  );
+  console.log(suggestions);
   await wait(500);
   await vscode.commands.executeCommand("acceptSelectedSuggestion");
   await wait(500);
