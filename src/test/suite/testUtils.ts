@@ -220,7 +220,6 @@ export async function autoComplete() {
   const suggestions = await vscode.commands.executeCommand(
     "editor.action.triggerSuggest"
   );
-  console.log(suggestions);
   await wait(500);
   await vscode.commands.executeCommand("acceptSelectedSuggestion");
   await wait(500);
