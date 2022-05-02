@@ -152,11 +152,13 @@ suite("assistant-completion.ts test", () => {
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
-    assert.ok(
-      documentTransformed ===
-        new vscode.SnippetString(documentRecipeIndentExpectedWithFourSpaces)
-          .value
-    );
+    const expectedValue = new vscode.SnippetString(
+      documentRecipeIndentExpectedWithFourSpaces
+    ).value;
+    console.log(documentTransformed);
+
+    console.log(expectedValue);
+    assert.ok(documentTransformed === expectedValue);
     await updateConfig(rustUri, originalConfig);
   });
 
@@ -178,11 +180,13 @@ suite("assistant-completion.ts test", () => {
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
-    assert.ok(
-      documentTransformed ===
-        new vscode.SnippetString(documentRecipeIndentExpectedWithTwoSpaces)
-          .value
-    );
+    const expectedValue = new vscode.SnippetString(
+      documentRecipeIndentExpectedWithTwoSpaces
+    ).value;
+    console.log(documentTransformed);
+
+    console.log(expectedValue);
+    assert.ok(documentTransformed === expectedValue);
     await updateConfig(rustUri, originalConfig);
   });
 
