@@ -39,6 +39,18 @@ export const GET_RECIPES: string = gql`
       creationTimestampMs
       vscodeFormat
       presentableFormat
+      downvotes
+      upvotes
+      owner {
+        id
+        username
+        accountType
+      }
+      groups {
+        id
+        name
+        type
+      }
     }
   }
 `;
@@ -75,6 +87,8 @@ export const GET_RECIPES_SEMANTIC: string = gql`
       creationTimestampMs
       vscodeFormat
       presentableFormat
+      downvotes
+      upvotes
       owner {
         username
         accountType
@@ -117,6 +131,18 @@ export const GET_RECIPES_BY_SHORTCUT: string = gql`
       creationTimestampMs
       vscodeFormat
       presentableFormat
+      downvotes
+      upvotes
+      owner {
+        id
+        username
+        accountType
+      }
+      groups {
+        id
+        name
+        type
+      }
     }
   }
 `;

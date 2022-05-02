@@ -153,6 +153,40 @@ export const Snippets = (props: SnippetsProps) => {
               gap: "1em 1em",
             }}
           >
+            {snippet.owner && snippet.owner.username && (
+              <p
+                style={{
+                  fontSize: "0.9em",
+                  fontWeight: "bold",
+                }}
+              >
+                Owner:{" "}
+                <a
+                  href={`https://app.codiga.io/hub/user/${snippet.owner.accountType.toLowerCase()}/${
+                    snippet.owner.username
+                  }`}
+                >
+                  {snippet.owner.username}
+                </a>
+              </p>
+            )}
+            {snippet.groups && snippet.groups.length > 0 && (
+              <p
+                style={{
+                  fontSize: "0.9em",
+                  fontWeight: "bold",
+                }}
+              >
+                Groups:{" "}
+                {snippet.groups.map((group) => (
+                  <a
+                    href={`https://app.codiga.io/assistant/group-sharing/recipes?group=${group.name}`}
+                  >
+                    {group.name}
+                  </a>
+                ))}
+              </p>
+            )}
             {snippet.isPublic === true && (
               <p
                 style={{
