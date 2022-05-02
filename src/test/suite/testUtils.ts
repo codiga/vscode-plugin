@@ -208,9 +208,9 @@ export async function closeFile() {
 }
 
 // we don't use SnippetInsert, no need to use it
-export function insertText(editor: vscode.TextEditor, code: string) {
+export async function insertText(editor: vscode.TextEditor, code: string) {
   if (editor) {
-    editor.edit((editBuilder) => {
+    await editor.edit((editBuilder) => {
       editBuilder.insert(editor.selection.active, code);
     });
   }
