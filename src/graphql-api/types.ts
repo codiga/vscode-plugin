@@ -26,7 +26,7 @@ export interface AssistantRecipe {
   shortcut: string;
   vscodeFormat: string;
   presentableFormat: string;
-  owner: AssistantRecipeOwner | undefined;
+  owner: AssistantRecipeOwner;
   groups: AssistantRecipeGroup[];
 }
 export interface User {
