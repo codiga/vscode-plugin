@@ -155,6 +155,9 @@
     "graphql": "^15.8.0",
     "graphql-request": "^3.7.0",
     "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react-dom": "^16.14.0",
+    "react-markdown": "^8.0.3",
+    "remark": "^14.0.2",
+    "remark-html": "^15.0.1"
   }
 }

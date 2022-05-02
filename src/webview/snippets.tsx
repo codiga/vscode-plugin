@@ -1,5 +1,10 @@
 import * as React from "react";
 import { useState } from "react";
+import { remark } from "remark";
+import html from "remark-html";
+import ReactDom from "react-dom";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import {
   VSCodeButton,
   VSCodeProgressRing,
@@ -244,10 +249,23 @@ export const Snippets = (props: SnippetsProps) => {
               paddingBottom: "0.5em",
               paddingLeft: "1em",
               paddingRight: "1em",
+              overflow: "auto",
             }}
           >
             <code>{atob(snippet.presentableFormat)}</code>
           </pre>
+
+          <div>
+            <ReactMarkdown
+              components={{
+                h1: "h3",
+                h2: "h4",
+                h3: "h5",
+                h4: "h6",
+              }}
+              children={snippet.description}
+            />
+          </div>
           <div
             style={{
               textAlign: "right",

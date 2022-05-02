@@ -122,6 +122,7 @@ export const Header = (props: HeaderProps) => {
               style={{
                 width: "100%",
               }}
+              placeholder="Search for snippets"
               disabled={props.language === Language.Unknown}
               onInput={(e) => {
                 props.setLoading(true);
