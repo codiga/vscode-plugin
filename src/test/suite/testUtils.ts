@@ -208,9 +208,9 @@ export async function closeFile() {
 }
 
 // we don't use SnippetInsert, no need to use it
-export function insertText(editor: vscode.TextEditor, code: string) {
+export async function insertText(editor: vscode.TextEditor, code: string) {
   if (editor) {
-    editor.edit((editBuilder) => {
+    await editor.edit((editBuilder) => {
       editBuilder.insert(editor.selection.active, code);
     });
   }
@@ -226,6 +226,7 @@ export async function autoComplete() {
 export const Config = Object.freeze({
   tabSize: "editor.tabSize",
   insertSpaces: "editor.insertSpaces",
+  detectIdentation: "editor.detectIndentation",
 } as const);
 
 // helper function to manage configuration state, DO NOT try to set/update
@@ -236,18 +237,14 @@ export async function updateConfig(
   newConfig: VsCodeConfiguration
 ): Promise<VsCodeConfiguration> {
   const oldConfig: VsCodeConfiguration = {};
-  const config = vscode.workspace.getConfiguration(undefined, documentUri);
+  const config = vscode.workspace.getConfiguration();
 
   for (const configKey of Object.keys(newConfig)) {
     oldConfig[configKey] = config.get(configKey);
-    await new Promise<void>((resolve, reject) =>
-      config
-        .update(
-          configKey,
-          newConfig[configKey],
-          vscode.ConfigurationTarget.Global
-        )
-        .then(() => resolve(), reject)
+    await config.update(
+      configKey,
+      newConfig[configKey],
+      vscode.ConfigurationTarget.Global
     );
   }
   return oldConfig;

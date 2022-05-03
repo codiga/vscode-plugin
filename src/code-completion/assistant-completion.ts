@@ -19,9 +19,7 @@ import {
 } from "../utils/textUtils";
 import { getShortcutCache } from "../graphql-api/shortcut-cache";
 import { filterImports } from "../utils/dependencies/filter-dependencies";
-import {
-  getFromLocalStorage,
-} from "../utils/localStorage";
+import { getFromLocalStorage } from "../utils/localStorage";
 import { generateKeyForUsedRecipe } from "../utils/snippetUtils";
 
 /**
@@ -182,7 +180,7 @@ export async function providesCodeCompletion(
      * Register this recipe as used
      */
     snippetCompletion.command = {
-      arguments: [r.id, language,  r.shortcut],
+      arguments: [r.id, language, r.shortcut],
       command: "codiga.registerUsage",
       title: "Codiga Register Usage",
     };
@@ -207,7 +205,6 @@ export async function providesCodeCompletion(
 
     snippetCompletion.insertText = new vscode.SnippetString(vscodeFormatCode);
 
-
     /* This will suggest recipes that have been used more recently first, for this we use the timestamp
      * stored in the local storage after selecting a suggested recipe and sort them.
      * Because sortText sorts in ascendant order we have to convert timestamps so we sort in descendant order.
@@ -218,11 +215,13 @@ export async function providesCodeCompletion(
       generateKeyForUsedRecipe(language, r.shortcut)
     );
     snippetCompletion.sortText = sortText
-      ? Array.from(sortText).map((x) => {
-          const xNumber = Number(x);
+      ? Array.from(sortText)
+          .map((x) => {
+            const xNumber = Number(x);
 
-          return (9 - xNumber).toString();
-        }).join("")
+            return (9 - xNumber).toString();
+          })
+          .join("")
       : "z";
 
     return snippetCompletion;
