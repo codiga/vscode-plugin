@@ -17,6 +17,7 @@ jobs:
       with:
         node-version: 16.x
     - run: npm install
+    - run: npm install -g npm-run-all
     - name: Test on Linux
       run: xvfb-run -a npm test
       if: runner.os == 'Linux'
@@ -34,6 +35,7 @@ jobs:
       with:
         node-version: 16.x
     - run: npm install
+    - run: npm install -g npm-run-all
     - name: Publish
       run: npm run deploy
       env:
