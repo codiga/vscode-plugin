@@ -140,13 +140,29 @@ export const Snippets = (props: SnippetsProps) => {
         >
           <div
             style={{
-              float: "right",
-              marginTop: "1em",
+              display: "flex",
+              alignItems: "left",
+              flexWrap: "wrap",
             }}
           >
-            <SnippetButton snippet={snippet} />
+            <h2>{snippet.name}</h2>
+            <div
+              style={{
+                display: "flex",
+                marginLeft: "auto",
+              }}
+            >
+              <div
+                style={{
+                  paddingTop: "1.2em",
+                  paddingRight: "0em",
+                }}
+              >
+                <SnippetButton snippet={snippet} />
+              </div>
+            </div>
           </div>
-          <h2>{snippet.name}</h2>
+
           <div
             style={{
               display: "flex",
