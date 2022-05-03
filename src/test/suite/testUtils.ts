@@ -241,16 +241,10 @@ export async function updateConfig(
 
   for (const configKey of Object.keys(newConfig)) {
     oldConfig[configKey] = config.get(configKey);
-    console.log(`Setting ${configKey}, old value: ${oldConfig[configKey]}`);
-    console.log(`Setting ${configKey}, new value: ${newConfig[configKey]}`);
     await config.update(
       configKey,
       newConfig[configKey],
-      vscode.ConfigurationTarget.Global,
-      true
-    );
-    console.log(
-      `Setting ${configKey}, updated value: ${config.get(configKey)}`
+      vscode.ConfigurationTarget.Global
     );
   }
   return oldConfig;
