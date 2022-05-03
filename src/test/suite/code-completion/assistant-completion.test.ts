@@ -116,10 +116,9 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     const originalConfig = await updateConfig(rustUri, configDefaults);
 
-    insertText(editor, "spawn.");
+    await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -135,18 +134,22 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
-    const originalConfig = await updateConfig(rustUri, configDefaults);
 
     await updateConfig(rustUri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: true,
+      [Config.detectIdentation]: false,
     });
     await wait(500);
+    const config = vscode.workspace.getConfiguration(undefined, rustUri);
 
-    insertText(editor, "spawn.");
+    console.log("tabsize");
+    console.log(config.get(Config.tabSize));
+    console.log("end of tabsize");
+
+    await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -155,11 +158,12 @@ suite("assistant-completion.ts test", () => {
     const expectedValue = new vscode.SnippetString(
       documentRecipeIndentExpectedWithFourSpaces
     ).value;
+    console.log("document transformed");
     console.log(documentTransformed);
-
+    console.log("expected value");
     console.log(expectedValue);
     assert.ok(documentTransformed === expectedValue);
-    await updateConfig(rustUri, originalConfig);
+    await updateConfig(rustUri, configDefaults);
   });
 
   test("test recipe indentation in recipe insertion with two indentation spaces", async () => {
@@ -171,10 +175,9 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     const originalConfig = await updateConfig(rustUri, configDefaults);
 
-    insertText(editor, "spawn.");
+    await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -183,9 +186,7 @@ suite("assistant-completion.ts test", () => {
     const expectedValue = new vscode.SnippetString(
       documentRecipeIndentExpectedWithTwoSpaces
     ).value;
-    console.log(documentTransformed);
 
-    console.log(expectedValue);
     assert.ok(documentTransformed === expectedValue);
     await updateConfig(rustUri, originalConfig);
   });
@@ -194,30 +195,32 @@ suite("assistant-completion.ts test", () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
     localStorageStub().returns("true");
 
-    const document = await vscode.workspace.openTextDocument(rustUri);
-    const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
-    const originalConfig = await updateConfig(rustUri, configDefaults);
-
     await updateConfig(rustUri, {
       [Config.tabSize]: 4,
       [Config.insertSpaces]: false,
+      [Config.detectIdentation]: false,
     });
+    const document = await vscode.workspace.openTextDocument(rustUri);
+    const editor = await vscode.window.showTextDocument(document);
+    await wait(500);
 
-    insertText(editor, "spawn.");
+    await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
+    const expectedValue = new vscode.SnippetString(
+      documentRecipeIndentExpectedWithTabs
+    ).value;
+    console.log("document transformed");
+    console.log(documentTransformed);
+    console.log("expected value");
+    console.log(expectedValue);
 
     assert.ok(usedRecipeMock.verify());
-    assert.ok(
-      documentTransformed ===
-        new vscode.SnippetString(documentRecipeIndentExpectedWithTabs).value
-    );
-    await updateConfig(rustUri, originalConfig);
+    assert.ok(documentTransformed === expectedValue);
+    await updateConfig(rustUri, configDefaults);
   });
 
   test("test imports are added after first comments in Python", async () => {
@@ -229,12 +232,11 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     const originalConfig = await updateConfig(pythonUri, configDefaults);
 
-    insertText(editor, "# First\n# Second\n");
+    await insertText(editor, "# First\n# Second\n");
     await wait(500);
-    insertText(editor, "requests.");
+    await insertText(editor, "requests.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -258,15 +260,14 @@ suite("assistant-completion.ts test", () => {
     const editor = await vscode.window.showTextDocument(document);
     await wait(500);
     const originalConfig = await updateConfig(pythonUri, configDefaults);
-    insertText(
+    await insertText(
       editor,
       `/*\n* Comment example\n*/\n\n// comment 2\n\npackage number;\n`
     );
     await wait(500);
-    insertText(editor, "java.");
+    await insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();
@@ -290,12 +291,11 @@ suite("assistant-completion.ts test", () => {
     await wait(500);
     const originalConfig = await updateConfig(javaUri, configDefaults);
 
-    insertText(editor, `/*\n* Comment example\n*/\n\n// comment 2\n`);
+    await insertText(editor, `/*\n* Comment example\n*/\n\n// comment 2\n`);
     await wait(500);
-    insertText(editor, "java.");
+    await insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
-    console.log(documentTransformed);
 
     await wait(500);
     await closeFile();

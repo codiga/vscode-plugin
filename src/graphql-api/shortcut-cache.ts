@@ -114,7 +114,6 @@ export const garbageCollection = (
  * @returns
  */
 export const fetchShortcuts = async () => {
-  console.log("fetchShortcuts");
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
@@ -198,7 +197,6 @@ export const fetchShortcuts = async () => {
  * execution.
  */
 export const fetchPeriodicShortcuts = async () => {
-  console.log("fetchPeriodicShortcuts");
   if (enablePeriodicPolling) {
     await fetchShortcuts().catch((e) => {
       console.error("error while fetching shortcuts");

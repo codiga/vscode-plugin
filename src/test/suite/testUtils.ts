@@ -226,6 +226,7 @@ export async function autoComplete() {
 export const Config = Object.freeze({
   tabSize: "editor.tabSize",
   insertSpaces: "editor.insertSpaces",
+  detectIdentation: "editor.detectIndentation",
 } as const);
 
 // helper function to manage configuration state, DO NOT try to set/update
@@ -236,14 +237,20 @@ export async function updateConfig(
   newConfig: VsCodeConfiguration
 ): Promise<VsCodeConfiguration> {
   const oldConfig: VsCodeConfiguration = {};
-  const config = vscode.workspace.getConfiguration(undefined, documentUri);
+  const config = vscode.workspace.getConfiguration();
 
   for (const configKey of Object.keys(newConfig)) {
     oldConfig[configKey] = config.get(configKey);
+    console.log(`Setting ${configKey}, old value: ${oldConfig[configKey]}`);
+    console.log(`Setting ${configKey}, new value: ${newConfig[configKey]}`);
     await config.update(
       configKey,
       newConfig[configKey],
-      vscode.ConfigurationTarget.Global
+      vscode.ConfigurationTarget.Global,
+      true
+    );
+    console.log(
+      `Setting ${configKey}, updated value: ${config.get(configKey)}`
     );
   }
   return oldConfig;
