@@ -10,7 +10,7 @@
 
 Install the extension and type `.` or `/` in your IDE to list all available snippets for your project. Accept a snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
 
-![Use of recipe in Python](images/vscode-read-file.gif)
+![Use of smart code snippet in Python](images/vscode-read-file.gif)
 
 **Note**: snippets are suggested based on your environment: language, libraries used, and filename (e.g. especially for YML files).
 
@@ -24,9 +24,9 @@ Install the extension and type `.` or `/` in your IDE to list all available snip
 
 ## Create Code Snippets
 
-Create a code snippet by selecting the code and click on `Create Codiga Recipe`
+Create a code snippet by selecting the code and click on `Create Codiga Snippet`
 
-![Use of recipe in Python](images/vscode-create-recipe.gif)
+![Creation of Smart Code Snippet](images/vscode-create-recipe.gif)
 
 ## Supported Languages
 

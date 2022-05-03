@@ -79,17 +79,22 @@
       {
         "category": "Codiga",
         "command": "codiga.recipeUse",
-        "title": "Codiga use recipe"
+        "title": "Use Snippet"
+      },
+      {
+        "category": "Codiga",
+        "command": "codiga.listShortcuts",
+        "title": "List Shortcuts"
       },
       {
         "category": "Codiga",
         "command": "codiga.recipeCreate",
-        "title": "Create Codiga Recipe"
+        "title": "Create Codiga Snippet"
       },
       {
         "category": "Codiga",
         "command": "codiga.removeRecentlyUsedRecipes",
-        "title": "Remove recently saved recipes"
+        "title": "Remove recently saved snippets"
       },
       {
         "category": "Codiga",
