@@ -113,7 +113,7 @@
   "scripts": {
     "compile": "npm-run-all compile:*",
     "compile:extension": "tsc -p ./",
-    "compile:webview": "webpack --mode development",
+    "compile:webview": "webpack --mode production",
     "watch:extension": "tsc -watch -p ./",
     "watch:webview": "webpack --watch --mode development",
     "watch": "npm-run-all -p watch:*",
