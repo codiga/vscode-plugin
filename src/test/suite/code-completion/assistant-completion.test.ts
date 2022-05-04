@@ -30,7 +30,6 @@ import {
   documentJavaRecipeImportsBetweenCommentsExpected,
 } from "../testUtils";
 import * as localStorage from "../../../utils/localStorage";
-import { VSCODE_DOCUMENTATION_SHOWN_KEY } from "../../../constants";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
@@ -72,12 +71,6 @@ suite("assistant-completion.ts test", () => {
         []
       );
 
-  // this will prevent to redirect to the browse for documentation on plugin activation
-  const localStorageStub: () => sinon.SinonStub = () =>
-    sandbox
-      .stub(localStorage, "getFromLocalStorage")
-      .withArgs(VSCODE_DOCUMENTATION_SHOWN_KEY);
-
   let usedRecipeMock: sinon.SinonExpectation;
 
   // these are the first state values for the settings we want to change and restore
@@ -110,7 +103,6 @@ suite("assistant-completion.ts test", () => {
 
   test("test insert suggestion from completion widget works", async () => {
     getRustRecipeStub().returns(mockRecipe(recipeForUser));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -136,7 +128,6 @@ suite("assistant-completion.ts test", () => {
       [Config.detectIdentation]: false,
     });
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -166,7 +157,6 @@ suite("assistant-completion.ts test", () => {
       [Config.detectIdentation]: false,
     });
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -189,7 +179,6 @@ suite("assistant-completion.ts test", () => {
 
   test("test recipe indentation in recipe insertion with two indentation spaces", async () => {
     getRustRecipeStub().returns(mockRecipe(recipeWithIndentVariable));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -214,7 +203,6 @@ suite("assistant-completion.ts test", () => {
 
   test("test imports are added after first comments in Python", async () => {
     getPythonRecipeStub().returns(mockRecipePython(pythonRecipe));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(pythonUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -243,7 +231,6 @@ suite("assistant-completion.ts test", () => {
 
   test("test imports are added after first comments and package in Java", async () => {
     getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
@@ -273,7 +260,6 @@ suite("assistant-completion.ts test", () => {
 
   test("test imports are added after first comments and before next comment in Java", async () => {
     getJavaRecipeStub().returns(mockRecipeJava(javaRecipe));
-    localStorageStub().returns("true");
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
