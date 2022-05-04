@@ -10,8 +10,8 @@ import {
   MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
   STARTUP_MESSAGE_MACOS,
   STARTUP_MESSAGE_WINDOWS,
-  VSCODE_DOCUMENTATION_SHOWN_KEY,
   VSCODE_DOCUMENTATION_URL,
+  PREFERENCES_OPEN_BROWSER_AFTER_INSTALL,
 } from "./constants";
 import { testApi } from "./commands/test-api";
 import {
@@ -205,12 +205,18 @@ export async function activate(context: vscode.ExtensionContext) {
 
   /**
    * Open the VSCode integration documentation only once after user installs it
-   * If there is a flag in the local storage it means the user was already redirected
-   * to the VSCode documentation
+   * We store in a preference if we should open the browser.
    */
-  if (!getFromLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY)) {
-    setToLocalStorage(VSCODE_DOCUMENTATION_SHOWN_KEY, "true");
-    vscode.env.openExternal(vscode.Uri.parse(VSCODE_DOCUMENTATION_URL));
+  const shouldOpenBrowser =
+    configuration.get(PREFERENCES_OPEN_BROWSER_AFTER_INSTALL) === undefined ||
+    configuration.get(PREFERENCES_OPEN_BROWSER_AFTER_INSTALL) === true;
+  if (shouldOpenBrowser) {
+    await configuration.update(
+      PREFERENCES_OPEN_BROWSER_AFTER_INSTALL,
+      false,
+      vscode.ConfigurationTarget.Global
+    );
+    await vscode.env.openExternal(vscode.Uri.parse(VSCODE_DOCUMENTATION_URL));
   }
 }
 

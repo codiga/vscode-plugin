@@ -31,7 +31,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.5.2",
+  "version": "0.5.3",
   "engines": {
     "vscode": "^1.57.0"
   },
@@ -50,10 +50,16 @@
             "description": "Show welcome messages and hints",
             "scope": "application"
           },
+          "codiga.openBrowserAfterInstall": {
+            "type": "boolean",
+            "default": true,
+            "description": "Open Codiga documentation (disabled after install)",
+            "scope": "application"
+          },
           "codiga.api.token": {
             "type": "string",
             "default": "<API-TOKEN>",
-            "description": "Your Codiga API Token (Preferred authentication method)",
+            "description": "Your Codiga API Token",
             "minLength": 32,
             "maxLength": 50,
             "scope": "application"
