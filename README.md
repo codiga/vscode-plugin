@@ -10,13 +10,13 @@
 
 ## Quick Start
 
-Install the extension and type `.` or `/` in your IDE to list all available snippets for your project. Accept a snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
+Install the extension and type `.` or `/` in your IDE to list all available smart code snippets for your project. Accept a smart code snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
 
 ![Use of smart code snippet in Python](images/vscode-read-file.gif)
 
 **Note**: snippets are suggested based on your environment: language, libraries used, and filename (e.g. especially for YML files).
 
-## Find and Reuse Code Snippets
+## Find and Reuse Smart Code Snippets
 
 - Get all snippets with a shortcut by using `CTRL` + `ALT` + `S` (`CMD` + `SHIFT` + `S` - `⌘⇧S` on Mac) and reuse them inline
 - Find snippets using an internal search engine using `CTRL` + `ALT` + `C` (`CMD` + `SHIFT` + `C` - `⌘⇧C` on Mac) and search for a snippet
@@ -24,9 +24,9 @@ Install the extension and type `.` or `/` in your IDE to list all available snip
 
 ![Coding Assistant to find snippets](images/vscode-coding-assistant.gif)
 
-## Create Code Snippets
+## Create Smart Code Snippets
 
-Create a code snippet by selecting the code and click on `Create Codiga Snippet`
+Create a smart code snippet by selecting the code and click on `Create Codiga Snippet`
 
 ![Creation of Smart Code Snippet](images/vscode-create-recipe.gif)
 

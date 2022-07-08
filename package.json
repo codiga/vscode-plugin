@@ -1,7 +1,7 @@
 {
   "name": "vscode-plugin",
-  "displayName": "Codiga Code Snippets",
-  "description": "Create and share code snippets for 15+ languages",
+  "displayName": "Codiga Smart Code Snippets",
+  "description": "Create and share Smart Code Snippets for 15+ languages",
   "publisher": "codiga",
   "license": "MIT",
   "author": "Xcoding Labs Inc",
