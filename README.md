@@ -6,6 +6,8 @@
 [![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 [![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 
+[Codiga](https://www.codiga.io) is a [Smart Code Snippets](https://www.codiga.io/code-snippets/smart-code-snippets/) manager. Create, share, search and use Smart Code Snippets from your IDE.
+
 ## Quick Start
 
 Install the extension and type `.` or `/` in your IDE to list all available snippets for your project. Accept a snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
