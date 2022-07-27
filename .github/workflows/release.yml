@@ -20,6 +20,7 @@ jobs:
       - run: npm install -g npm-run-all
       - name: Run tests
         uses: GabrielBB/xvfb-action@v1
+        if: runner.os != 'Linux'
         with:
           run: npm test
   publish:
