@@ -15,8 +15,10 @@ jobs:
           node-version: 10.x
       - run: npm install
       - run: npm install -g npm-run-all
+      - name: Install xvfb
+        run: sudo apt-get install xvfb
       - name: Test on Linux
-        run: xvfb-run -a npm test
+        run: sudo xvfb-run -a npm test
         if: runner.os == 'Linux'
       - name: Test on Windows
         run: npm test
