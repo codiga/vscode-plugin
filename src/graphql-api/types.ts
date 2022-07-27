@@ -41,6 +41,7 @@ export enum Language {
   Cpp = "Cpp",
   Csharp = "Csharp",
   Css = "Css",
+  Coldfusion = "Coldfusion",
   Dart = "Dart",
   Docker = "Docker",
   Go = "Go",
