@@ -29,8 +29,8 @@ export const Header = (props: HeaderProps) => {
   const [term, setTerm] = useState<string>("");
   const [debounceTimeout, setDebounceTimeout] = useState(null);
 
-  const refreshPage = () => {
-    props.vscodeApi.postMessage({
+  const refreshPage = async () => {
+    await props.vscodeApi.postMessage({
       command: "search",
       term: term,
       onlyPublic: searchPublic === true ? true : undefined,
@@ -39,8 +39,8 @@ export const Header = (props: HeaderProps) => {
     });
   };
 
-  const requestUser = () => {
-    props.vscodeApi.postMessage({
+  const requestUser = async () => {
+    await props.vscodeApi.postMessage({
       command: "getUser",
     });
   };

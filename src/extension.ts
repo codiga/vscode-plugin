@@ -45,6 +45,9 @@ export async function activate(context: vscode.ExtensionContext) {
   initializeClient();
   initializeLocalStorage(context.workspaceState);
 
+  // ALWAYS record the first editor FIRST
+  recordLastEditor();
+
   const codigaStatusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
     10
@@ -90,8 +93,8 @@ export async function activate(context: vscode.ExtensionContext) {
     removeRecentlyUsedRecipes();
   });
 
-  vscode.commands.registerCommand("codiga.showWebview", () => {
-    showCodigaWebview(context);
+  vscode.commands.registerCommand("codiga.showWebview", async () => {
+    await showCodigaWebview(context);
   });
 
   /**
@@ -192,7 +195,6 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Whenever we open a new document, we refresh the webview
    */
-  recordLastEditor();
   vscode.workspace.onDidOpenTextDocument(async () => {
     try {
       recordLastEditor();

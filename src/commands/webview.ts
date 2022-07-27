@@ -69,7 +69,7 @@ export async function showCodigaWebview(
       light: faviconUri,
     };
 
-    panel.webview.html = getWebviewContent(context.extensionPath);
+    panel.webview.html = await getWebviewContent(context.extensionPath);
 
     // Set up message receicing from the webview
     panel.webview.onDidReceiveMessage(async (message) => {
@@ -88,7 +88,7 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
     const user = await getUser();
 
     if (panel) {
-      panel.webview.postMessage({
+      await panel.webview.postMessage({
         command: "user",
         user: user,
       });
@@ -102,7 +102,7 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
     const onlyPrivate = message.onlyPrivate;
     const onlySubscribed = message.onlySubscribed;
 
-    updateWebview(searchTerm, onlyPublic, onlyPrivate, onlySubscribed);
+    await updateWebview(searchTerm, onlyPublic, onlyPrivate, onlySubscribed);
     return;
   }
   if (message.command === "insertSnippet") {
@@ -171,7 +171,7 @@ export const updateWebview = async (
   const language: Language = getLanguageForDocument(document);
 
   if (panel && language === Language.Unknown) {
-    panel.webview.postMessage({
+    await panel.webview.postMessage({
       command: "pageChanged",
       language: null,
       languageString: null,
@@ -197,7 +197,7 @@ export const updateWebview = async (
      */
     const resetSearch = !term || term?.length === 0;
 
-    panel.webview.postMessage({
+    await panel.webview.postMessage({
       command: "pageChanged",
       language: language,
       languageString: LANGUAGE_ENUMATION_TO_STRING[language],
