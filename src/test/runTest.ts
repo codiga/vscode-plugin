@@ -31,6 +31,7 @@ async function main() {
       await runTests({
         extensionDevelopmentPath,
         extensionTestsPath,
+        version: "1.69.0",
         launchArgs: [
           // This disables all extensions except the one being tested
           "--disable-extensions",
