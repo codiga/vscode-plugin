@@ -9,6 +9,8 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".css": Language.Css,
   ".cs": Language.Csharp,
   ".cpp": Language.Cpp,
+  ".cfc": Language.Coldfusion,
+  ".cfm": Language.Coldfusion,
   ".dart": Language.Dart,
   ".go": Language.Go,
   ".hs": Language.Haskell,
@@ -112,7 +114,7 @@ export function firstLineToImportPython(lines: string[]): number {
 }
 
 /**
- * 
+ *
  * There are different scenarios where we decide how to include imports
  * 1) If there is no comment nor package they're inserted at the top of the file
  * 2) If there is a comment at the top of the file it goes after that comment
@@ -135,15 +137,15 @@ export function firstLineToImportJavaLike(lines: string[]): number {
       line.startsWith("import") ||
       line.includes("*/") ||
       line.includes("*") ||
-      line.includes("//") 
+      line.includes("//")
     ) {
       foundComment = true;
-    } else if(line.trim().startsWith("package ")){
+    } else if (line.trim().startsWith("package ")) {
       return i + 1;
-    } else if(line.trim() === ""){
-      if(foundComment && !spaceFound){
+    } else if (line.trim() === "") {
+      if (foundComment && !spaceFound) {
         lineNumber = i;
-        spaceFound=true;
+        spaceFound = true;
       }
     }
   }

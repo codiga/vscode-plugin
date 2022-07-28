@@ -6,7 +6,6 @@ import { AssistantRecipe, Language } from "../graphql-api/types";
 import { useRecipeCallback } from "../graphql-api/use-recipe";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
-import { LANGUAGE_ENUMATION_TO_STRING } from "../utils/languageUtils";
 import {
   addRecipeToEditor,
   deleteInsertedCode,
@@ -15,6 +14,7 @@ import {
   resetRecipeHolder,
 } from "../utils/snippetUtils";
 import { getUser } from "../graphql-api/user";
+import { LANGUAGE_ENUMATION_TO_STRING } from "../utils/languageUtils";
 
 let panel: vscode.WebviewPanel | undefined = undefined;
 let lastActiveTextEditor: vscode.TextEditor | undefined = undefined;
