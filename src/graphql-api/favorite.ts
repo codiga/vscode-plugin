@@ -1,4 +1,3 @@
-import { getUserFingerprint } from "../utils/configurationUtils";
 import { doQuery } from "./client";
 import { SUBSCRIBE_TO_RECIPE, UNSUBSCRIBE_TO_RECIPE } from "./queries";
 import { AssistantRecipe } from "./types";
