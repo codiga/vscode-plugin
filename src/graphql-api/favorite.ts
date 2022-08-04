@@ -6,8 +6,6 @@ import { AssistantRecipe } from "./types";
 export async function favoriteSnippet(
   snippet: AssistantRecipe
 ): Promise<boolean> {
-  const userFingerprint = getUserFingerprint();
-
   const variables: Record<string, number> = {
     id: snippet.id,
   };
@@ -23,8 +21,6 @@ export async function favoriteSnippet(
 export async function unfavoriteSnippet(
   snippet: AssistantRecipe
 ): Promise<boolean> {
-  const userFingerprint = getUserFingerprint();
-
   const variables: Record<string, number> = {
     id: snippet.id,
   };
