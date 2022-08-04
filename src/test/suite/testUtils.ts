@@ -109,6 +109,7 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           keywords: ["spawn", "thr"],
           tags: [],
           code: code,
+          isSubscribed: false,
           imports: ["use std::thread;"],
           shortcut: "spawn.thr",
           vscodeFormat: code,
@@ -141,6 +142,7 @@ export function mockRecipePython(code: string): Promise<AssistantRecipe[]> {
           isPublic: true,
           isGlobal: true,
           keywords: ["requests"],
+          isSubscribed: false,
           tags: [],
           code: code,
           imports: ["import requests"],
@@ -177,6 +179,7 @@ export function mockRecipeJava(code: string): Promise<AssistantRecipe[]> {
           keywords: ["awt"],
           tags: [],
           code: code,
+          isSubscribed: false,
           imports: [
             "import java.awt.*;",
             "import java.io.IOException;",

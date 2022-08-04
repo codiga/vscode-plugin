@@ -23,6 +23,7 @@ export interface AssistantRecipe {
   upvotes: number;
   downvotes: number;
   imports: string[];
+  isSubscribed: boolean;
   shortcut: string;
   vscodeFormat: string;
   presentableFormat: string;
