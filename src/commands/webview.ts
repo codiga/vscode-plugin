@@ -114,7 +114,6 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
 
     if (message.snippet) {
       const favoriteResult = await favoriteSnippet(message.snippet);
-      console.log(favoriteResult);
       if (!favoriteResult) {
         vscode.window.showInformationMessage(
           "Error, make sure you put your Codiga API keys in your preferences."
@@ -133,7 +132,6 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
 
     if (message.snippet) {
       const result = await unfavoriteSnippet(message.snippet);
-      console.log(result);
       if (!result) {
         vscode.window.showInformationMessage(
           "Error, make sure you put your Codiga API keys in your preferences."
@@ -194,13 +192,35 @@ export const updateWebview = async (
   onlyPrivate: boolean | undefined = undefined,
   onlySubscribed: boolean | undefined = undefined
 ): Promise<void> => {
-  const editor = lastActiveTextEditor;
+  const editor = lastActiveTextEditor || vscode.window.activeTextEditor;
+
   if (!editor) {
-    return;
+    console.debug("no editor");
+    if (panel) {
+      await panel.webview.postMessage({
+        command: "pageChanged",
+        language: null,
+        languageString: null,
+        snippets: [],
+        resetSearch: true,
+      });
+      return;
+    } else {
+      console.debug("no editor and no panel");
+      return;
+    }
   }
   const document = editor.document;
 
-  if (!document) {
+  if (!document && panel) {
+    console.debug("no document");
+    await panel.webview.postMessage({
+      command: "pageChanged",
+      language: null,
+      languageString: null,
+      snippets: [],
+      resetSearch: true,
+    });
     return;
   }
   const path = document.uri.path;
@@ -243,6 +263,8 @@ export const updateWebview = async (
       snippets: snippets,
       resetSearch: resetSearch,
     });
+  } else {
+    console.debug("no panel");
   }
 };
 
