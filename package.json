@@ -31,9 +31,9 @@
     "React",
     "Typescript"
   ],
-  "version": "0.5.7",
+  "version": "0.6.1",
   "engines": {
-    "vscode": "^1.57.0"
+    "vscode": "^1.70.0"
   },
   "activationEvents": [
     "onStartupFinished"
@@ -62,6 +62,34 @@
             "description": "Your Codiga API Token",
             "minLength": 32,
             "maxLength": 50,
+            "scope": "application"
+          },
+          "codiga.editor.inlineCompletion": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Inline Completions",
+            "scope": "application"
+          },
+          "codiga.searchPreferences.onlySubscribed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only my favorite snippets",
+            "scope": "application"
+          },
+          "codiga.searchPreferences.searchVisibility": {
+            "type": "string",
+            "enum": [
+              "all",
+              "private",
+              "public"
+            ],
+            "enumDescriptions": [
+              "Search Public + Private Snippets",
+              "Search Private Snippets Only",
+              "Search Public Snippets Only"
+            ],
+            "default": "all",
+            "description": "Default Visibility when searching snippets",
             "scope": "application"
           }
         }
@@ -145,7 +173,7 @@
     "@types/node": "^14.18.12",
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.0",
-    "@types/vscode": "^1.57.0",
+    "@types/vscode": "^1.69.0",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "@vscode/test-electron": "^2.1.2",

@@ -16,6 +16,11 @@ import {
 import { getUser } from "../graphql-api/user";
 import { LANGUAGE_ENUMATION_TO_STRING } from "../utils/languageUtils";
 import { favoriteSnippet, unfavoriteSnippet } from "../graphql-api/favorite";
+import {
+  snippetVisibilityOnlyPrivate,
+  snippetVisibilityOnlyPublic,
+  snippetVisibilityOnlySubscribed,
+} from "../graphql-api/configuration";
 
 let panel: vscode.WebviewPanel | undefined = undefined;
 let lastActiveTextEditor: vscode.TextEditor | undefined = undefined;
@@ -92,6 +97,19 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
       await panel.webview.postMessage({
         command: "user",
         user: user,
+      });
+    }
+
+    return;
+  }
+
+  if (message.command === "setup") {
+    if (panel) {
+      await panel.webview.postMessage({
+        command: "setup",
+        onlyPublic: snippetVisibilityOnlyPublic(),
+        onlyPrivate: snippetVisibilityOnlyPrivate(),
+        onlySubscribed: snippetVisibilityOnlySubscribed(),
       });
     }
 

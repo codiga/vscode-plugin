@@ -10,6 +10,12 @@ export interface AssistantRecipeGroup {
   type: string;
 }
 
+export interface Cookbook {
+  id: number;
+  isSubscribed: boolean;
+  name: string;
+}
+
 export interface AssistantRecipe {
   id: number;
   name: string;
@@ -29,6 +35,7 @@ export interface AssistantRecipe {
   presentableFormat: string;
   owner: AssistantRecipeOwner;
   groups: AssistantRecipeGroup[];
+  cookbook: Cookbook | undefined;
 }
 export interface User {
   id: number;

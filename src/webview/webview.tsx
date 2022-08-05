@@ -46,6 +46,12 @@ export const Webview = (props: WebviewProps) => {
         case "user":
           setUser(message.user);
           break;
+
+        case "setup":
+          setSearchPublic(message.onlyPublic);
+          setSearchPrivate(message.onlyPrivate);
+          setSearchSubscribedOnly(message.onlySubscribed);
+          break;
       }
     });
   }, []);

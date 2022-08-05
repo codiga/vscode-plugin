@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
 import { GRAPHQL_ENDPOINT } from "../constants";
-import { getAccessKey, getApiToken, getSecretKey } from "./configuration";
+import { getApiToken } from "./configuration";
 
 let client: GraphQLClient;
 
@@ -13,8 +13,6 @@ export function initializeClient(): void {
 }
 
 function generateHeaders(): Record<string, string> {
-  const accessKey = getAccessKey();
-  const secretKey = getSecretKey();
   const apiToken = getApiToken();
 
   /**
@@ -26,16 +24,7 @@ function generateHeaders(): Record<string, string> {
       "X-Api-Token": apiToken,
     };
   }
-
-  if (!accessKey || !secretKey) {
-    return {};
-  }
-
-  const headers = {
-    "X-Access-Key": accessKey,
-    "X-Secret-Key": secretKey,
-  };
-  return headers;
+  return {};
 }
 
 /**

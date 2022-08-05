@@ -39,6 +39,8 @@ import {
   showCodigaWebview,
   updateWebview,
 } from "./commands/webview";
+import { provideInlineComplextion } from "./code-completion/inline-completion";
+import { AssistantRecipe } from "./graphql-api/types";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -109,9 +111,40 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  /**
+   * Remove a line from the current active text editor. Used for the line
+   * code completion
+   */
+  vscode.commands.registerCommand(
+    "codiga.cleanLineAndRegisterUsage",
+    async (
+      snippet: AssistantRecipe,
+      document: vscode.TextDocument,
+      lineNumber: number
+    ) => {
+      await vscode.window.activeTextEditor?.edit((editBuilder) => {
+        editBuilder.delete(new vscode.Range(lineNumber, 0, lineNumber + 1, 0));
+      });
+      await useRecipeCallback(snippet.id, snippet.language, undefined);
+    }
+  );
+
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
+    const inlineProvider: vscode.InlineCompletionItemProvider = {
+      provideInlineCompletionItems: async (
+        document,
+        position,
+        context,
+        token
+      ) => {
+        return provideInlineComplextion(document, position, context, token);
+      },
+    };
+
+    vscode.languages.registerInlineCompletionItemProvider(lang, inlineProvider);
+
     const codeCompletionProvider =
       vscode.languages.registerCompletionItemProvider(
         lang,
