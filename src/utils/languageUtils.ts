@@ -28,3 +28,30 @@ export const LANGUAGE_ENUMATION_TO_STRING: Record<string, string> = {
   Typescript: "Typescript",
   Yaml: "YAML",
 };
+
+/**
+ * Indicate if a line is a comment or not
+ * @param line
+ * @param language
+ * @returns
+ */
+export const isLineComment = (line: string, language: string): boolean => {
+  const filteredLine = line.replace(/\s/g, "");
+  switch (language.toLocaleLowerCase()) {
+    case "javascript":
+    case "typescript":
+    case "c":
+    case "cpp":
+    case "scala":
+    case "java":
+      return filteredLine.startsWith("//");
+    case "python":
+    case "shell":
+    case "php":
+      return filteredLine.startsWith("#");
+    case "terraform":
+      return filteredLine.startsWith("#") || filteredLine.startsWith("//");
+    default:
+      return false;
+  }
+};

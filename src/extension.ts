@@ -39,6 +39,7 @@ import {
   showCodigaWebview,
   updateWebview,
 } from "./commands/webview";
+import { provideInlineComplextion } from "./code-completion/inline-completion";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -112,6 +113,19 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
+    const inlineProvider: vscode.InlineCompletionItemProvider = {
+      provideInlineCompletionItems: async (
+        document,
+        position,
+        context,
+        token
+      ) => {
+        return provideInlineComplextion(document, position, context, token);
+      },
+    };
+
+    vscode.languages.registerInlineCompletionItemProvider(lang, inlineProvider);
+
     const codeCompletionProvider =
       vscode.languages.registerCompletionItemProvider(
         lang,
