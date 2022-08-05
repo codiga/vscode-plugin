@@ -1,4 +1,10 @@
 import * as vscode from "vscode";
+import {
+  isInlineCompletionEnabled,
+  snippetVisibilityOnlyPrivate,
+  snippetVisibilityOnlyPublic,
+  snippetVisibilityOnlySubscribed,
+} from "../graphql-api/configuration";
 import { getRecipesForClient } from "../graphql-api/get-recipes-for-client";
 import { Language } from "../graphql-api/types";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
@@ -16,6 +22,10 @@ export const provideInlineComplextion = async (
   context: vscode.InlineCompletionContext,
   token: vscode.CancellationToken
 ): Promise<vscode.InlineCompletionItem[] | vscode.InlineCompletionList> => {
+  if (!isInlineCompletionEnabled()) {
+    console.log("disabled");
+    return Promise.resolve([]);
+  }
   if (position.line <= 0) {
     return Promise.resolve([]);
   }
@@ -34,7 +44,10 @@ export const provideInlineComplextion = async (
     cleanLine(term),
     filename,
     language,
-    dependencies
+    dependencies,
+    snippetVisibilityOnlyPublic(),
+    snippetVisibilityOnlyPrivate(),
+    snippetVisibilityOnlySubscribed()
   );
 
   return snippets.slice(0, 5).map((snippet) => {
@@ -47,9 +60,14 @@ export const provideInlineComplextion = async (
       new vscode.Position(position.line, 0),
       new vscode.Position(position.line, position.character)
     );
-    console.log(replacingRange);
     return new vscode.InlineCompletionItem(
-      new vscode.SnippetString("\n" + vscodeFormatCode)
+      new vscode.SnippetString("\n" + vscodeFormatCode),
+      undefined,
+      {
+        arguments: [snippet, document, position.line],
+        command: "codiga.cleanLineAndRegisterUsage",
+        title: "clean line",
+      }
     );
   });
 };

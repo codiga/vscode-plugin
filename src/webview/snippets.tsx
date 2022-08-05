@@ -9,6 +9,7 @@ import {
 
 import { AssistantRecipe, Language, User } from "../graphql-api/types";
 import { HeartFilledIcon, HeartIcon } from "./icons/heartIcon";
+import { LockClosed, LockOpen } from "./icons/lock";
 
 interface SnippetsProps {
   vsCodeApi: any;
@@ -57,6 +58,19 @@ export const Snippets = (props: SnippetsProps) => {
     return "none";
   };
 
+  const getIconColor = (themeKind: string): string => {
+    if (themeKind === "vscode-dark") {
+      return " #CCCCCC";
+    }
+    if (themeKind === "vscode-light") {
+      return "#404040";
+    }
+    if (themeKind === "vscode-high-contrast") {
+      return "none";
+    }
+    return "none";
+  };
+
   const getCodeBackgroundColor = (themeKind: string): string => {
     if (themeKind === "vscode-dark") {
       return "rgba(255, 255, 255, 0.05)";
@@ -72,6 +86,7 @@ export const Snippets = (props: SnippetsProps) => {
 
   const snippetBackgroundColor = getSnippetBackgroundColor(vsCodeThemeKind);
   const codeBackgroundColor = getCodeBackgroundColor(vsCodeThemeKind);
+  const iconColor = getIconColor(vsCodeThemeKind);
 
   if (props.language === Language.Unknown) {
     return (
@@ -185,6 +200,32 @@ export const Snippets = (props: SnippetsProps) => {
               >
                 {snippet.name}{" "}
               </h2>{" "}
+              {snippet.isPublic === true && (
+                <div
+                  style={{
+                    alignItems: "center",
+                    display: "flex",
+                    justifyContent: "center",
+                    marginLeft: "10px",
+                  }}
+                  title="Public Snippet"
+                >
+                  <LockOpen width={15} height={15} color={iconColor} />
+                </div>
+              )}
+              {snippet.isPublic === false && (
+                <div
+                  style={{
+                    alignItems: "center",
+                    display: "flex",
+                    justifyContent: "center",
+                    marginLeft: "10px",
+                  }}
+                  title="Private Snippet"
+                >
+                  <LockClosed width={15} height={15} color={iconColor} />
+                </div>
+              )}{" "}
               {props.user && snippet.isSubscribed === true && (
                 <>
                   <div
@@ -192,14 +233,15 @@ export const Snippets = (props: SnippetsProps) => {
                       alignItems: "center",
                       display: "flex",
                       justifyContent: "center",
-                      marginLeft: "5px",
+                      marginLeft: "10px",
                     }}
+                    title="Favorite Snippet"
                     onClick={(e) => {
                       e.preventDefault;
                       unFavoriteSnippet(snippet);
                     }}
                   >
-                    <HeartFilledIcon />
+                    <HeartFilledIcon width={15} height={15} />
                   </div>
                 </>
               )}
@@ -210,14 +252,15 @@ export const Snippets = (props: SnippetsProps) => {
                       alignItems: "center",
                       display: "flex",
                       justifyContent: "center",
-                      marginLeft: "5px",
+                      marginLeft: "10px",
                     }}
                     onClick={(e) => {
                       e.preventDefault;
                       favoriteSnippet(snippet);
                     }}
+                    title="Not a favorite Snippet"
                   >
-                    <HeartIcon />
+                    <HeartIcon width={15} height={15} />
                   </div>
                 </>
               )}
@@ -281,26 +324,31 @@ export const Snippets = (props: SnippetsProps) => {
                   </a>
                 ))}
               </p>
-            )}
-            {snippet.isPublic === true && (
-              <p
+            )}{" "}
+            {snippet.cookbook && (
+              <div
                 style={{
-                  fontSize: "0.9em",
-                  fontWeight: "bold",
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  alignItems: "left",
+                  gap: "1em 1em",
                 }}
               >
-                Public
-              </p>
-            )}
-            {snippet.isPublic === false && (
-              <p
-                style={{
-                  fontSize: "0.9em",
-                  fontWeight: "bold",
-                }}
-              >
-                Private
-              </p>
+                <p
+                  style={{
+                    fontSize: "0.9em",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Cookbook:{" "}
+                  <a
+                    href={`https://app.codiga.io/hub/cookbook/${snippet.cookbook.id}/cookbook`}
+                  >
+                    {snippet.cookbook.name}
+                  </a>
+                </p>
+              </div>
             )}{" "}
             {snippet.shortcut && (
               <div

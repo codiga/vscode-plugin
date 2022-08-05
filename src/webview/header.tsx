@@ -47,6 +47,11 @@ export const Header = (props: HeaderProps) => {
       command: "getUser",
     });
   };
+  const requestSetup = async () => {
+    await props.vscodeApi.postMessage({
+      command: "setup",
+    });
+  };
 
   useEffect(() => {
     props.setLoading(true);
@@ -61,6 +66,7 @@ export const Header = (props: HeaderProps) => {
   useEffect(() => {
     refreshPage();
     requestUser();
+    requestSetup();
   }, []);
 
   const deBounceTerm = (term: string) => {

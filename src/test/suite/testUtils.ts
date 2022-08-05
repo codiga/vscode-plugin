@@ -106,6 +106,7 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           language: "Rust",
           isPublic: true,
           isGlobal: true,
+          cookbook: undefined,
           keywords: ["spawn", "thr"],
           tags: [],
           code: code,
@@ -148,6 +149,7 @@ export function mockRecipePython(code: string): Promise<AssistantRecipe[]> {
           imports: ["import requests"],
           shortcut: "requests.get",
           vscodeFormat: code,
+          cookbook: undefined,
           presentableFormat: code,
           upvotes: 10,
           downvotes: 3,
@@ -179,6 +181,7 @@ export function mockRecipeJava(code: string): Promise<AssistantRecipe[]> {
           keywords: ["awt"],
           tags: [],
           code: code,
+          cookbook: undefined,
           isSubscribed: false,
           imports: [
             "import java.awt.*;",

@@ -41,16 +41,33 @@ export const isLineComment = (line: string, language: string): boolean => {
     case "javascript":
     case "typescript":
     case "c":
+    case "apex":
     case "cpp":
+    case "php":
     case "scala":
+    case "dart":
+    case "go":
+    case "objective-c":
+    case "kotlin":
     case "java":
+    case "swift":
+    case "solidity":
+    case "rust":
       return filteredLine.startsWith("//");
     case "python":
     case "shell":
     case "php":
+    case "perl":
+    case "yaml":
       return filteredLine.startsWith("#");
     case "terraform":
       return filteredLine.startsWith("#") || filteredLine.startsWith("//");
+    case "coldfusion":
+      return filteredLine.startsWith("<!---");
+    case "haskell":
+      return filteredLine.startsWith("--");
+    case "css":
+      return filteredLine.startsWith("/*");
     default:
       return false;
   }

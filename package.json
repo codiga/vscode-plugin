@@ -31,7 +31,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.5.7",
+  "version": "0.6.1",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -62,6 +62,34 @@
             "description": "Your Codiga API Token",
             "minLength": 32,
             "maxLength": 50,
+            "scope": "application"
+          },
+          "codiga.editor.inlineCompletion": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Inline Completions",
+            "scope": "application"
+          },
+          "codiga.searchPreferences.onlySubscribed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only my favorite snippets",
+            "scope": "application"
+          },
+          "codiga.searchPreferences.searchVisibility": {
+            "type": "string",
+            "enum": [
+              "all",
+              "private",
+              "public"
+            ],
+            "enumDescriptions": [
+              "Search Public + Private Snippets",
+              "Search Private Snippets Only",
+              "Search Public Snippets Only"
+            ],
+            "default": "all",
+            "description": "Default Visibility when searching snippets",
             "scope": "application"
           }
         }

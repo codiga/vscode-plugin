@@ -91,6 +91,11 @@ export const GET_RECIPES_SEMANTIC: string = gql`
       presentableFormat
       downvotes
       upvotes
+      cookbook {
+        id
+        isSubscribed
+        name
+      }
       owner {
         username
         accountType

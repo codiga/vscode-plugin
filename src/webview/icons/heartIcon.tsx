@@ -1,10 +1,10 @@
 import * as React from "react";
 
-export const HeartIcon = () => {
+export const HeartIcon = (props: { width: number; height: number }) => {
   return (
     <svg
-      width="20"
-      height="20"
+      width={props.width}
+      height={props.height}
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -17,11 +17,11 @@ export const HeartIcon = () => {
   );
 };
 
-export const HeartFilledIcon = () => {
+export const HeartFilledIcon = (props: { width: number; height: number }) => {
   return (
     <svg
-      width="20"
-      height="20"
+      width={props.width}
+      height={props.height}
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
