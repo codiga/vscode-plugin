@@ -122,7 +122,6 @@ export async function activate(context: vscode.ExtensionContext) {
       document: vscode.TextDocument,
       lineNumber: number
     ) => {
-      const line = document.lineAt(lineNumber);
       await vscode.window.activeTextEditor?.edit((editBuilder) => {
         editBuilder.delete(new vscode.Range(lineNumber, 0, lineNumber + 1, 0));
       });

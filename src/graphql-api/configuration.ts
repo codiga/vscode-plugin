@@ -26,12 +26,12 @@ export const snippetVisibilityOnlyPublic = (): boolean => {
   const preferenceValue = vscode.workspace
     .getConfiguration()
     .get("codiga.searchPreferences.searchVisibility") as string;
-  return preferenceValue == "public";
+  return preferenceValue === "public";
 };
 
 export const snippetVisibilityOnlyPrivate = (): boolean => {
   const preferenceValue = vscode.workspace
     .getConfiguration()
     .get("codiga.searchPreferences.searchVisibility") as string;
-  return preferenceValue == "private";
+  return preferenceValue === "private";
 };

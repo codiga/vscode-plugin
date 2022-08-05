@@ -56,10 +56,7 @@ export const provideInlineComplextion = async (
       "base64"
     ).toString("utf8");
     const vscodeFormatCode = decodeIndent(decodeVscodeFormatFromBase64);
-    const replacingRange = new vscode.Range(
-      new vscode.Position(position.line, 0),
-      new vscode.Position(position.line, position.character)
-    );
+
     return new vscode.InlineCompletionItem(
       new vscode.SnippetString("\n" + vscodeFormatCode),
       undefined,

@@ -43,7 +43,6 @@ export const isLineComment = (line: string, language: string): boolean => {
     case "c":
     case "apex":
     case "cpp":
-    case "php":
     case "scala":
     case "dart":
     case "go":
@@ -56,11 +55,11 @@ export const isLineComment = (line: string, language: string): boolean => {
       return filteredLine.startsWith("//");
     case "python":
     case "shell":
-    case "php":
     case "perl":
     case "yaml":
       return filteredLine.startsWith("#");
     case "terraform":
+    case "php":
       return filteredLine.startsWith("#") || filteredLine.startsWith("//");
     case "coldfusion":
       return filteredLine.startsWith("<!---");
