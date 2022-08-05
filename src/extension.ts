@@ -31,6 +31,7 @@ import {
   enableShortcutsPolling,
   fetchPeriodicShortcuts,
   fetchShortcuts,
+  recordLastActivity,
 } from "./graphql-api/shortcut-cache";
 import { removeRecentlyUsedRecipes } from "./commands/remove-recently-used-recipes";
 import {
@@ -197,12 +198,21 @@ export async function activate(context: vscode.ExtensionContext) {
    */
   vscode.workspace.onDidOpenTextDocument(async () => {
     try {
+      recordLastActivity();
       recordLastEditor();
       await updateWebview();
     } catch (e) {
       console.debug("Error when trying to refresh the webview");
       console.debug(e);
     }
+  });
+
+  /**
+   * Record when a doc is changed so that we know when the user
+   * is active or not.
+   */
+  vscode.workspace.onDidChangeTextDocument(() => {
+    recordLastActivity();
   });
 
   /**
