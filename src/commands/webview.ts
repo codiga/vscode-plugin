@@ -15,6 +15,7 @@ import {
 } from "../utils/snippetUtils";
 import { getUser } from "../graphql-api/user";
 import { LANGUAGE_ENUMATION_TO_STRING } from "../utils/languageUtils";
+import { favoriteSnippet, unfavoriteSnippet } from "../graphql-api/favorite";
 
 let panel: vscode.WebviewPanel | undefined = undefined;
 let lastActiveTextEditor: vscode.TextEditor | undefined = undefined;
@@ -101,6 +102,44 @@ const handleMessage = async (message: MessageFromWebview): Promise<void> => {
     const onlyPublic = message.onlyPublic;
     const onlyPrivate = message.onlyPrivate;
     const onlySubscribed = message.onlySubscribed;
+
+    await updateWebview(searchTerm, onlyPublic, onlyPrivate, onlySubscribed);
+    return;
+  }
+  if (message.command === "favoriteSnippet") {
+    const searchTerm = message.term?.length === 0 ? undefined : message.term;
+    const onlyPublic = message.onlyPublic;
+    const onlyPrivate = message.onlyPrivate;
+    const onlySubscribed = message.onlySubscribed;
+
+    if (message.snippet) {
+      const favoriteResult = await favoriteSnippet(message.snippet);
+      console.log(favoriteResult);
+      if (!favoriteResult) {
+        vscode.window.showInformationMessage(
+          "Error, make sure you put your Codiga API keys in your preferences."
+        );
+      }
+    }
+
+    await updateWebview(searchTerm, onlyPublic, onlyPrivate, onlySubscribed);
+    return;
+  }
+  if (message.command === "unfavoriteSnippet") {
+    const searchTerm = message.term?.length === 0 ? undefined : message.term;
+    const onlyPublic = message.onlyPublic;
+    const onlyPrivate = message.onlyPrivate;
+    const onlySubscribed = message.onlySubscribed;
+
+    if (message.snippet) {
+      const result = await unfavoriteSnippet(message.snippet);
+      console.log(result);
+      if (!result) {
+        vscode.window.showInformationMessage(
+          "Error, make sure you put your Codiga API keys in your preferences."
+        );
+      }
+    }
 
     await updateWebview(searchTerm, onlyPublic, onlyPrivate, onlySubscribed);
     return;

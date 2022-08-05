@@ -19,23 +19,26 @@ interface HeaderProps {
   setLoading: (loading: boolean) => void;
   isLoading: boolean;
   initialLoading: boolean;
+  searchPublic: boolean;
+  setSearchPublic: (loading: boolean) => void;
+  searchPrivate: boolean;
+  setSearchPrivate: (loading: boolean) => void;
+  searchSubscribedOnly: boolean;
+  setSearchSubscribedOnly: (loading: boolean) => void;
+  term: string;
+  setTerm: (term: string) => void;
 }
 
 export const Header = (props: HeaderProps) => {
-  const [searchPublic, setSearchPublic] = useState<boolean>(false);
-  const [searchPrivate, setSearchPrivate] = useState<boolean>(false);
-  const [searchSubscribedOnly, setSearchSubscribedOnly] =
-    useState<boolean>(false);
-  const [term, setTerm] = useState<string>("");
   const [debounceTimeout, setDebounceTimeout] = useState(null);
 
   const refreshPage = async () => {
     await props.vscodeApi.postMessage({
       command: "search",
-      term: term,
-      onlyPublic: searchPublic === true ? true : undefined,
-      onlyPrivate: searchPrivate === true ? true : undefined,
-      onlySubscribed: searchSubscribedOnly === true ? true : undefined,
+      term: props.term,
+      onlyPublic: props.searchPublic === true ? true : undefined,
+      onlyPrivate: props.searchPrivate === true ? true : undefined,
+      onlySubscribed: props.searchSubscribedOnly === true ? true : undefined,
     });
   };
 
@@ -48,7 +51,12 @@ export const Header = (props: HeaderProps) => {
   useEffect(() => {
     props.setLoading(true);
     refreshPage();
-  }, [searchPublic, searchPrivate, searchSubscribedOnly, term]);
+  }, [
+    props.searchPublic,
+    props.searchPrivate,
+    props.searchSubscribedOnly,
+    props.term,
+  ]);
 
   useEffect(() => {
     refreshPage();
@@ -59,7 +67,7 @@ export const Header = (props: HeaderProps) => {
     clearTimeout(debounceTimeout);
     setDebounceTimeout(
       setTimeout(() => {
-        setTerm(term);
+        props.setTerm(term);
       }, 1000)
     );
   };
@@ -145,10 +153,12 @@ export const Header = (props: HeaderProps) => {
               style={{
                 minWidth: "50%",
               }}
-              checked={searchPublic === false && searchPrivate === false}
+              checked={
+                props.searchPublic === false && props.searchPrivate === false
+              }
               onClick={() => {
-                setSearchPrivate(false);
-                setSearchPublic(false);
+                props.setSearchPrivate(false);
+                props.setSearchPublic(false);
               }}
             >
               All Snippets
@@ -156,7 +166,7 @@ export const Header = (props: HeaderProps) => {
             <VSCodeRadio
               id="snippetsPublic"
               name="snippetsPrivacy"
-              checked={searchPublic}
+              checked={props.searchPublic}
               style={{
                 minWidth: "50%",
               }}
@@ -165,8 +175,8 @@ export const Header = (props: HeaderProps) => {
               }
               hoverText="bla"
               onClick={() => {
-                setSearchPrivate(false);
-                setSearchPublic(!searchPublic);
+                props.setSearchPrivate(false);
+                props.setSearchPublic(!props.searchPublic);
               }}
             >
               Public Snippets Only
@@ -183,7 +193,7 @@ export const Header = (props: HeaderProps) => {
               type="radio"
               id="snippetsPrivate"
               name="snippetsPrivacy"
-              checked={searchPrivate}
+              checked={props.searchPrivate}
               disabled={
                 props.user === undefined || props.language === Language.Unknown
               }
@@ -191,8 +201,8 @@ export const Header = (props: HeaderProps) => {
                 minWidth: "50%",
               }}
               onClick={() => {
-                setSearchPrivate(!searchPrivate);
-                setSearchPublic(false);
+                props.setSearchPrivate(!props.searchPrivate);
+                props.setSearchPublic(false);
               }}
             >
               Private Snippets Only
@@ -202,7 +212,7 @@ export const Header = (props: HeaderProps) => {
               type="checkbox"
               id="checkboxOnlySubscribed"
               name="onlySubscribed"
-              checked={searchSubscribedOnly}
+              checked={props.searchSubscribedOnly}
               disabled={
                 props.user === undefined || props.language === Language.Unknown
               }
@@ -210,7 +220,7 @@ export const Header = (props: HeaderProps) => {
                 minWidth: "50%",
               }}
               onClick={() => {
-                setSearchSubscribedOnly(!searchSubscribedOnly);
+                props.setSearchSubscribedOnly(!props.searchSubscribedOnly);
               }}
             >
               Favorite Snippets Only

@@ -33,6 +33,7 @@ export const GET_RECIPES: string = gql`
       keywords
       tags
       code
+      isSubscribed
       imports
       shortcut
       language
@@ -78,6 +79,7 @@ export const GET_RECIPES_SEMANTIC: string = gql`
       name
       description
       isPublic
+      isSubscribed
       keywords
       tags
       code
@@ -158,5 +160,17 @@ export const GET_RECIPES_BY_SHORTCUT_LAST_TIMESTAMP: string = gql`
       dependencies: $dependencies
       language: $language
     )
+  }
+`;
+
+export const SUBSCRIBE_TO_RECIPE = gql`
+  mutation subscribeToRecipe($id: Long!) {
+    subscribeToRecipe(id: $id)
+  }
+`;
+
+export const UNSUBSCRIBE_TO_RECIPE = gql`
+  mutation unsubscribeFromRecipe($id: Long!) {
+    unsubscribeFromRecipe(id: $id)
   }
 `;

@@ -7,7 +7,8 @@ import {
   VSCodeLink,
 } from "@vscode/webview-ui-toolkit/react";
 
-import { AssistantRecipe, Language } from "../graphql-api/types";
+import { AssistantRecipe, Language, User } from "../graphql-api/types";
+import { HeartFilledIcon, HeartIcon } from "./icons/heartIcon";
 
 interface SnippetsProps {
   vsCodeApi: any;
@@ -15,6 +16,11 @@ interface SnippetsProps {
   language: Language;
   loading: boolean;
   initialLoading: boolean;
+  user: User | undefined;
+  searchPublic: boolean;
+  searchPrivate: boolean;
+  searchSubscribedOnly: boolean;
+  term: string;
 }
 
 export const Snippets = (props: SnippetsProps) => {
@@ -76,6 +82,28 @@ export const Snippets = (props: SnippetsProps) => {
   if (props.snippets.length === 0) {
     return <div>No snippets</div>;
   }
+
+  const favoriteSnippet = (snippet: AssistantRecipe) => {
+    props.vsCodeApi.postMessage({
+      command: "favoriteSnippet",
+      snippet: snippet,
+      term: props.term,
+      searchPublic: props.searchPublic,
+      searchPrivate: props.searchPrivate,
+      searchSubscribedOnly: props.searchSubscribedOnly,
+    });
+  };
+
+  const unFavoriteSnippet = (snippet: AssistantRecipe) => {
+    props.vsCodeApi.postMessage({
+      command: "unfavoriteSnippet",
+      snippet: snippet,
+      term: props.term,
+      searchPublic: props.searchPublic,
+      searchPrivate: props.searchPrivate,
+      searchSubscribedOnly: props.searchSubscribedOnly,
+    });
+  };
 
   const insertSnippet = (snippet: AssistantRecipe) => {
     props.vsCodeApi.postMessage({
@@ -145,7 +173,55 @@ export const Snippets = (props: SnippetsProps) => {
               flexWrap: "wrap",
             }}
           >
-            <h2>{snippet.name}</h2>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "left",
+                flexDirection: "row",
+              }}
+            >
+              <h2
+              // style={{ display: "inline-block", verticalAlign: "middle" }}
+              >
+                {snippet.name}{" "}
+              </h2>{" "}
+              {props.user && snippet.isSubscribed === true && (
+                <>
+                  <div
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      marginLeft: "5px",
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault;
+                      unFavoriteSnippet(snippet);
+                    }}
+                  >
+                    <HeartFilledIcon />
+                  </div>
+                </>
+              )}
+              {snippet.isSubscribed === false && (
+                <>
+                  <div
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      marginLeft: "5px",
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault;
+                      favoriteSnippet(snippet);
+                    }}
+                  >
+                    <HeartIcon />
+                  </div>
+                </>
+              )}
+            </div>
             <div
               style={{
                 display: "flex",

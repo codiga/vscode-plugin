@@ -16,6 +16,12 @@ export const Webview = (props: WebviewProps) => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
+  const [searchPublic, setSearchPublic] = useState<boolean>(false);
+  const [searchPrivate, setSearchPrivate] = useState<boolean>(false);
+  const [searchSubscribedOnly, setSearchSubscribedOnly] =
+    useState<boolean>(false);
+  const [term, setTerm] = useState<string>("");
+
   useEffect(() => {
     window.addEventListener("message", (event) => {
       const message = event.data;
@@ -54,6 +60,14 @@ export const Webview = (props: WebviewProps) => {
         setLoading={setLoading}
         isLoading={loading}
         initialLoading={initialLoading}
+        searchPublic={searchPublic}
+        setSearchPublic={setSearchPublic}
+        searchPrivate={searchPrivate}
+        setSearchPrivate={setSearchPrivate}
+        searchSubscribedOnly={searchSubscribedOnly}
+        setSearchSubscribedOnly={setSearchSubscribedOnly}
+        term={term}
+        setTerm={setTerm}
       />
       <Snippets
         snippets={snippets}
@@ -61,6 +75,11 @@ export const Webview = (props: WebviewProps) => {
         language={language}
         loading={loading}
         initialLoading={initialLoading}
+        user={user}
+        searchPublic={searchPublic}
+        searchPrivate={searchPrivate}
+        searchSubscribedOnly={searchSubscribedOnly}
+        term={term}
       />
     </div>
   );
