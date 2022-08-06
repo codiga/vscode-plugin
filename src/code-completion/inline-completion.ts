@@ -16,6 +16,11 @@ export const cleanLine = (line: string): string => {
   return line.replace("#", "").replace("//", "");
 };
 
+export const shouldAnalyze = (line: string): boolean => {
+  const parts = cleanLine(line).split(" ");
+  return parts.filter((p) => p.length > 0).length >= 2;
+};
+
 export const provideInlineComplextion = async (
   document: vscode.TextDocument,
   position: vscode.Position,
@@ -23,7 +28,6 @@ export const provideInlineComplextion = async (
   token: vscode.CancellationToken
 ): Promise<vscode.InlineCompletionItem[] | vscode.InlineCompletionList> => {
   if (!isInlineCompletionEnabled()) {
-    console.log("disabled");
     return Promise.resolve([]);
   }
   if (position.line <= 0) {
@@ -36,7 +40,11 @@ export const provideInlineComplextion = async (
   const filename = vscode.workspace.asRelativePath(document.uri.path);
   const dependencies: string[] = await getDependencies(document);
 
-  if (!isLineComment(term, language)) {
+  if (!isLineComment(currentLine, language)) {
+    return [];
+  }
+
+  if (!shouldAnalyze(currentLine)) {
     return [];
   }
 

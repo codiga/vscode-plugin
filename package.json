@@ -31,7 +31,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.6.2",
+  "version": "0.6.3",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -198,5 +198,11 @@
     "react-markdown": "^8.0.3",
     "remark": "^14.0.2",
     "remark-html": "^15.0.1"
+  },
+  "__metadata": {
+    "id": "251775d3-1b6c-426f-bb28-419880a36f83",
+    "publisherDisplayName": "codiga",
+    "publisherId": "1ff72dc4-0da2-4de5-93cc-b443bb0a75f7",
+    "isPreReleaseVersion": false
   }
 }
