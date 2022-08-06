@@ -8,7 +8,19 @@
 
 [Codiga](https://www.codiga.io) is a [Smart Code Snippets](https://www.codiga.io/code-snippets/smart-code-snippets/) manager. Create, share, search and use Smart Code Snippets from your IDE.
 
+# Codiga: Code Snippets on Steroids
+
+Look for snippets using a shortcut or search using inline completions like GitHub Copilot.
+
+Adapt the list of snippets by adding your own.
+
 ## Quick Start
+
+Start a comment and type what you want to have. Like GitHub Copilot, it suggests a list of snippets you can insert in your code.
+
+![Use of smart code snippet in Python](images/inline-completion.gif)
+
+## Use Snippets using Shortcuts
 
 Install the extension and type `.` or `/` in your IDE to list all available smart code snippets for your project. Accept a smart code snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
 
@@ -26,7 +38,7 @@ Install the extension and type `.` or `/` in your IDE to list all available smar
 
 ## Create Smart Code Snippets
 
-Create a smart code snippet by selecting the code and click on `Create Codiga Snippet`
+Create a smart code snippet by selecting the code and click on `Create Codiga Snippet`. The keywords put in your snippet are used to index the snippet and find it using smart search.
 
 ![Creation of Smart Code Snippet](images/vscode-create-recipe.gif)
 
