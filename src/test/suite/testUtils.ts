@@ -119,7 +119,9 @@ export function mockRecipe(code: string): Promise<AssistantRecipe[]> {
           downvotes: 3,
           owner: {
             id: 42,
-            username: "foobar",
+            displayName: "author",
+            hasSlug: false,
+            slug: undefined,
             accountType: "GitHub",
           },
           groups: [],
@@ -155,7 +157,9 @@ export function mockRecipePython(code: string): Promise<AssistantRecipe[]> {
           downvotes: 3,
           owner: {
             id: 42,
-            username: "foobar",
+            displayName: "foobar",
+            hasSlug: false,
+            slug: undefined,
             accountType: "GitHub",
           },
           groups: [],
@@ -196,7 +200,9 @@ export function mockRecipeJava(code: string): Promise<AssistantRecipe[]> {
           downvotes: 3,
           owner: {
             id: 42,
-            username: "foobar",
+            displayName: "author",
+            hasSlug: false,
+            slug: undefined,
             accountType: "GitHub",
           },
           groups: [],

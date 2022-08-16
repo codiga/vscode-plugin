@@ -1,7 +1,9 @@
 export interface AssistantRecipeOwner {
   id: number;
-  username: string;
+  displayName: string;
   accountType: string;
+  hasSlug: boolean;
+  slug: string | undefined;
 }
 
 export interface AssistantRecipeGroup {

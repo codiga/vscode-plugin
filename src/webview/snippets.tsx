@@ -291,7 +291,7 @@ export const Snippets = (props: SnippetsProps) => {
               gap: "1em 1em",
             }}
           >
-            {snippet.owner && snippet.owner.username && (
+            {snippet.owner && snippet.owner.displayName && (
               <p
                 style={{
                   fontSize: "0.9em",
@@ -299,13 +299,14 @@ export const Snippets = (props: SnippetsProps) => {
                 }}
               >
                 Owner:{" "}
-                <a
-                  href={`https://app.codiga.io/hub/user/${snippet.owner.accountType.toLowerCase()}/${
-                    snippet.owner.username
-                  }`}
-                >
-                  {snippet.owner.username}
-                </a>
+                {snippet.owner.hasSlug && snippet.owner.slug !== undefined && (
+                  <a
+                    href={`https://app.codiga.io/hub/user/${snippet.owner.slug}`}
+                  >
+                    {snippet.owner.displayName}
+                  </a>
+                )}
+                {!snippet.owner.hasSlug && <>{snippet.owner.displayName}</>}
               </p>
             )}
             {snippet.groups && snippet.groups.length > 0 && (

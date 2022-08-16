@@ -44,7 +44,9 @@ export const GET_RECIPES: string = gql`
       upvotes
       owner {
         id
-        username
+        displayName
+        hasSlug
+        slug
         accountType
       }
       groups {
@@ -97,7 +99,9 @@ export const GET_RECIPES_SEMANTIC: string = gql`
         name
       }
       owner {
-        username
+        displayName
+        slug
+        hasSlug
         accountType
       }
       groups {
@@ -142,8 +146,9 @@ export const GET_RECIPES_BY_SHORTCUT: string = gql`
       upvotes
       owner {
         id
-        username
-        accountType
+        displayName
+        slug
+        hasSlug
       }
       groups {
         id
