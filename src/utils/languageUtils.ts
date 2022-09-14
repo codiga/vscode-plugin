@@ -14,18 +14,22 @@ export const LANGUAGE_ENUMATION_TO_STRING: Record<string, string> = {
   Json: "JSON",
   Javascript: "JavaScript",
   Kotlin: "Kotlin",
+  Markdown: "Markdown",
   Objectivec: "Objective-C",
   Php: "PHP",
   Python: "Python",
   Perl: "Perl",
   Rust: "Rust",
   Ruby: "Ruby",
+  Sass: "Sass",
   Scala: "Scala",
+  Scss: "Scss",
   Solidity: "Solidity",
   Swift: "Swift",
   Sql: "SQL",
   Terraform: "Terraform",
   Typescript: "Typescript",
+  Twig: "Twig",
   Yaml: "YAML",
 };
 
@@ -52,6 +56,8 @@ export const isLineComment = (line: string, language: string): boolean => {
     case "swift":
     case "solidity":
     case "rust":
+    case "sass":
+    case "scss":
       return filteredLine.startsWith("//");
     case "python":
     case "shell":
@@ -67,6 +73,8 @@ export const isLineComment = (line: string, language: string): boolean => {
       return filteredLine.startsWith("--");
     case "css":
       return filteredLine.startsWith("/*");
+    case "twig":
+      return filteredLine.startsWith("{#");
     default:
       return false;
   }
