@@ -203,7 +203,11 @@ export async function providesCodeCompletion(
       ];
     }
 
-    snippetCompletion.insertText = new vscode.SnippetString(vscodeFormatCode);
+    // When we build a SnippetString with a dollar sign, it's substituted in the text so we escape it.
+    const codeWithDollarEscaped = vscodeFormatCode.replace(/\$/g, "\\$");
+    snippetCompletion.insertText = new vscode.SnippetString(
+      codeWithDollarEscaped
+    );
 
     /* This will suggest recipes that have been used more recently first, for this we use the timestamp
      * stored in the local storage after selecting a suggested recipe and sort them.
