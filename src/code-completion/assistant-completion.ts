@@ -20,7 +20,10 @@ import {
 import { getShortcutCache } from "../graphql-api/shortcut-cache";
 import { filterImports } from "../utils/dependencies/filter-dependencies";
 import { getFromLocalStorage } from "../utils/localStorage";
-import { generateKeyForUsedRecipe } from "../utils/snippetUtils";
+import {
+  escapeDollarSign,
+  generateKeyForUsedRecipe,
+} from "../utils/snippetUtils";
 
 /**
  * Get the recipes. We first attempt to get them from the cache if there
@@ -204,9 +207,8 @@ export async function providesCodeCompletion(
     }
 
     // When we build a SnippetString with a dollar sign, it's substituted in the text so we escape it.
-    const codeWithDollarEscaped = vscodeFormatCode.replace(/\$/g, "\\$");
     snippetCompletion.insertText = new vscode.SnippetString(
-      codeWithDollarEscaped
+      escapeDollarSign(vscodeFormatCode)
     );
 
     /* This will suggest recipes that have been used more recently first, for this we use the timestamp

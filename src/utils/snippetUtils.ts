@@ -28,6 +28,16 @@ export const resetRecipeHolder = (recipeHolder: LatestRecipeHolder) => {
   recipeHolder.recipe = undefined;
 };
 
+/**
+ * When we insert a snippet, any value with a dollar sign on front is changed
+ * by a potential variable. It leads to issue when inserting a snippet.
+ * @param code
+ * @returns
+ */
+export const escapeDollarSign = (code: string): string => {
+  return code.replace(/\$/g, "\\$");
+};
+
 export const insertSnippet = async (
   editor: vscode.TextEditor,
   initialPosition: vscode.Position,
@@ -37,7 +47,7 @@ export const insertSnippet = async (
   const decodeFromBase64 = Buffer.from(recipe.vscodeFormat, "base64").toString(
     "utf8"
   );
-  const decodedCode = decodeIndent(decodeFromBase64);
+  const decodedCode = escapeDollarSign(decodeIndent(decodeFromBase64));
   const snippet = new vscode.SnippetString(decodedCode);
 
   /**

@@ -11,6 +11,7 @@ import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
 import { decodeIndent } from "../utils/indentationUtils";
 import { isLineComment } from "../utils/languageUtils";
+import { escapeDollarSign } from "../utils/snippetUtils";
 
 export const cleanLine = (line: string): string => {
   return line.replace("#", "").replace("//", "");
@@ -63,7 +64,9 @@ export const provideInlineComplextion = async (
       snippet.vscodeFormat || "",
       "base64"
     ).toString("utf8");
-    const vscodeFormatCode = decodeIndent(decodeVscodeFormatFromBase64);
+    const vscodeFormatCode = decodeIndent(
+      escapeDollarSign(decodeVscodeFormatFromBase64)
+    );
 
     return new vscode.InlineCompletionItem(
       new vscode.SnippetString("\n" + vscodeFormatCode),
