@@ -1,3 +1,4 @@
+import { stringify } from "querystring";
 import * as vscode from "vscode";
 import { PREFIX_RECENTLY_ADDED_RECIPE } from "../constants";
 
@@ -35,7 +36,9 @@ export const resetRecipeHolder = (recipeHolder: LatestRecipeHolder) => {
  * @returns
  */
 export const escapeDollarSign = (code: string): string => {
-  return code.replace(/\$/g, "\\$");
+  // return code.replace(/\$/g, "\\$");
+
+  return code.replace(/([^\\])(\$)([^{0-9])/g, "$1\\$$$3");
 };
 
 export const insertSnippet = async (
