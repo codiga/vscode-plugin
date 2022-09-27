@@ -12,6 +12,7 @@ import {
   STARTUP_MESSAGE_WINDOWS,
   VSCODE_DOCUMENTATION_URL,
   PREFERENCES_OPEN_BROWSER_AFTER_INSTALL,
+  DIAGNOSTICS_COLLECTION_NAME,
 } from "./constants";
 import { testApi } from "./commands/test-api";
 import {
@@ -41,6 +42,9 @@ import {
 } from "./commands/webview";
 import { provideInlineComplextion } from "./code-completion/inline-completion";
 import { AssistantRecipe } from "./graphql-api/types";
+import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
+import { applyFix, RosieFixAction } from "./rosie/rosiefix";
+import { RosieFix } from "./rosie/rosieTypes";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -50,6 +54,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // ALWAYS record the first editor FIRST
   recordLastEditor();
+
+  // Create diagnostics and register them
+  const diagnostics = vscode.languages.createDiagnosticCollection(
+    DIAGNOSTICS_COLLECTION_NAME
+  );
+  context.subscriptions.push(diagnostics);
+
+  subscribeToDocumentChanges(context, diagnostics);
 
   const codigaStatusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
@@ -112,6 +124,21 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   /**
+   * Action to apply a fix for Rosie. This action is called
+   * by the code analysis handler.
+   */
+  vscode.commands.registerCommand(
+    "codiga.applyFix",
+    async (document: vscode.TextDocument, fix: RosieFix) => {
+      console.log("doc");
+      console.log(document);
+      console.log("fix");
+      console.log(fix);
+      await applyFix(document, fix);
+    }
+  );
+
+  /**
    * Remove a line from the current active text editor. Used for the line
    * code completion
    */
@@ -132,6 +159,12 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
+    context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(lang, new RosieFixAction(), {
+        providedCodeActionKinds: RosieFixAction.providedCodeActionKinds,
+      })
+    );
+
     const inlineProvider: vscode.InlineCompletionItemProvider = {
       provideInlineCompletionItems: async (
         document,
