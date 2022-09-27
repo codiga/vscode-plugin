@@ -8,6 +8,8 @@ export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show again";
 
 export const DIAGNOSTIC_CODE = "codiga";
 
+export const DIAGNOSTICS_COLLECTION_NAME = "codiga";
+
 export const NODE_PACKAGE_FILE = "package.json";
 export const COMPOSER_FILE = "composer.json";
 export const REQUIREMENTS_FILE = "requirements.txt";
@@ -17,6 +19,8 @@ export const AUTO_COMPLETION_CHARACTER_TRIGGER = "./";
 
 // 10 seconds
 export const CODING_ASSISTANT_SHORTCUTS_POLLING_MS = 10000;
+
+export const TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS = 100;
 // 10 minutes
 export const CODING_ASSISTANT_MAX_TIME_IN_CACHE_MS = 600000;
 
