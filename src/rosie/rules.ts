@@ -6,14 +6,9 @@ import { RuleSet } from "./rosieTypes";
 const CODIGA_RULES_DEBUGFILE = ".codigadebug";
 
 export const getRulesetsDebug = async (
-  document: vscode.TextDocument,
-  language: Language
+  document: vscode.TextDocument
 ): Promise<RuleSet[] | undefined> => {
-  const ruleFile = await getRulesFile(
-    document,
-    CODIGA_RULES_DEBUGFILE,
-    language
-  );
+  const ruleFile = await getRulesFile(document, CODIGA_RULES_DEBUGFILE);
 
   if (ruleFile) {
     try {
@@ -37,8 +32,7 @@ export const getRulesetsDebug = async (
 
 const getRulesFile = async (
   document: vscode.TextDocument,
-  filename: string,
-  language: Language
+  filename: string
 ): Promise<vscode.Uri | undefined> => {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length < 1) {

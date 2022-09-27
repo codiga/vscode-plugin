@@ -2,8 +2,6 @@ import * as vscode from "vscode";
 import { getFixesForDocument } from "../diagnostics/diagnostics";
 import { RosieFix, RosieFixEdit } from "./rosieTypes";
 
-const COMMAND = "codiga.rosiefix";
-
 /**
  * Get all the fix edits.
  */
@@ -11,7 +9,6 @@ const mapFixEditToTextEdit = (
   fixEdit: RosieFixEdit
 ): vscode.TextEdit | undefined => {
   if (fixEdit.editType === "add") {
-    const edit = new vscode.WorkspaceEdit();
     const insertPosition = new vscode.Position(
       fixEdit.start.line - 1,
       fixEdit.start.col - 1
@@ -19,7 +16,6 @@ const mapFixEditToTextEdit = (
     return vscode.TextEdit.insert(insertPosition, fixEdit.content || "");
   }
   if (fixEdit.editType === "update") {
-    const edit = new vscode.WorkspaceEdit();
     const startPosition = new vscode.Position(
       fixEdit.start.line - 1,
       fixEdit.start.col - 1
@@ -34,7 +30,6 @@ const mapFixEditToTextEdit = (
     );
   }
   if (fixEdit.editType === "remove") {
-    const edit = new vscode.WorkspaceEdit();
     const startPosition = new vscode.Position(
       fixEdit.start.line - 1,
       fixEdit.start.col - 1

@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { getLanguageForDocument, getLanguageForFile } from "../utils/fileUtils";
-const fetch = require("node-fetch");
 import axios from "axios";
 
 import {
@@ -161,7 +160,7 @@ export const getRuleResponses = async (
 
   // Convert the code to Base64
   const codeBuffer = Buffer.from(document.getText());
-  let codeBase64 = codeBuffer.toString("base64");
+  const codeBase64 = codeBuffer.toString("base64");
 
   // Build the request post data
   const data = {
@@ -241,7 +240,7 @@ export async function refreshDiagnostics(
     return;
   }
 
-  const rulesetDebug = await getRulesetsDebug(doc, language);
+  const rulesetDebug = await getRulesetsDebug(doc);
 
   if (rulesetDebug) {
     const rules = getRulesFromRulesets(rulesetDebug);
