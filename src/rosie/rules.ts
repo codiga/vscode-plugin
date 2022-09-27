@@ -31,6 +31,7 @@ export const getRulesetsDebug = async (
       return undefined;
     }
   }
+  console.log("no ruleset found");
   return undefined;
 };
 

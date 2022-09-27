@@ -42,6 +42,7 @@ export interface RuleReponse {
   errors: string[];
   identifier: string;
   violations: Violation[];
+  executionTimeMs: number;
 }
 
 export interface RosieReponse {

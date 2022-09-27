@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getBasename, getLanguageForFile } from "../utils/fileUtils";
+import { getLanguageForDocument, getLanguageForFile } from "../utils/fileUtils";
 const fetch = require("node-fetch");
 import axios from "axios";
 
@@ -15,20 +15,28 @@ import {
   Rule,
   RuleReponse,
   RuleSet,
-  Violation,
 } from "../rosie/rosieTypes";
 import {
+  ROSIE_ENDPOINT_PROD,
   ROSIE_SEVERITY_CRITICAL,
   ROSIE_SEVERITY_WARNING,
 } from "../rosie/rosieConstants";
+import { getRosieLanguage } from "../rosie/rosieLanguage";
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
   vscode.Uri,
   Map<vscode.Range, RosieFix[]>
 > = new Map();
-const ROSIE_ENDPOINT = "https://analysis.codiga.io/analyze";
 
+/**
+ * This function is a helper for the quick fixes. It retrieves the quickfix for a
+ * violation. We register the list of fixes when we analyze. Then, when the user
+ * hover a quick fix, we get the list of quick fixes using this function.
+ * @param documentUri
+ * @param range
+ * @returns
+ */
 export const getFixesForDocument = (
   documentUri: vscode.Uri,
   range: vscode.Range
@@ -45,6 +53,14 @@ export const getFixesForDocument = (
   return undefined;
 };
 
+/**
+ * Register a fix for a document and a range. When we analyze the file,
+ * we store all the quick fixes in a Map so that we can retrieve them
+ * later when the user hover the fixes.
+ * @param documentUri
+ * @param range
+ * @param fix
+ */
 const registerFixForDocument = (
   documentUri: vscode.Uri,
   range: vscode.Range,
@@ -61,6 +77,11 @@ const registerFixForDocument = (
   FIXES_BY_DOCUMENT.get(documentUri)?.get(range)?.push(fix);
 };
 
+/**
+ * Reset the quick fixes for a document. When we start another analysis, we reset
+ * the list of fixes to only have a short list of quick fixes.
+ * @param documentUri
+ */
 const resetFixesForDocument = (documentUri: vscode.Uri): void => {
   FIXES_BY_DOCUMENT.set(documentUri, new Map());
 };
@@ -118,46 +139,55 @@ export const getRulesFromRulesets = (ruleSets: RuleSet[]): Rule[] => {
   return result;
 };
 
-export const getViolations = async (
+/**
+ * Get the rule responses from Rosie
+ * @param document - the document being analyzed
+ * @param rules - the list of rules
+ * @returns
+ */
+export const getRuleResponses = async (
   document: vscode.TextDocument,
   rules: Rule[]
 ): Promise<RuleReponse[]> => {
-  const result: Violation[] = [];
+  const language = getLanguageForDocument(document);
+  const rosieLanguage = getRosieLanguage(language);
+
+  if (!rosieLanguage) {
+    console.debug("language not supported by Rosie");
+    return [];
+  }
+
   const relativePath = vscode.workspace.asRelativePath(document.uri.path);
+
+  // Convert the code to Base64
   const codeBuffer = Buffer.from(document.getText());
   let codeBase64 = codeBuffer.toString("base64");
+
+  // Build the request post data
   const data = {
     filename: relativePath,
     fileEncoding: "utf-8",
-    language: "python",
+    language: rosieLanguage,
     codeBase64: codeBase64,
     rules: rules,
-    logOutput: true,
+    logOutput: false,
   };
 
-  const response = await axios.post<RosieReponse>(ROSIE_ENDPOINT, data, {
+  // Make the initial request to Rosie
+  const response = await axios.post<RosieReponse>(ROSIE_ENDPOINT_PROD, data, {
     headers: {
       "Content-Type": "application/json",
     },
   });
 
-  if (!response) {
-    console.debug("no response");
+  if (!response || !response.data) {
+    console.debug("no response from Rosie");
     return [];
   }
 
   const responses = response.data.ruleResponses as RuleReponse[];
 
   return responses;
-
-  // for (const ruleResponse of responses) {
-  //   if (ruleResponse.violations) {
-  //     for (const violation of ruleResponse.violations) {
-  //       result.push(violation);
-  //     }
-  //   }
-  // }
-  // return result;
 };
 
 const mapRosieSeverityToVsCodeSeverity = (
@@ -178,7 +208,6 @@ export async function refreshDiagnostics(
 ): Promise<void> {
   const path = doc.uri.path;
   const relativePath = vscode.workspace.asRelativePath(path);
-  const newDiagnostics: vscode.Diagnostic[] = [];
   const language: Language = getLanguageForFile(relativePath);
 
   if (language === Language.Unknown) {
@@ -187,15 +216,19 @@ export async function refreshDiagnostics(
   }
 
   if (language !== Language.Python) {
-    console.debug("langauge not supported");
+    console.debug("language not supported");
     return;
   }
 
+  /**
+   * We do not proceed yet, we make sure the user is done typing some text
+   */
   const shouldDoAnalysis = await shouldProceed(doc);
   if (!shouldDoAnalysis) {
     return;
   }
 
+  // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
 
   if (doc.getText().length === 0) {
@@ -213,10 +246,11 @@ export async function refreshDiagnostics(
   if (rulesetDebug) {
     const rules = getRulesFromRulesets(rulesetDebug);
 
-    const ruleReponses = await getViolations(doc, rules);
+    const ruleReponses = await getRuleResponses(doc, rules);
     const diags: vscode.Diagnostic[] = [];
 
     ruleReponses.forEach((ruleReponse) => {
+      console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
       ruleReponse.violations.forEach((v) => {
         const range = new vscode.Range(
           new vscode.Position(v.start.line - 1, v.start.col - 1),
@@ -250,11 +284,15 @@ export function subscribeToDocumentChanges(
   diagnostics: vscode.DiagnosticCollection
 ): void {
   if (vscode.window.activeTextEditor) {
+    console.debug("refreshing diagnostics because new editor");
+
     refreshDiagnostics(vscode.window.activeTextEditor.document, diagnostics);
   }
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
+        console.debug("refreshing diagnostics because editor changed");
+
         refreshDiagnostics(editor.document, diagnostics);
       }
     })
@@ -269,8 +307,10 @@ export function subscribeToDocumentChanges(
   );
 
   context.subscriptions.push(
-    vscode.workspace.onDidCloseTextDocument((doc) =>
-      diagnostics.delete(doc.uri)
-    )
+    vscode.workspace.onDidCloseTextDocument((doc) => {
+      console.debug("deleting diagnostics because document closes");
+
+      diagnostics.delete(doc.uri);
+    })
   );
 }
