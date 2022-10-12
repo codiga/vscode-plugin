@@ -1,13 +1,28 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { Language } from "../graphql-api/types";
-import { RuleSet } from "./rosieTypes";
+import { Rule, RuleSet } from "./rosieTypes";
+import { CODIGA_RULES_DEBUGFILE } from "../constants";
 
-const CODIGA_RULES_DEBUGFILE = ".codigadebug";
+/**
+ * Get the rules from the rulesets in JSON in the .codigadebug file
+ * @param ruleSets
+ * @returns
+ */
+const getRulesFromDebugRulesets = (ruleSets: RuleSet[]): Rule[] => {
+  const result: Rule[] = [];
 
-export const getRulesetsDebug = async (
+  for (const ruleset of ruleSets) {
+    for (const rule of ruleset.rules) {
+      result.push(rule);
+    }
+  }
+
+  return result;
+};
+
+export const getRulesDebug = async (
   document: vscode.TextDocument
-): Promise<RuleSet[] | undefined> => {
+): Promise<Rule[] | undefined> => {
   const ruleFile = await getRulesFile(document, CODIGA_RULES_DEBUGFILE);
 
   if (ruleFile) {
@@ -20,7 +35,7 @@ export const getRulesetsDebug = async (
       if (!rulesJson) {
         return undefined;
       }
-      return rulesJson;
+      return getRulesFromDebugRulesets(rulesJson);
     } catch (err) {
       console.debug("error when trying to read the rules");
       return undefined;

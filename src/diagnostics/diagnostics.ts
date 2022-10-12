@@ -7,7 +7,7 @@ import {
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { Language } from "../graphql-api/types";
-import { getRulesetsDebug } from "../rosie/rules";
+import { getRulesDebug, getRulesetsDebug } from "../rosie/debug";
 import {
   RosieFix,
   RosieReponse,
@@ -16,11 +16,13 @@ import {
   RuleSet,
 } from "../rosie/rosieTypes";
 import {
+  GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
   ROSIE_ENDPOINT_PROD,
   ROSIE_SEVERITY_CRITICAL,
   ROSIE_SEVERITY_WARNING,
 } from "../rosie/rosieConstants";
 import { getRosieLanguage } from "../rosie/rosieLanguage";
+import { getRulesFromCache } from "../rosie/rosieCache";
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
@@ -126,18 +128,6 @@ const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
   return actualTimeoutMs === currentTimestampMs;
 };
 
-export const getRulesFromRulesets = (ruleSets: RuleSet[]): Rule[] => {
-  const result: Rule[] = [];
-
-  for (const ruleset of ruleSets) {
-    for (const rule of ruleset.rules) {
-      result.push(rule);
-    }
-  }
-
-  return result;
-};
-
 /**
  * Get the rule responses from Rosie
  * @param document - the document being analyzed
@@ -214,7 +204,7 @@ export async function refreshDiagnostics(
     return;
   }
 
-  if (language !== Language.Python) {
+  if (!(language in GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys())) {
     console.debug("language not supported");
     return;
   }
@@ -240,11 +230,9 @@ export async function refreshDiagnostics(
     return;
   }
 
-  const rulesetDebug = await getRulesetsDebug(doc);
+  const rules = (await getRulesFromCache(doc)) || (await getRulesDebug(doc));
 
-  if (rulesetDebug) {
-    const rules = getRulesFromRulesets(rulesetDebug);
-
+  if (rules && rules.length > 0) {
     const ruleReponses = await getRuleResponses(doc, rules);
     const diags: vscode.Diagnostic[] = [];
 
@@ -274,7 +262,7 @@ export async function refreshDiagnostics(
 
     diagnostics.set(doc.uri, diags);
   } else {
-    console.log("no ruleset for debug");
+    console.log("no ruleset to use");
   }
 }
 

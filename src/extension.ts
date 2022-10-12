@@ -32,7 +32,6 @@ import {
   enableShortcutsPolling,
   fetchPeriodicShortcuts,
   fetchShortcuts,
-  recordLastActivity,
 } from "./graphql-api/shortcut-cache";
 import { removeRecentlyUsedRecipes } from "./commands/remove-recently-used-recipes";
 import {
@@ -45,6 +44,8 @@ import { AssistantRecipe } from "./graphql-api/types";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { applyFix, RosieFixAction } from "./rosie/rosiefix";
 import { RosieFix } from "./rosie/rosieTypes";
+import { refreshCachePeriodic } from "./rosie/rosieCache";
+import { recordLastActivity } from "./utils/activity";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -244,7 +245,8 @@ export async function activate(context: vscode.ExtensionContext) {
       });
   }
   enableShortcutsPolling();
-  fetchPeriodicShortcuts();
+  fetchPeriodicShortcuts(); // refresh available shortcuts periodically
+  refreshCachePeriodic(); // refresh rules available for all workspaces
 
   /**
    * Whenever we open a document, we attempt to fetch the shortcuts

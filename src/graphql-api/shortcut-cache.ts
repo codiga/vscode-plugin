@@ -3,6 +3,7 @@ import {
   CODING_ASSISTANT_MAX_TIME_IN_CACHE_MS,
   CODING_ASSISTANT_SHORTCUTS_POLLING_MS,
 } from "../constants";
+import { wasActiveRecently } from "../utils/activity";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
 import {
@@ -12,26 +13,6 @@ import {
 import { AssistantRecipe, Language } from "./types";
 
 let enablePeriodicPolling = true;
-let lastActivityTimestamp: number = Date.now();
-
-/**
- * Report if the editor was active recently. If the editor
- * was not active, we will not refresh the cache.
- * @returns
- */
-export const wasActiveRecently = (): boolean => {
-  const tenMinutesInMilliseconds = 60 * 10 * 1000;
-  const tenMinutesAgo = Date.now() - tenMinutesInMilliseconds;
-  return lastActivityTimestamp > tenMinutesAgo;
-};
-
-/**
- * Record the timestamp of the last activity to know
- * if we refresh the cache or not.
- */
-export const recordLastActivity = (): void => {
-  lastActivityTimestamp = Date.now();
-};
 
 /**
  * Interface for cache key and cache values

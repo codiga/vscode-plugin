@@ -1,5 +1,5 @@
 import { GraphQLClient } from "graphql-request";
-import { GRAPHQL_ENDPOINT } from "../constants";
+import { GRAPHQL_ENDPOINT_STAGING, GRAPHQL_ENDPOINT_PROD } from "../constants";
 import { getApiToken } from "./configuration";
 
 let client: GraphQLClient;
@@ -9,7 +9,7 @@ let client: GraphQLClient;
  * to perform all the GraphQL request.
  */
 export function initializeClient(): void {
-  client = new GraphQLClient(GRAPHQL_ENDPOINT);
+  client = new GraphQLClient(GRAPHQL_ENDPOINT_STAGING);
 }
 
 function generateHeaders(): Record<string, string> {
@@ -43,6 +43,8 @@ export function doQuery(
   const query = client
     .request(graphqlQuery, variables, generateHeaders())
     .catch((e) => {
+      console.log("exception");
+      console.log(e);
       return undefined;
     });
   return query;
