@@ -229,7 +229,6 @@ export async function refreshDiagnostics(
    */
   const shouldDoAnalysis = await shouldProceed(doc);
   if (!shouldDoAnalysis) {
-    console.log("should not proceed");
     return;
   }
   DIAGNOSTICS_TO_RULE_RESPONSE.clear();
@@ -282,7 +281,7 @@ export async function refreshDiagnostics(
 
     diagnostics.set(doc.uri, diags);
   } else {
-    console.log("no ruleset to use");
+    console.debug("no ruleset to use");
   }
 }
 
@@ -290,9 +289,8 @@ export function subscribeToDocumentChanges(
   context: vscode.ExtensionContext,
   diagnostics: vscode.DiagnosticCollection
 ): void {
-  console.log("pushing changes");
   if (vscode.window.activeTextEditor) {
-    console.debug("refreshing diagnostics because new editor");
+    // console.debug("refreshing diagnostics because new editor");
 
     refreshDiagnostics(vscode.window.activeTextEditor.document, diagnostics);
   }
