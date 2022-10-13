@@ -137,7 +137,6 @@ const updateCacheForWorkspace = async (
       if (cache.has(workspace)) {
         cache.delete(workspace);
       }
-      console.log("no timestamp, not putting anything in the cache");
       return;
     }
 
@@ -182,13 +181,8 @@ const updateCacheForWorkspace = async (
 export const getRulesFromCache = async (
   doc: vscode.TextDocument
 ): Promise<Rule[]> => {
-  console.log("doc");
-  console.log(doc);
   const workspacefolder = vscode.workspace.getWorkspaceFolder(doc.uri);
-  console.log("workspace folder");
 
-  console.log(workspacefolder);
-  console.log(workspacefolder?.uri.path);
   if (!workspacefolder) {
     return [];
   }
@@ -199,17 +193,16 @@ export const getRulesFromCache = async (
       const language = getLanguageForDocument(doc);
       const rosieLanguage = GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.get(language);
       if (rosieLanguage) {
-        console.log("got something in cache");
-        return rules.filter((r) => r.language === rosieLanguage);
+        return rules.filter(
+          (r) => r.language.toLocaleLowerCase() === rosieLanguage
+        );
       } else {
-        console.log("got something in cache");
         return [];
       }
     } else {
       return [];
     }
   } else {
-    console.log("nothing in cache");
     return [];
   }
 };

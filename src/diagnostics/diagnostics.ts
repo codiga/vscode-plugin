@@ -200,12 +200,12 @@ export async function refreshDiagnostics(
   const language: Language = getLanguageForFile(relativePath);
 
   if (language === Language.Unknown) {
-    console.debug("unknown language, skipping");
     return;
   }
-
-  if (!(language in GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys())) {
-    console.debug("language not supported");
+  const supportedLanguages = Array.from(
+    GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys()
+  );
+  if (supportedLanguages.indexOf(language) === -1) {
     return;
   }
 
@@ -214,8 +214,10 @@ export async function refreshDiagnostics(
    */
   const shouldDoAnalysis = await shouldProceed(doc);
   if (!shouldDoAnalysis) {
+    console.log("should not proceed");
     return;
   }
+  console.log("should proceed");
 
   // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
@@ -237,7 +239,7 @@ export async function refreshDiagnostics(
     const diags: vscode.Diagnostic[] = [];
 
     ruleReponses.forEach((ruleReponse) => {
-      console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
+      // console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
       ruleReponse.violations.forEach((v) => {
         const range = new vscode.Range(
           new vscode.Position(v.start.line - 1, v.start.col - 1),
@@ -270,6 +272,7 @@ export function subscribeToDocumentChanges(
   context: vscode.ExtensionContext,
   diagnostics: vscode.DiagnosticCollection
 ): void {
+  console.log("pushing changes");
   if (vscode.window.activeTextEditor) {
     console.debug("refreshing diagnostics because new editor");
 
@@ -278,7 +281,7 @@ export function subscribeToDocumentChanges(
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
-        console.debug("refreshing diagnostics because editor changed");
+        // console.debug("refreshing diagnostics because editor changed");
 
         refreshDiagnostics(editor.document, diagnostics);
       }
@@ -287,7 +290,7 @@ export function subscribeToDocumentChanges(
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((e) => {
-      console.debug("new analysis because of document changes");
+      // console.debug("new analysis because of document changes");
 
       refreshDiagnostics(e.document, diagnostics);
     })
@@ -295,7 +298,7 @@ export function subscribeToDocumentChanges(
 
   context.subscriptions.push(
     vscode.workspace.onDidCloseTextDocument((doc) => {
-      console.debug("deleting diagnostics because document closes");
+      // console.debug("deleting diagnostics because document closes");
 
       diagnostics.delete(doc.uri);
     })
