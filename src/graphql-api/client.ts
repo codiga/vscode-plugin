@@ -9,7 +9,7 @@ let client: GraphQLClient;
  * to perform all the GraphQL request.
  */
 export function initializeClient(): void {
-  client = new GraphQLClient(GRAPHQL_ENDPOINT_STAGING);
+  client = new GraphQLClient(GRAPHQL_ENDPOINT_PROD);
 }
 
 function generateHeaders(): Record<string, string> {
