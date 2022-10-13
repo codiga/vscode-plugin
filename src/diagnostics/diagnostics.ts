@@ -7,26 +7,43 @@ import {
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { Language } from "../graphql-api/types";
-import { getRulesetsDebug } from "../rosie/rules";
+import { getRulesDebug } from "../rosie/debug";
 import {
   RosieFix,
   RosieReponse,
   Rule,
   RuleReponse,
-  RuleSet,
+  Violation,
 } from "../rosie/rosieTypes";
 import {
+  GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
   ROSIE_ENDPOINT_PROD,
   ROSIE_SEVERITY_CRITICAL,
   ROSIE_SEVERITY_WARNING,
 } from "../rosie/rosieConstants";
 import { getRosieLanguage } from "../rosie/rosieLanguage";
+import { getRulesFromCache } from "../rosie/rosieCache";
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
   vscode.Uri,
   Map<vscode.Range, RosieFix[]>
 > = new Map();
+const DIAGNOSTICS_TO_RULE_RESPONSE: Map<vscode.Diagnostic, RuleReponse> =
+  new Map();
+const DIAGNOSTICS_TO_VIOLATION: Map<vscode.Diagnostic, Violation> = new Map();
+
+export function getRuleResponseFromDiagnostic(
+  diag: vscode.Diagnostic
+): RuleReponse | undefined {
+  return DIAGNOSTICS_TO_RULE_RESPONSE.get(diag);
+}
+
+export function getViolationFromDiagnostics(
+  diag: vscode.Diagnostic
+): Violation | undefined {
+  return DIAGNOSTICS_TO_VIOLATION.get(diag);
+}
 
 /**
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
@@ -126,18 +143,6 @@ const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
   return actualTimeoutMs === currentTimestampMs;
 };
 
-export const getRulesFromRulesets = (ruleSets: RuleSet[]): Rule[] => {
-  const result: Rule[] = [];
-
-  for (const ruleset of ruleSets) {
-    for (const rule of ruleset.rules) {
-      result.push(rule);
-    }
-  }
-
-  return result;
-};
-
 /**
  * Get the rule responses from Rosie
  * @param document - the document being analyzed
@@ -210,12 +215,12 @@ export async function refreshDiagnostics(
   const language: Language = getLanguageForFile(relativePath);
 
   if (language === Language.Unknown) {
-    console.debug("unknown language, skipping");
     return;
   }
-
-  if (language !== Language.Python) {
-    console.debug("language not supported");
+  const supportedLanguages = Array.from(
+    GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys()
+  );
+  if (supportedLanguages.indexOf(language) === -1) {
     return;
   }
 
@@ -226,6 +231,8 @@ export async function refreshDiagnostics(
   if (!shouldDoAnalysis) {
     return;
   }
+  DIAGNOSTICS_TO_RULE_RESPONSE.clear();
+  DIAGNOSTICS_TO_VIOLATION.clear();
 
   // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
@@ -240,16 +247,14 @@ export async function refreshDiagnostics(
     return;
   }
 
-  const rulesetDebug = await getRulesetsDebug(doc);
+  const rules = (await getRulesFromCache(doc)) || (await getRulesDebug(doc));
 
-  if (rulesetDebug) {
-    const rules = getRulesFromRulesets(rulesetDebug);
-
+  if (rules && rules.length > 0) {
     const ruleReponses = await getRuleResponses(doc, rules);
     const diags: vscode.Diagnostic[] = [];
 
     ruleReponses.forEach((ruleReponse) => {
-      console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
+      // console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
       ruleReponse.violations.forEach((v) => {
         const range = new vscode.Range(
           new vscode.Position(v.start.line - 1, v.start.col - 1),
@@ -269,12 +274,14 @@ export async function refreshDiagnostics(
           });
         }
         diags.push(diag);
+        DIAGNOSTICS_TO_RULE_RESPONSE.set(diag, ruleReponse);
+        DIAGNOSTICS_TO_VIOLATION.set(diag, v);
       });
     });
 
     diagnostics.set(doc.uri, diags);
   } else {
-    console.log("no ruleset for debug");
+    console.debug("no ruleset to use");
   }
 }
 
@@ -283,14 +290,14 @@ export function subscribeToDocumentChanges(
   diagnostics: vscode.DiagnosticCollection
 ): void {
   if (vscode.window.activeTextEditor) {
-    console.debug("refreshing diagnostics because new editor");
+    // console.debug("refreshing diagnostics because new editor");
 
     refreshDiagnostics(vscode.window.activeTextEditor.document, diagnostics);
   }
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
-        console.debug("refreshing diagnostics because editor changed");
+        // console.debug("refreshing diagnostics because editor changed");
 
         refreshDiagnostics(editor.document, diagnostics);
       }
@@ -299,7 +306,7 @@ export function subscribeToDocumentChanges(
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((e) => {
-      console.debug("new analysis because of document changes");
+      // console.debug("new analysis because of document changes");
 
       refreshDiagnostics(e.document, diagnostics);
     })
@@ -307,7 +314,7 @@ export function subscribeToDocumentChanges(
 
   context.subscriptions.push(
     vscode.workspace.onDidCloseTextDocument((doc) => {
-      console.debug("deleting diagnostics because document closes");
+      // console.debug("deleting diagnostics because document closes");
 
       diagnostics.delete(doc.uri);
     })

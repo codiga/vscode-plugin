@@ -18,6 +18,22 @@ export interface Cookbook {
   name: string;
 }
 
+export interface RuleType {
+  id: number;
+  name: string;
+  content: string;
+  ruleType: string;
+  language: string;
+  pattern: string | undefined;
+  elementChecked: string | undefined;
+}
+
+export interface RulesetType {
+  id: number;
+  name: string;
+  rules: RuleType[];
+}
+
 export interface AssistantRecipe {
   id: number;
   name: string;
