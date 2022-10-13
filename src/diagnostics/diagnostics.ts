@@ -13,7 +13,7 @@ import {
   RosieReponse,
   Rule,
   RuleReponse,
-  RuleSet,
+  Violation,
 } from "../rosie/rosieTypes";
 import {
   GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
@@ -29,6 +29,21 @@ const FIXES_BY_DOCUMENT: Map<
   vscode.Uri,
   Map<vscode.Range, RosieFix[]>
 > = new Map();
+const DIAGNOSTICS_TO_RULE_RESPONSE: Map<vscode.Diagnostic, RuleReponse> =
+  new Map();
+const DIAGNOSTICS_TO_VIOLATION: Map<vscode.Diagnostic, Violation> = new Map();
+
+export function getRuleResponseFromDiagnostic(
+  diag: vscode.Diagnostic
+): RuleReponse | undefined {
+  return DIAGNOSTICS_TO_RULE_RESPONSE.get(diag);
+}
+
+export function getViolationFromDiagnostics(
+  diag: vscode.Diagnostic
+): Violation | undefined {
+  return DIAGNOSTICS_TO_VIOLATION.get(diag);
+}
 
 /**
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
@@ -217,7 +232,8 @@ export async function refreshDiagnostics(
     console.log("should not proceed");
     return;
   }
-  console.log("should proceed");
+  DIAGNOSTICS_TO_RULE_RESPONSE.clear();
+  DIAGNOSTICS_TO_VIOLATION.clear();
 
   // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
@@ -259,6 +275,8 @@ export async function refreshDiagnostics(
           });
         }
         diags.push(diag);
+        DIAGNOSTICS_TO_RULE_RESPONSE.set(diag, ruleReponse);
+        DIAGNOSTICS_TO_VIOLATION.set(diag, v);
       });
     });
 

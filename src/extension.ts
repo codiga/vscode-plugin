@@ -13,6 +13,8 @@ import {
   VSCODE_DOCUMENTATION_URL,
   PREFERENCES_OPEN_BROWSER_AFTER_INSTALL,
   DIAGNOSTICS_COLLECTION_NAME,
+  LEARN_MORE_COMMAND,
+  IGNORE_VIOLATION_COMMAND,
 } from "./constants";
 import { testApi } from "./commands/test-api";
 import {
@@ -43,9 +45,14 @@ import { provideInlineComplextion } from "./code-completion/inline-completion";
 import { AssistantRecipe } from "./graphql-api/types";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { applyFix, RosieFixAction } from "./rosie/rosiefix";
-import { RosieFix } from "./rosie/rosieTypes";
+import { RosieFix, Violation } from "./rosie/rosieTypes";
 import { refreshCachePeriodic } from "./rosie/rosieCache";
 import { recordLastActivity } from "./utils/activity";
+import { SeeRule } from "./diagnostics/see-rule";
+import {
+  IgnoreViolation,
+  ignoreViolation,
+} from "./diagnostics/ignore-violation";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -131,10 +138,6 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand(
     "codiga.applyFix",
     async (document: vscode.TextDocument, fix: RosieFix) => {
-      console.log("doc");
-      console.log(document);
-      console.log("fix");
-      console.log(fix);
       await applyFix(document, fix);
     }
   );
@@ -157,6 +160,27 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  /**
+   * Register the learn more command, this is a command that is pushed
+   * when we have a diagnostic being shown for a violation.
+   */
+  context.subscriptions.push(
+    vscode.commands.registerCommand(LEARN_MORE_COMMAND, (url) =>
+      vscode.env.openExternal(vscode.Uri.parse(url))
+    )
+  );
+
+  /**
+   * Command to ignore a violation
+   */
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      IGNORE_VIOLATION_COMMAND,
+      async (document: vscode.TextDocument, violation: Violation) =>
+        await ignoreViolation(document, violation)
+    )
+  );
+
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
@@ -164,6 +188,22 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.languages.registerCodeActionsProvider(lang, new RosieFixAction(), {
         providedCodeActionKinds: RosieFixAction.providedCodeActionKinds,
       })
+    );
+
+    context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(lang, new SeeRule(), {
+        providedCodeActionKinds: SeeRule.providedCodeActionKinds,
+      })
+    );
+
+    context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(
+        lang,
+        new IgnoreViolation(),
+        {
+          providedCodeActionKinds: IgnoreViolation.providedCodeActionKinds,
+        }
+      )
     );
 
     const inlineProvider: vscode.InlineCompletionItemProvider = {

@@ -58,7 +58,7 @@ export const applyFix = async (
 
   const workspaceEdit = new vscode.WorkspaceEdit();
   workspaceEdit.set(document.uri, edits);
-  vscode.workspace.applyEdit(workspaceEdit);
+  await vscode.workspace.applyEdit(workspaceEdit);
 };
 
 export class RosieFixAction implements vscode.CodeActionProvider {
@@ -91,6 +91,7 @@ export class RosieFixAction implements vscode.CodeActionProvider {
       command: "codiga.applyFix",
       title: "Apply Fix",
     };
+    fix.isPreferred = true;
 
     return fix;
   }
