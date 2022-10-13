@@ -7,7 +7,7 @@ import {
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { Language } from "../graphql-api/types";
-import { getRulesDebug, getRulesetsDebug } from "../rosie/debug";
+import { getRulesDebug } from "../rosie/debug";
 import {
   RosieFix,
   RosieReponse,
