@@ -282,7 +282,7 @@ export const updateWebview = async (
       resetSearch: resetSearch,
     });
   } else {
-    console.debug("no panel");
+    // console.debug("no panel");
   }
 };
 
