@@ -91,6 +91,34 @@ export const refreshCache = async (
 };
 
 /**
+ * Get the rules from the YAML file
+ */
+const getRulesFromYamlFile = async (
+  codigaFile: vscode.Uri
+): Promise<string[]> => {
+  // check that the file exists
+  if (!fs.existsSync(codigaFile.path)) {
+    return [];
+  }
+
+  // Read the YAML file content and get the rulesets
+  try {
+    const fileContent = await vscode.workspace.fs
+      .readFile(codigaFile)
+      .then((f) => f.toString());
+    const yamlContent = yaml.load(fileContent) as any;
+    if (yamlContent && yamlContent["rulesets"]) {
+      return yamlContent["rulesets"] as string[];
+    }
+    return [];
+  } catch (e) {
+    console.log("error when reading the updating the rules");
+    console.log(e);
+    return [];
+  }
+};
+
+/**
  * Refresh/update the cache for the workspace.
  * Update if and only if the update timestamp for all rules
  * is different than the previous one.
@@ -104,31 +132,16 @@ const updateCacheForWorkspace = async (
   workspace: vscode.WorkspaceFolder,
   codigaFile: vscode.Uri
 ): Promise<void> => {
-  if (!fs.existsSync(codigaFile.path)) {
+  const rulesets = await getRulesFromYamlFile(codigaFile);
+
+  // no rulesets to query, just exit
+  if (!rulesets || rulesets.length == 0) {
     return;
   }
+
   const nowMs = Date.now();
 
-  const fileContent = await (
-    await vscode.workspace.fs.readFile(codigaFile)
-  ).toString();
   try {
-    const yamlContent = yaml.load(fileContent) as any;
-
-    // get all the rulesets from the YAML file
-    const rulesets = yamlContent.flatMap((c: any) => {
-      if (c["rulesets"]) {
-        return c["rulesets"];
-      } else {
-        return [];
-      }
-    });
-
-    // no rulesets to query, just exit
-    if (!rulesets || rulesets.length == 0) {
-      return;
-    }
-
     // get the last update timestamp for all the rulesets
     const rulesTimestamp = await getRulesLastUpdatedTimestamp(rulesets);
 
