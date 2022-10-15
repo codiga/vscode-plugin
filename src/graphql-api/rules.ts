@@ -17,9 +17,6 @@ export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
 
   const data = await doQuery(GET_RULESETS_FOR_CLIENT, variables);
 
-  console.log("data");
-  console.log(data);
-
   if (!data) {
     return [];
   }

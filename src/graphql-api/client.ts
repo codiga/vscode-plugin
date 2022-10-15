@@ -43,7 +43,7 @@ export function doQuery(
   const query = client
     .request(graphqlQuery, variables, generateHeaders())
     .catch((e) => {
-      console.log("exception");
+      console.log("exception when querying the GraphQL API");
       console.log(e);
       return undefined;
     });
