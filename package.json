@@ -1,7 +1,7 @@
 {
   "name": "vscode-plugin",
-  "displayName": "Codiga Smart Code Snippets",
-  "description": "Create and share Smart Code Snippets for 15+ languages",
+  "displayName": "Codiga",
+  "description": "Code Snippets for 15+ languages and Code Analysis with Custom Rules",
   "publisher": "codiga",
   "license": "MIT",
   "author": "Xcoding Labs Inc",
@@ -31,7 +31,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.6.8",
+  "version": "0.7.0",
   "engines": {
     "vscode": "^1.70.0"
   },

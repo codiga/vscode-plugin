@@ -167,6 +167,8 @@ export const getRuleResponses = async (
   const codeBuffer = Buffer.from(document.getText());
   const codeBase64 = codeBuffer.toString("base64");
 
+  console.log(rules);
+
   // Build the request post data
   const data = {
     filename: relativePath,
