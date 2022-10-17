@@ -31,7 +31,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.7.0",
+  "version": "0.7.1",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -169,7 +169,6 @@
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
-    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^8.2.3",
     "@types/node": "^14.18.12",
     "@types/react": "^18.0.8",
@@ -195,12 +194,12 @@
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "graphql": "^15.8.0",
     "graphql-request": "^3.7.0",
-    "js-yaml": "^4.1.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-markdown": "^8.0.3",
     "remark": "^14.0.2",
-    "remark-html": "^15.0.1"
+    "remark-html": "^15.0.1",
+    "yaml": "^2.1.1"
   },
   "__metadata": {
     "id": "251775d3-1b6c-426f-bb28-419880a36f83",

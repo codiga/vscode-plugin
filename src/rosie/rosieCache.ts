@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as yaml from "js-yaml";
+import { parse } from "yaml";
 import * as vscode from "vscode";
 import {
   CODIGA_RULES_FILE,
@@ -106,7 +106,7 @@ const getRulesFromYamlFile = async (
     const fileContent = await vscode.workspace.fs
       .readFile(codigaFile)
       .then((f) => f.toString());
-    const yamlContent = yaml.load(fileContent) as any;
+    const yamlContent = parse(fileContent) as any;
     if (yamlContent && yamlContent["rulesets"]) {
       return yamlContent["rulesets"] as string[];
     }
