@@ -45,4 +45,4 @@ export const VSCODE_DOCUMENTATION_URL =
   "https://doc.codiga.io/docs/coding-assistant/coding-assistant-vscode/";
 
 export const CODIGA_RULES_DEBUGFILE = ".codigadebug";
-export const CODIGA_RULES_FILE = ".codiga";
+export const CODIGA_RULES_FILE = "codiga.yml";
