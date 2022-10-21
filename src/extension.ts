@@ -10,18 +10,12 @@ import {
   MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
   STARTUP_MESSAGE_MACOS,
   STARTUP_MESSAGE_WINDOWS,
-  VSCODE_DOCUMENTATION_URL,
-  PREFERENCES_OPEN_BROWSER_AFTER_INSTALL,
   DIAGNOSTICS_COLLECTION_NAME,
   LEARN_MORE_COMMAND,
   IGNORE_VIOLATION_COMMAND,
 } from "./constants";
 import { testApi } from "./commands/test-api";
-import {
-  getFromLocalStorage,
-  initializeLocalStorage,
-  setToLocalStorage,
-} from "./utils/localStorage";
+import { initializeLocalStorage } from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
