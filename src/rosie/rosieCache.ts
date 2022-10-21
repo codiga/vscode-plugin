@@ -98,7 +98,7 @@ const getRulesFromYamlFile = async (
   codigaFile: vscode.Uri
 ): Promise<string[]> => {
   // check that the file exists
-  if (!fs.existsSync(codigaFile.path)) {
+  if (!fs.existsSync(codigaFile.fsPath)) {
     return [];
   }
 
