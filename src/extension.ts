@@ -322,22 +322,6 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeTextDocument(() => {
     recordLastActivity();
   });
-
-  /**
-   * Open the VSCode integration documentation only once after user installs it
-   * We store in a preference if we should open the browser.
-   */
-  const shouldOpenBrowser =
-    configuration.get(PREFERENCES_OPEN_BROWSER_AFTER_INSTALL) === undefined ||
-    configuration.get(PREFERENCES_OPEN_BROWSER_AFTER_INSTALL) === true;
-  if (shouldOpenBrowser) {
-    await configuration.update(
-      PREFERENCES_OPEN_BROWSER_AFTER_INSTALL,
-      false,
-      vscode.ConfigurationTarget.Global
-    );
-    await vscode.env.openExternal(vscode.Uri.parse(VSCODE_DOCUMENTATION_URL));
-  }
 }
 
 // this method is called when your extension is deactivated

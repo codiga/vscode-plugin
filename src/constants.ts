@@ -39,10 +39,5 @@ export const STARTUP_MESSAGE_WINDOWS =
 
 export const PREFIX_RECENTLY_ADDED_RECIPE = "recently-added-recipe";
 
-// VSCode documentation
-export const PREFERENCES_OPEN_BROWSER_AFTER_INSTALL = "openBrowserAfterInstall";
-export const VSCODE_DOCUMENTATION_URL =
-  "https://doc.codiga.io/docs/coding-assistant/coding-assistant-vscode/";
-
 export const CODIGA_RULES_DEBUGFILE = ".codigadebug";
 export const CODIGA_RULES_FILE = "codiga.yml";
