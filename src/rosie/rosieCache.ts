@@ -15,6 +15,7 @@ import { Rule } from "./rosieTypes";
 interface CacheData {
   lastRefreshed: number; // last time we refreshed the data
   lastTimestamp: number; // timestamp of all rules used
+  fileLastModification: number; // last modification timestamp of the codiga file
   rules: Rule[];
 }
 
@@ -136,10 +137,16 @@ const updateCacheForWorkspace = async (
 
   // no rulesets to query, just exit
   if (!rulesets || rulesets.length == 0) {
+    // if there was some data before, delete it
+    if (cache.has(workspace)) {
+      cache.delete(workspace);
+    }
     return;
   }
 
   const nowMs = Date.now();
+  const stats = fs.statSync(codigaFile.fsPath);
+  const lastUpdateOnFileTimestampMs = stats.mtimeMs;
 
   try {
     // get the last update timestamp for all the rulesets
@@ -160,7 +167,8 @@ const updateCacheForWorkspace = async (
     const existingCacheData = cache.get(workspace);
     if (
       existingCacheData &&
-      existingCacheData.lastTimestamp === rulesTimestamp
+      existingCacheData.lastTimestamp === rulesTimestamp &&
+      existingCacheData.fileLastModification == lastUpdateOnFileTimestampMs
     ) {
       existingCacheData.lastRefreshed = nowMs;
       cache.set(workspace, existingCacheData);
@@ -177,6 +185,7 @@ const updateCacheForWorkspace = async (
       rules: rules,
       lastRefreshed: nowMs,
       lastTimestamp: rulesTimestamp,
+      fileLastModification: lastUpdateOnFileTimestampMs,
     };
 
     cache.set(workspace, newCacheData);
