@@ -136,7 +136,7 @@ const updateCacheForWorkspace = async (
   const rulesets = await getRulesFromYamlFile(codigaFile);
 
   // no rulesets to query, just exit
-  if (!rulesets || rulesets.length == 0) {
+  if (!rulesets || rulesets.length === 0) {
     // if there was some data before, delete it
     if (cache.has(workspace)) {
       cache.delete(workspace);
@@ -168,7 +168,7 @@ const updateCacheForWorkspace = async (
     if (
       existingCacheData &&
       existingCacheData.lastTimestamp === rulesTimestamp &&
-      existingCacheData.fileLastModification == lastUpdateOnFileTimestampMs
+      existingCacheData.fileLastModification === lastUpdateOnFileTimestampMs
     ) {
       existingCacheData.lastRefreshed = nowMs;
       cache.set(workspace, existingCacheData);
