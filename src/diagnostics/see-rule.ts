@@ -43,7 +43,7 @@ export class SeeRule implements vscode.CodeActionProvider {
       "Learn more...",
       vscode.CodeActionKind.QuickFix
     );
-    const url = `https://app.codiga.io/hub/rulesets/${ruleResponse?.identifier}`;
+    const url = `https://app.codiga.io/hub/ruleset/${ruleResponse?.identifier}`;
     action.command = {
       command: LEARN_MORE_COMMAND,
       arguments: [url],
