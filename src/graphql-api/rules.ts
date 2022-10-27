@@ -1,3 +1,4 @@
+import { ELEMENT_CHECKED_TO_ENTITY_CHECKED } from "../constants";
 import { Rule } from "../rosie/rosieTypes";
 import { getUserFingerprint } from "../utils/configurationUtils";
 import { doQuery } from "./client";
@@ -6,6 +7,24 @@ import {
   GET_RULESETS_LAST_UPDATED_TIMESTAMP,
 } from "./queries";
 import { RulesetType } from "./types";
+
+/**
+ * Map the element checked value from the GraphQL API
+ * into an entityChecked value we actually pass to Rosie.
+ * @param elementChecked - the GraphQL elementChecked value
+ * @returns
+ */
+const graphQlElementCheckedToRosieEntityCheck = (
+  elementChecked: string | undefined
+): string | undefined => {
+  if (!elementChecked) {
+    return undefined;
+  }
+
+  return ELEMENT_CHECKED_TO_ENTITY_CHECKED.get(
+    elementChecked.toLocaleLowerCase()
+  );
+};
 
 export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
   const userFingerprint = getUserFingerprint();
@@ -23,11 +42,15 @@ export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
 
   return data.ruleSetsForClient.flatMap((ruleset: RulesetType) => {
     return ruleset.rules.map((rule) => {
+      const entityChecked = graphQlElementCheckedToRosieEntityCheck(
+        rule.elementChecked
+      );
+
       return {
         id: `${ruleset.name}/${rule.name}`,
         language: rule.language,
         type: rule.ruleType,
-        entityChecked: rule.elementChecked,
+        entityChecked: entityChecked,
         contentBase64: rule.content,
         pattern: rule.pattern,
       };

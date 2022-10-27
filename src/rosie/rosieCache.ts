@@ -3,6 +3,7 @@ import { parse } from "yaml";
 import * as vscode from "vscode";
 import {
   CODIGA_RULES_FILE,
+  ELEMENT_CHECKED_TO_ENTITY_CHECKED,
   RULES_MAX_TIME_IN_CACHE_MS,
   RULES_POLLING_INTERVAL_MS,
 } from "../constants";
