@@ -8,7 +8,7 @@
 
 [Codiga](https://www.codiga.io) is a [Smart Code Snippets](https://www.codiga.io/code-snippets/smart-code-snippets/) manager. Create, share, search and use Smart Code Snippets from your IDE.
 
-# Codiga: Static Code Analysis & Code Snippets on steroids
+# Codiga: Static Code Analysis & Code Snippets on Steroids
 
 - [**Static Code Analysis**](#static-code-analysis): select the rules from the [Codiga Hub](https://app.codiga.io/hub/rulesets) and get real-time analysis in your IDE
 - [**Code Snippets**](#code-snippets): use snippets from the [Codiga Hub](https://app.codiga.io/hub) or create/share private code snippets with your team.

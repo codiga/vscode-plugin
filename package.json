@@ -1,7 +1,7 @@
 {
   "name": "vscode-plugin",
   "displayName": "Codiga",
-  "description": "Code Analysis and Code Snippets on steroids",
+  "description": "Code Analysis and Code Snippets on Steroids",
   "publisher": "codiga",
   "license": "MIT",
   "author": "Xcoding Labs Inc",
