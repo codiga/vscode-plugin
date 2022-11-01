@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-import { DIAGNOSTIC_CODE, IGNORE_VIOLATION_COMMAND } from "../constants";
-import { getViolationFromDiagnostics } from "../diagnostics/diagnostics";
-import { Violation } from "../rosie/rosieTypes";
+import { DIAGNOSTIC_SOURCE, IGNORE_VIOLATION_COMMAND } from "../constants";
+
 import { getLanguageForDocument } from "../utils/fileUtils";
 import { getCurrentIndentationForDocument } from "../utils/indentationUtils";
 import { getCommentSign } from "../utils/languageUtils";
@@ -24,35 +23,30 @@ export class IgnoreViolation implements vscode.CodeActionProvider {
     return context.diagnostics
       .filter(
         (diagnostic) =>
-          diagnostic.code?.toLocaleString().indexOf(DIAGNOSTIC_CODE) != -1
+          diagnostic.source?.toLocaleString().indexOf(DIAGNOSTIC_SOURCE) != -1
       )
-      .filter(
-        (diagnostic) =>
-          getViolationFromDiagnostics(diagnostic) &&
-          getViolationFromDiagnostics(diagnostic)?.start
-      )
-      .map((diagnostic) =>
-        this.createCommandCodeAction(
-          diagnostic,
-          getViolationFromDiagnostics(diagnostic),
-          document
-        )
-      );
+      .map((diagnostic) => this.createCommandCodeAction(diagnostic, document));
   }
 
   private createCommandCodeAction(
     diagnostic: vscode.Diagnostic,
-    violation: Violation | undefined,
     document: vscode.TextDocument
   ): vscode.CodeAction {
-    const action = new vscode.CodeAction(
-      "Ignore violation",
-      vscode.CodeActionKind.QuickFix
-    );
+    const ruleCode = diagnostic.code as {
+      value: string | number;
+      target: vscode.Uri;
+    };
+    const ruleIdentifier = ruleCode.value;
+    const range = diagnostic.range;
+
+    const title = ruleIdentifier
+      ? `Ignore rule ${ruleIdentifier}`
+      : "Ignore rule";
+    const action = new vscode.CodeAction(title, vscode.CodeActionKind.QuickFix);
     action.command = {
       command: IGNORE_VIOLATION_COMMAND,
-      arguments: [document, violation],
-      title: "Ignore Violation",
+      arguments: [document, range, ruleIdentifier],
+      title: title,
       tooltip: "This will add a comment to ignore this violation",
     };
     action.diagnostics = [diagnostic];
@@ -63,18 +57,23 @@ export class IgnoreViolation implements vscode.CodeActionProvider {
 
 export const ignoreViolation = async (
   document: vscode.TextDocument,
-  violation: Violation
+  range: vscode.Range,
+  ruleIdentifier: string
 ): Promise<void> => {
-  const insertPosition = new vscode.Position(violation.start.line - 1, 0);
+  const insertPosition = new vscode.Position(range.start.line, 0);
   const language = getLanguageForDocument(document);
   const commentSymbol = getCommentSign(language);
   const indentation = getCurrentIndentationForDocument(
     document,
-    new vscode.Position(violation.start.line - 1, violation.start.col - 1)
+    new vscode.Position(range.start.line, range.start.character)
   );
 
   const spaces = indentation || 0;
 
+  /**
+   * TODO: when Rosie supports it, add the specific
+   * rule to filter.
+   */
   const edit = vscode.TextEdit.insert(
     insertPosition,
     `${" ".repeat(spaces)}${commentSymbol} codiga-disable\n`

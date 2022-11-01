@@ -8,6 +8,7 @@ export const MESSAGE_STARTUP_SHOW_SNIPPETS = "Search Snippets";
 export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show again";
 
 export const DIAGNOSTIC_CODE = "codiga";
+export const DIAGNOSTIC_SOURCE = "Codiga";
 export const LEARN_MORE_COMMAND = "CODIGA_LEARN_MORE";
 export const IGNORE_VIOLATION_COMMAND = "CODIGA_IGNORE_VIOLATION";
 

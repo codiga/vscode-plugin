@@ -42,7 +42,6 @@ import { applyFix, RosieFixAction } from "./rosie/rosiefix";
 import { RosieFix, Violation } from "./rosie/rosieTypes";
 import { refreshCachePeriodic } from "./rosie/rosieCache";
 import { recordLastActivity } from "./utils/activity";
-import { SeeRule } from "./diagnostics/see-rule";
 import {
   IgnoreViolation,
   ignoreViolation,
@@ -170,26 +169,17 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       IGNORE_VIOLATION_COMMAND,
-      async (document: vscode.TextDocument, violation: Violation) =>
-        await ignoreViolation(document, violation)
+      async (
+        document: vscode.TextDocument,
+        range: vscode.Range,
+        ruleIdentifier: string
+      ) => await ignoreViolation(document, range, ruleIdentifier)
     )
   );
 
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
-    context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(lang, new RosieFixAction(), {
-        providedCodeActionKinds: RosieFixAction.providedCodeActionKinds,
-      })
-    );
-
-    context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(lang, new SeeRule(), {
-        providedCodeActionKinds: SeeRule.providedCodeActionKinds,
-      })
-    );
-
     context.subscriptions.push(
       vscode.languages.registerCodeActionsProvider(
         lang,
@@ -198,6 +188,12 @@ export async function activate(context: vscode.ExtensionContext) {
           providedCodeActionKinds: IgnoreViolation.providedCodeActionKinds,
         }
       )
+    );
+
+    context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(lang, new RosieFixAction(), {
+        providedCodeActionKinds: RosieFixAction.providedCodeActionKinds,
+      })
     );
 
     const inlineProvider: vscode.InlineCompletionItemProvider = {

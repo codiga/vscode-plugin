@@ -4,6 +4,7 @@ import axios from "axios";
 
 import {
   DIAGNOSTIC_CODE,
+  DIAGNOSTIC_SOURCE,
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { Language } from "../graphql-api/types";
@@ -29,21 +30,6 @@ const FIXES_BY_DOCUMENT: Map<
   vscode.Uri,
   Map<vscode.Range, RosieFix[]>
 > = new Map();
-const DIAGNOSTICS_TO_RULE_RESPONSE: Map<vscode.Diagnostic, RuleReponse> =
-  new Map();
-const DIAGNOSTICS_TO_VIOLATION: Map<vscode.Diagnostic, Violation> = new Map();
-
-export function getRuleResponseFromDiagnostic(
-  diag: vscode.Diagnostic
-): RuleReponse | undefined {
-  return DIAGNOSTICS_TO_RULE_RESPONSE.get(diag);
-}
-
-export function getViolationFromDiagnostics(
-  diag: vscode.Diagnostic
-): Violation | undefined {
-  return DIAGNOSTICS_TO_VIOLATION.get(diag);
-}
 
 /**
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
@@ -231,8 +217,6 @@ export async function refreshDiagnostics(
   if (!shouldDoAnalysis) {
     return;
   }
-  DIAGNOSTICS_TO_RULE_RESPONSE.clear();
-  DIAGNOSTICS_TO_VIOLATION.clear();
 
   // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
@@ -266,7 +250,15 @@ export async function refreshDiagnostics(
           v.message,
           mapRosieSeverityToVsCodeSeverity(v.severity)
         );
-        diag.code = DIAGNOSTIC_CODE + "/" + ruleReponse.identifier;
+        diag.source = DIAGNOSTIC_SOURCE;
+        diag.code = {
+          value: ruleReponse.identifier,
+          target: vscode.Uri.parse(
+            `https://app.codiga.io/hub/ruleset/${ruleReponse.identifier}`
+          ),
+        };
+
+        diag.relatedInformation;
 
         if (v.fixes) {
           v.fixes.forEach((fix) => {
@@ -274,8 +266,6 @@ export async function refreshDiagnostics(
           });
         }
         diags.push(diag);
-        DIAGNOSTICS_TO_RULE_RESPONSE.set(diag, ruleReponse);
-        DIAGNOSTICS_TO_VIOLATION.set(diag, v);
       });
     });
 
