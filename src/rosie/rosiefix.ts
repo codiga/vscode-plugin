@@ -83,7 +83,7 @@ export class RosieFixAction implements vscode.CodeActionProvider {
     rosieFix: RosieFix
   ): vscode.CodeAction {
     const fix = new vscode.CodeAction(
-      rosieFix.description,
+      `Fix: ${rosieFix.description}`,
       vscode.CodeActionKind.QuickFix
     );
     fix.command = {

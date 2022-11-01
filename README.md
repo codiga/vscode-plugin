@@ -22,6 +22,8 @@ With Codiga, you can:
 - Use Code Analysis rules from the [Codiga Hub](https://app.codiga.io/hub/rulesets)
 - Create your own Code Analysis rules
 
+![Check Python Naming](images/python-naming.gif)
+
 ### Getting Started
 
 Visit the [Codiga Hub](https://app.codiga.io/hub/rulesets) and select the rulesets to use for your project.
