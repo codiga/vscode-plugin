@@ -32,8 +32,10 @@ export class IgnoreViolation implements vscode.CodeActionProvider {
     diagnostic: vscode.Diagnostic,
     document: vscode.TextDocument
   ): vscode.CodeAction {
-    const ruleCode: { value: string | number; target: vscode.Uri } =
-      diagnostic.code as any;
+    const ruleCode = diagnostic.code as {
+      value: string | number;
+      target: vscode.Uri;
+    };
     const ruleIdentifier = ruleCode.value;
     const range = diagnostic.range;
 
