@@ -42,7 +42,6 @@ import { applyFix, RosieFixAction } from "./rosie/rosiefix";
 import { RosieFix, Violation } from "./rosie/rosieTypes";
 import { refreshCachePeriodic } from "./rosie/rosieCache";
 import { recordLastActivity } from "./utils/activity";
-import { SeeRule } from "./diagnostics/see-rule";
 import {
   IgnoreViolation,
   ignoreViolation,
@@ -181,12 +180,6 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
-    // context.subscriptions.push(
-    //   vscode.languages.registerCodeActionsProvider(lang, new SeeRule(), {
-    //     providedCodeActionKinds: SeeRule.providedCodeActionKinds,
-    //   })
-    // );
-
     context.subscriptions.push(
       vscode.languages.registerCodeActionsProvider(
         lang,
