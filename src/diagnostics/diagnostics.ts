@@ -3,19 +3,12 @@ import { getLanguageForDocument, getLanguageForFile } from "../utils/fileUtils";
 import axios from "axios";
 
 import {
-  DIAGNOSTIC_CODE,
   DIAGNOSTIC_SOURCE,
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { Language } from "../graphql-api/types";
 import { getRulesDebug } from "../rosie/debug";
-import {
-  RosieFix,
-  RosieReponse,
-  Rule,
-  RuleReponse,
-  Violation,
-} from "../rosie/rosieTypes";
+import { RosieFix, RosieReponse, Rule, RuleReponse } from "../rosie/rosieTypes";
 import {
   GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
   ROSIE_ENDPOINT_PROD,
@@ -42,17 +35,17 @@ const FIXES_BY_DOCUMENT: Map<
 export const getFixesForDocument = (
   documentUri: vscode.Uri,
   range: vscode.Range
-): undefined | RosieFix[] => {
+): RosieFix[] => {
   const fixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
+  const result: RosieFix[] = [];
   if (fixesForDocument) {
     for (const k of fixesForDocument.keys()) {
-      if (k.isEqual(range)) {
-        return fixesForDocument.get(k);
+      if (k.contains(range)) {
+        fixesForDocument.get(k)?.forEach((f) => result.push(f));
       }
     }
-    return fixesForDocument.get(range);
   }
-  return undefined;
+  return result;
 };
 
 /**
@@ -218,9 +211,6 @@ export async function refreshDiagnostics(
     return;
   }
 
-  // Empty the mapping between the analysis and the list of fixes
-  resetFixesForDocument(doc.uri);
-
   if (doc.getText().length === 0) {
     console.debug("empty code");
     return;
@@ -232,6 +222,9 @@ export async function refreshDiagnostics(
   }
 
   const rules = (await getRulesFromCache(doc)) || (await getRulesDebug(doc));
+
+  // Empty the mapping between the analysis and the list of fixes
+  resetFixesForDocument(doc.uri);
 
   if (rules && rules.length > 0) {
     const ruleReponses = await getRuleResponses(doc, rules);

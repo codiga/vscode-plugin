@@ -71,6 +71,7 @@ export class RosieFixAction implements vscode.CodeActionProvider {
     range: vscode.Range
   ): vscode.CodeAction[] | undefined {
     const fixes = getFixesForDocument(document.uri, range);
+
     if (!fixes) {
       return undefined;
     }
