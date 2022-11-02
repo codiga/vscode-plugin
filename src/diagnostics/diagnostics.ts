@@ -28,9 +28,9 @@ const FIXES_BY_DOCUMENT: Map<
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
  * violation. We register the list of fixes when we analyze. Then, when the user
  * hover a quick fix, we get the list of quick fixes using this function.
- * @param documentUri
- * @param range
- * @returns
+ * @param documentUri - the URI of the VS Code document
+ * @param range - the range we are at in the document
+ * @returns - the list of fixes for the given range
  */
 export const getFixesForDocument = (
   documentUri: vscode.Uri,
