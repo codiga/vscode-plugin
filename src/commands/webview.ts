@@ -75,7 +75,12 @@ export async function showCodigaWebview(
       light: faviconUri,
     };
 
-    panel.webview.html = await getWebviewContent(context.extensionPath);
+    const webviewContent = await getWebviewContent(
+      panel.webview,
+      context.extensionPath
+    );
+
+    panel.webview.html = webviewContent;
 
     // Set up message receicing from the webview
     panel.webview.onDidReceiveMessage(async (message) => {
@@ -286,30 +291,40 @@ export const updateWebview = async (
   }
 };
 
-const getWebviewContent = (extensionPath: string): string => {
+function getNonce() {
+  let text = "";
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+const getWebviewContent = (
+  webview: vscode.Webview,
+  extensionPath: string
+): string => {
   const reactAppPathOnDisk = vscode.Uri.file(
     path.join(extensionPath, "webview", "webview.js")
   );
-  const reactAppUri = reactAppPathOnDisk.with({ scheme: "vscode-resource" });
+  const scriptUri = webview.asWebviewUri(reactAppPathOnDisk);
+  const nonce = getNonce();
 
   return `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Codiga</title>
-        <meta http-equiv="Content-Security-Policy"
-                    content="default-src 'none';
-                             img-src https:;
-                             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-                             style-src vscode-resource: 'unsafe-inline';">
+        <title>Codiga</title>   
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}' 'self' 'unsafe-eval';">
         <script>
           window.acquireVsCodeApi = acquireVsCodeApi;
         </script>
     </head>
     <body>
         <div id="root"></div>
-        <script src="${reactAppUri}"></script>
+        <script nonce="${nonce}" src="${scriptUri}"></script>
     </body>
     </html>`;
 };
