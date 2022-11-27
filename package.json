@@ -70,6 +70,12 @@
             "description": "Enable Inline Completions",
             "scope": "application"
           },
+          "codiga.editor.shortcutCompletion": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable Shortcut Completions",
+            "scope": "application"
+          },
           "codiga.searchPreferences.onlySubscribed": {
             "type": "boolean",
             "default": false,
