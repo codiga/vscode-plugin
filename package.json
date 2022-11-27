@@ -66,7 +66,7 @@
           },
           "codiga.editor.inlineCompletion": {
             "type": "boolean",
-            "default": true,
+            "default": false,
             "description": "Enable Inline Completions",
             "scope": "application"
           },
