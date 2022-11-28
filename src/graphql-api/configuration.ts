@@ -15,6 +15,13 @@ export const isInlineCompletionEnabled = (): boolean => {
   return preferenceValue;
 };
 
+export const isShortcutCompletionEnabled = (): boolean => {
+  const preferenceValue = vscode.workspace
+    .getConfiguration()
+    .get("codiga.editor.inlineCompletion") as boolean;
+  return preferenceValue;
+};
+
 export const snippetVisibilityOnlySubscribed = (): boolean => {
   const preferenceValue = vscode.workspace
     .getConfiguration()

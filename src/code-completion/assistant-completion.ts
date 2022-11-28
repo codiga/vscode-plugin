@@ -24,6 +24,7 @@ import {
   escapeDollarSign,
   generateKeyForUsedRecipe,
 } from "../utils/snippetUtils";
+import { isShortcutCompletionEnabled } from "../graphql-api/configuration";
 
 /**
  * Get the recipes. We first attempt to get them from the cache if there
@@ -78,6 +79,10 @@ export async function providesCodeCompletion(
 
   const currentCharacter = lineText.charAt(position.character - 1);
   if (currentCharacter !== "." && currentCharacter !== "/") {
+    return undefined;
+  }
+
+  if (!isShortcutCompletionEnabled()) {
     return undefined;
   }
 

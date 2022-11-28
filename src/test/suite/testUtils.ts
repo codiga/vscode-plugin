@@ -229,6 +229,12 @@ export async function insertText(editor: vscode.TextEditor, code: string) {
 }
 
 export async function autoComplete() {
+  const configuration = vscode.workspace.getConfiguration("codiga");
+  configuration.update(
+    "editor.inlineCompletion",
+    true,
+    vscode.ConfigurationTarget.Global
+  );
   await vscode.commands.executeCommand("editor.action.triggerSuggest");
   await wait(500);
   await vscode.commands.executeCommand("acceptSelectedSuggestion");

@@ -31,7 +31,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.8.2",
+  "version": "0.8.4",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -66,8 +66,14 @@
           },
           "codiga.editor.inlineCompletion": {
             "type": "boolean",
-            "default": true,
+            "default": false,
             "description": "Enable Inline Completions",
+            "scope": "application"
+          },
+          "codiga.editor.shortcutCompletion": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable Shortcut Completions",
             "scope": "application"
           },
           "codiga.searchPreferences.onlySubscribed": {
