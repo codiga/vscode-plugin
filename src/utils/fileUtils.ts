@@ -30,6 +30,7 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".php4": Language.Php,
   ".php5": Language.Php,
   ".php": Language.Php,
+  ".ipynb": Language.Python,
   ".py": Language.Python,
   ".py3": Language.Python,
   ".pm": Language.Perl,

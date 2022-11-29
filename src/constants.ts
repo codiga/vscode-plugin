@@ -9,6 +9,9 @@ export const MESSAGE_STARTUP_SHOW_SHORTCUTS = "View Shortcuts";
 export const MESSAGE_STARTUP_SHOW_SNIPPETS = "Search Snippets";
 export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show again";
 
+export const VALUE_STRING_TRUE = "true";
+export const VALUE_STRING_FALSE = "false";
+
 export const DIAGNOSTIC_CODE = "codiga";
 export const DIAGNOSTIC_SOURCE = "Codiga";
 export const LEARN_MORE_COMMAND = "CODIGA_LEARN_MORE";
@@ -87,4 +90,4 @@ rulesets:
 
 export const ROSIE_SUPPORTED_LANGUAGES = [Language.Python];
 
-export const MAX_FILE_SEARCH = 1;
+export const ROSIE_LANGUAGE_DETECT_MAX_RESULTS = 1;

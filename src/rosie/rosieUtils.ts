@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
-import { MAX_FILE_SEARCH, ROSIE_SUPPORTED_LANGUAGES } from "../constants";
+import { Extension } from "vscode";
+
+import {
+  ROSIE_LANGUAGE_DETECT_MAX_RESULTS,
+  ROSIE_SUPPORTED_LANGUAGES,
+} from "../constants";
 import { LANGUAGE_TO_EXTENSION } from "../utils/fileUtils";
 
 /**
@@ -29,9 +34,11 @@ export async function isRosieLanguageDetected(): Promise<boolean> {
     .findFiles(
       `**/*.{${rosieSupportedExtensions.join(",")}}`,
       "node_modules",
-      MAX_FILE_SEARCH
+      ROSIE_LANGUAGE_DETECT_MAX_RESULTS
     )
-    .then((files) => files.length === MAX_FILE_SEARCH);
+    .then(
+      (files) => files && files.length === ROSIE_LANGUAGE_DETECT_MAX_RESULTS
+    );
 
   return shouldSuggestCodiga;
 }
