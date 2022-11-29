@@ -1,3 +1,5 @@
+import { Language } from "./graphql-api/types";
+
 export const GRAPHQL_ENDPOINT_PROD = "https://api.codiga.io/graphql";
 export const GRAPHQL_ENDPOINT_STAGING = "https://api-staging.codiga.io/graphql";
 
@@ -68,3 +70,21 @@ export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
   [ELEMENT_CHECKED_IMPORT, ROSIE_ENTITY_IMPORT],
   [ELEMENT_CHECKED_ASSIGNMENT, ROSIE_ENTITY_ASSIGNMENT],
 ]);
+
+export const INFO_MESSAGE_CODIGA_FILE_KEY = "ignoreCodigaFile";
+export const INFO_MESSAGE_CODIGA_FILE =
+  "Check for security, code style in your Python code with Codiga";
+export const INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE =
+  "Create a codiga.yml file to check code";
+export const INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE = "Never remind me";
+
+export const DEFAULT_PYTHON_RULESET_CONFIG = `
+rulesets:
+  - python-security
+  - python-best-practices
+  - python-code-style
+`.trim();
+
+export const ROSIE_SUPPORTED_LANGUAGES = [Language.Python];
+
+export const MAX_FILE_SEARCH = 1;

@@ -13,9 +13,19 @@ import {
   DIAGNOSTICS_COLLECTION_NAME,
   LEARN_MORE_COMMAND,
   IGNORE_VIOLATION_COMMAND,
+  CODIGA_RULES_FILE,
+  INFO_MESSAGE_CODIGA_FILE,
+  INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE,
+  INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE,
+  DEFAULT_PYTHON_RULESET_CONFIG,
+  INFO_MESSAGE_CODIGA_FILE_KEY,
 } from "./constants";
 import { testApi } from "./commands/test-api";
-import { initializeLocalStorage } from "./utils/localStorage";
+import {
+  initializeLocalStorage,
+  setToLocalStorage,
+  getFromLocalStorage,
+} from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
 import { providesCodeCompletion } from "./code-completion/assistant-completion";
@@ -46,6 +56,8 @@ import {
   IgnoreViolation,
   ignoreViolation,
 } from "./diagnostics/ignore-violation";
+import getFileUri, { doesFileExist } from "./utils/fileUtils";
+import { isRosieLanguageDetected } from "./rosie/rosieUtils";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -225,6 +237,40 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(codeCompletionProvider);
   });
+
+  /**
+   * check if
+   * - the user has ignore this warning before
+   * - if there's a codiga.yml file present
+   * - if the workspace contains languages that rosie supports
+   */
+  if (
+    getFromLocalStorage(INFO_MESSAGE_CODIGA_FILE_KEY) !== "true" &&
+    !doesFileExist(CODIGA_RULES_FILE) &&
+    (await isRosieLanguageDetected())
+  ) {
+    vscode.window
+      .showInformationMessage(
+        INFO_MESSAGE_CODIGA_FILE,
+        INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE,
+        INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE
+      )
+      .then(async (selectedItem) => {
+        if (selectedItem === INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE) {
+          const codigaUri = getFileUri(CODIGA_RULES_FILE);
+          if (codigaUri) {
+            const codigaFileContent = Buffer.from(
+              DEFAULT_PYTHON_RULESET_CONFIG,
+              "utf-8"
+            );
+            await vscode.workspace.fs.writeFile(codigaUri, codigaFileContent);
+          }
+        }
+        if (selectedItem === INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE) {
+          setToLocalStorage(INFO_MESSAGE_CODIGA_FILE_KEY, "true");
+        }
+      });
+  }
 
   /**
    * Finally, attempt to get the current user. If the current user
