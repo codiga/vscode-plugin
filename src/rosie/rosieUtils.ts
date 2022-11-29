@@ -7,7 +7,7 @@ import { LANGUAGE_TO_EXTENSION } from "../utils/fileUtils";
  * languages that rosie supports
  * @returns boolean
  */
-export async function isRosieLanguageDetected(): Promise<Boolean> {
+export async function isRosieLanguageDetected(): Promise<boolean> {
   /**
    * get an array of extensions (with the . removed)
    * for all supported rosie languages
