@@ -1,3 +1,5 @@
+import { Language } from "./graphql-api/types";
+
 export const GRAPHQL_ENDPOINT_PROD = "https://api.codiga.io/graphql";
 export const GRAPHQL_ENDPOINT_STAGING = "https://api-staging.codiga.io/graphql";
 
@@ -6,6 +8,9 @@ export const CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS = 200;
 export const MESSAGE_STARTUP_SHOW_SHORTCUTS = "View Shortcuts";
 export const MESSAGE_STARTUP_SHOW_SNIPPETS = "Search Snippets";
 export const MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN = "Do not show again";
+
+export const VALUE_STRING_TRUE = "true";
+export const VALUE_STRING_FALSE = "false";
 
 export const DIAGNOSTIC_CODE = "codiga";
 export const DIAGNOSTIC_SOURCE = "Codiga";
@@ -68,3 +73,21 @@ export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
   [ELEMENT_CHECKED_IMPORT, ROSIE_ENTITY_IMPORT],
   [ELEMENT_CHECKED_ASSIGNMENT, ROSIE_ENTITY_ASSIGNMENT],
 ]);
+
+export const INFO_MESSAGE_CODIGA_FILE_KEY = "ignoreCodigaFile";
+export const INFO_MESSAGE_CODIGA_FILE =
+  "Check for security, code style in your Python code with Codiga";
+export const INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE =
+  "Create a codiga.yml file to check code";
+export const INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE = "Never remind me";
+
+export const DEFAULT_PYTHON_RULESET_CONFIG = `
+rulesets:
+  - python-security
+  - python-best-practices
+  - python-code-style
+`.trim();
+
+export const ROSIE_SUPPORTED_LANGUAGES = [Language.Python];
+
+export const ROSIE_LANGUAGE_DETECT_MAX_RESULTS = 1;

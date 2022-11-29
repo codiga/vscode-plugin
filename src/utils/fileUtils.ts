@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as vscode from "vscode";
 import { Language } from "../graphql-api/types";
 const pathModule = require("path");
@@ -29,6 +30,7 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".php4": Language.Php,
   ".php5": Language.Php,
   ".php": Language.Php,
+  ".ipynb": Language.Python,
   ".py": Language.Python,
   ".py3": Language.Python,
   ".pm": Language.Perl,
@@ -50,6 +52,22 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".yml": Language.Yaml,
   ".yaml": Language.Yaml,
 };
+
+/**
+ * converts the EXTENSION_TO_LANGUAGE object into:
+ * { [Language]: extension-strings[] }
+ * used to get all extensions for a language
+ */
+export const LANGUAGE_TO_EXTENSION = Object.entries(
+  EXTENSION_TO_LANGUAGE
+).reduce((acc, [extension, language]) => {
+  if (acc[language]) {
+    acc[language].push(extension);
+  } else {
+    acc[language] = [extension];
+  }
+  return acc;
+}, {} as { [key in Language]: string[] });
 
 export function getBasename(filename: string): string | undefined {
   const parsedFilename: any = pathModule.parse(filename);
@@ -189,4 +207,34 @@ export function insertIndentSize(size: number, tabSize: number) {
   return Array(size / tabSize)
     .fill("\t")
     .join("");
+}
+
+/**
+ * creates a Uri for the given file, if workspaces are present
+ * @param fileLocation string - from root
+ * @returns vscode.Uri | null
+ */
+export default function getFileUri(fileLocation: string): vscode.Uri | null {
+  const workspaceFolder = vscode.workspace.workspaceFolders;
+  /**
+   * if no workspaces are open or the length is zero,
+   * then the file cannot exist, so we return null
+   */
+  if (!workspaceFolder || workspaceFolder.length === 0) {
+    return null;
+  }
+  return vscode.Uri.joinPath(workspaceFolder[0].uri, fileLocation);
+}
+
+/**
+ * checks if a file exists in the location given
+ * @param fileLocation string - from root
+ * @returns boolean
+ */
+export function doesFileExist(fileLocation: string): boolean {
+  const fileUri = getFileUri(fileLocation);
+  if (!fileUri) {
+    return false;
+  }
+  return fs.existsSync(fileUri.fsPath);
 }

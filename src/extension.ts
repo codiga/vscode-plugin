@@ -46,6 +46,7 @@ import {
   IgnoreViolation,
   ignoreViolation,
 } from "./diagnostics/ignore-violation";
+import { checkCodigaFileSuggestion } from "./utils/startupUtils";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -225,6 +226,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(codeCompletionProvider);
   });
+
+  await checkCodigaFileSuggestion();
 
   /**
    * Finally, attempt to get the current user. If the current user
