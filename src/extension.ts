@@ -39,7 +39,7 @@ import { provideInlineComplextion } from "./code-completion/inline-completion";
 import { AssistantRecipe } from "./graphql-api/types";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { applyFix, RosieFixAction } from "./rosie/rosiefix";
-import { RosieFix, Violation } from "./rosie/rosieTypes";
+import { RosieFix } from "./rosie/rosieTypes";
 import { refreshCachePeriodic } from "./rosie/rosieCache";
 import { recordLastActivity } from "./utils/activity";
 import {
