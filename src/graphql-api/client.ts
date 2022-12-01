@@ -1,11 +1,13 @@
+import * as vscode from "vscode";
 import { GraphQLClient } from "graphql-request";
 import {
   GRAPHQL_ENDPOINT_PROD,
   API_TOKEN_HEADER_KEY,
   USER_AGENT_HEADER_KEY,
-  USER_AGENT_HEADER_VALUE,
+  USER_AGENT_HEADER_PRODUCT,
 } from "../constants";
 import { getApiToken } from "./configuration";
+import { getExtensionVersion } from "../utils/extensionUtils";
 
 let client: GraphQLClient;
 
@@ -20,18 +22,24 @@ export function initializeClient(): void {
 function generateHeaders(): Record<string, string> {
   const apiToken = getApiToken();
 
+  const userAgentHeader = {
+    [USER_AGENT_HEADER_KEY]: `${USER_AGENT_HEADER_PRODUCT}/${
+      getExtensionVersion() || ""
+    }`,
+  };
+
   /**
    * First, check if there is a token. If that is the case,
    * prioritize its use.
    */
   if (apiToken && apiToken.length > 20) {
     return {
-      [USER_AGENT_HEADER_KEY]: USER_AGENT_HEADER_VALUE,
+      ...userAgentHeader,
       [API_TOKEN_HEADER_KEY]: apiToken,
     };
   }
   return {
-    [USER_AGENT_HEADER_KEY]: USER_AGENT_HEADER_VALUE,
+    ...userAgentHeader,
   };
 }
 
