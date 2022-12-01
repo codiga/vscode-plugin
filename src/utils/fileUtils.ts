@@ -12,6 +12,7 @@ const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".cpp": Language.Cpp,
   ".cfc": Language.Coldfusion,
   ".cfm": Language.Coldfusion,
+  ".dockerfile": Language.Docker,
   ".dart": Language.Dart,
   ".go": Language.Go,
   ".hs": Language.Haskell,
