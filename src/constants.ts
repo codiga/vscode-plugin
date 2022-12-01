@@ -3,6 +3,10 @@ import { Language } from "./graphql-api/types";
 export const GRAPHQL_ENDPOINT_PROD = "https://api.codiga.io/graphql";
 export const GRAPHQL_ENDPOINT_STAGING = "https://api-staging.codiga.io/graphql";
 
+export const API_TOKEN_HEADER_KEY = "X-Api-Token";
+export const USER_AGENT_HEADER_KEY = "User-Agent";
+export const USER_AGENT_HEADER_VALUE = "VsCode";
+
 export const CODING_ASSISTANT_WAIT_BEFORE_QUERYING_RESULTS_IN_MS = 200;
 
 export const MESSAGE_STARTUP_SHOW_SHORTCUTS = "View Shortcuts";

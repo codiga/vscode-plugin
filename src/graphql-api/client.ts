@@ -1,5 +1,11 @@
 import { GraphQLClient } from "graphql-request";
-import { GRAPHQL_ENDPOINT_STAGING, GRAPHQL_ENDPOINT_PROD } from "../constants";
+import {
+  GRAPHQL_ENDPOINT_STAGING,
+  GRAPHQL_ENDPOINT_PROD,
+  API_TOKEN_HEADER_KEY,
+  USER_AGENT_HEADER_KEY,
+  USER_AGENT_HEADER_VALUE,
+} from "../constants";
 import { getApiToken } from "./configuration";
 
 let client: GraphQLClient;
@@ -21,10 +27,13 @@ function generateHeaders(): Record<string, string> {
    */
   if (apiToken && apiToken.length > 20) {
     return {
-      "X-Api-Token": apiToken,
+      [USER_AGENT_HEADER_KEY]: USER_AGENT_HEADER_VALUE,
+      [API_TOKEN_HEADER_KEY]: apiToken,
     };
   }
-  return {};
+  return {
+    [USER_AGENT_HEADER_KEY]: USER_AGENT_HEADER_VALUE,
+  };
 }
 
 /**
