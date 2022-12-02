@@ -12,6 +12,7 @@ import {
   NODE_PACKAGE_FILE,
   REQUIREMENTS_FILE,
 } from "../../constants";
+import { rollbarLogger } from "../rollbarUtils";
 
 /**
  * Search from the top of the project a dependency file and walk backwards to the
@@ -58,6 +59,7 @@ export async function getDependenciesFromProject(
       return await functionToExecute(potentialDependencyFile).catch((e) => {
         console.debug("Codiga - error when fetching dependencies");
         console.debug(e);
+        rollbarLogger(e, { packageFile: filename });
         return [];
       });
     }

@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import { Rule, RuleSet } from "./rosieTypes";
 import { CODIGA_RULES_DEBUGFILE } from "../constants";
+import { rollbarLogger } from "../utils/rollbarUtils";
 
 /**
  * Get the rules from the rulesets in JSON in the .codigadebug file
@@ -36,8 +37,9 @@ export const getRulesDebug = async (
         return undefined;
       }
       return getRulesFromDebugRulesets(rulesJson);
-    } catch (err) {
+    } catch (e) {
       console.debug("error when trying to read the rules");
+      rollbarLogger(e);
       return undefined;
     }
   }

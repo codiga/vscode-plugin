@@ -8,6 +8,7 @@ import {
 } from "../constants";
 import { getApiToken } from "./configuration";
 import { getExtensionVersion } from "../utils/extensionUtils";
+import { rollbarLogger } from "../utils/rollbarUtils";
 
 let client: GraphQLClient;
 
@@ -61,6 +62,7 @@ export function doQuery(
     .catch((e) => {
       console.log("exception when querying the GraphQL API");
       console.log(e);
+      rollbarLogger(e, { variables });
       return undefined;
     });
   return query;
@@ -81,6 +83,7 @@ export function doMutation(
     .catch((e) => {
       console.error("exception");
       console.debug(e);
+      rollbarLogger(e, { variables });
       return undefined;
     });
   return query;

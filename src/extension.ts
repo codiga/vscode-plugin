@@ -47,6 +47,7 @@ import {
   ignoreViolation,
 } from "./diagnostics/ignore-violation";
 import { checkCodigaFileSuggestion } from "./utils/startupUtils";
+import { rollbarLogger } from "./utils/rollbarUtils";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -291,6 +292,7 @@ export async function activate(context: vscode.ExtensionContext) {
     } catch (e) {
       console.debug("Error when trying to fetch shortcuts");
       console.debug(e);
+      rollbarLogger(e);
     }
   });
 
@@ -305,6 +307,7 @@ export async function activate(context: vscode.ExtensionContext) {
     } catch (e) {
       console.debug("Error when trying to refresh the webview");
       console.debug(e);
+      rollbarLogger(e);
     }
   });
 
