@@ -6,6 +6,7 @@ import {
 import { wasActiveRecently } from "../utils/activity";
 import { getDependencies } from "../utils/dependencies/get-dependencies";
 import { getLanguageForDocument } from "../utils/fileUtils";
+import { rollbarLogger } from "../utils/rollbarUtils";
 import {
   getRecipesForClientByShorcut,
   getRecipesForClientByShorcutLastTimestamp,
@@ -204,6 +205,7 @@ export const fetchShortcuts = async () => {
 export const fetchPeriodicShortcuts = async () => {
   if (enablePeriodicPolling) {
     await fetchShortcuts().catch((e) => {
+      rollbarLogger(e);
       console.error("error while fetching shortcuts");
     });
     garbageCollection(cache);

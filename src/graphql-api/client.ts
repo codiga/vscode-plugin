@@ -1,6 +1,14 @@
+import * as vscode from "vscode";
 import { GraphQLClient } from "graphql-request";
-import { GRAPHQL_ENDPOINT_STAGING, GRAPHQL_ENDPOINT_PROD } from "../constants";
+import {
+  GRAPHQL_ENDPOINT_PROD,
+  API_TOKEN_HEADER_KEY,
+  USER_AGENT_HEADER_KEY,
+  USER_AGENT_HEADER_PRODUCT,
+} from "../constants";
 import { getApiToken } from "./configuration";
+import { getExtensionVersion } from "../utils/extensionUtils";
+import { rollbarLogger } from "../utils/rollbarUtils";
 
 let client: GraphQLClient;
 
@@ -15,16 +23,25 @@ export function initializeClient(): void {
 function generateHeaders(): Record<string, string> {
   const apiToken = getApiToken();
 
+  const userAgentHeader = {
+    [USER_AGENT_HEADER_KEY]: `${USER_AGENT_HEADER_PRODUCT}/${
+      getExtensionVersion() || ""
+    }`,
+  };
+
   /**
    * First, check if there is a token. If that is the case,
    * prioritize its use.
    */
   if (apiToken && apiToken.length > 20) {
     return {
-      "X-Api-Token": apiToken,
+      ...userAgentHeader,
+      [API_TOKEN_HEADER_KEY]: apiToken,
     };
   }
-  return {};
+  return {
+    ...userAgentHeader,
+  };
 }
 
 /**
@@ -45,6 +62,10 @@ export function doQuery(
     .catch((e) => {
       console.log("exception when querying the GraphQL API");
       console.log(e);
+      // ignore user-not-logged errors
+      if (!e.message.includes("user-not-logged")) {
+        rollbarLogger(e, { variables });
+      }
       return undefined;
     });
   return query;
@@ -65,6 +86,7 @@ export function doMutation(
     .catch((e) => {
       console.error("exception");
       console.debug(e);
+      rollbarLogger(e, { variables });
       return undefined;
     });
   return query;

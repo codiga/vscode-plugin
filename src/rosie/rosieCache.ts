@@ -12,6 +12,7 @@ import { wasActiveRecently } from "../utils/activity";
 import { getLanguageForDocument } from "../utils/fileUtils";
 import { GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE } from "./rosieConstants";
 import { Rule } from "./rosieTypes";
+import { rollbarLogger } from "../utils/rollbarUtils";
 
 interface CacheData {
   lastRefreshed: number; // last time we refreshed the data
@@ -27,6 +28,7 @@ const RULES_CACHE = new Map<vscode.WorkspaceFolder, CacheData>();
  */
 export const refreshCachePeriodic = async (): Promise<void> => {
   await refreshCache(RULES_CACHE).catch((e) => {
+    rollbarLogger(e);
     console.error("error while fetching shortcuts");
   });
   garbageCollection(RULES_CACHE);
@@ -116,6 +118,7 @@ const getRulesFromYamlFile = async (
   } catch (e) {
     console.log("error when reading the updating the rules");
     console.log(e);
+    rollbarLogger(e);
     return [];
   }
 };
@@ -193,6 +196,7 @@ const updateCacheForWorkspace = async (
   } catch (e) {
     console.log("error when reading the updating the rules");
     console.log(e);
+    rollbarLogger(e);
   }
 };
 
