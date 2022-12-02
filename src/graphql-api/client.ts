@@ -62,7 +62,10 @@ export function doQuery(
     .catch((e) => {
       console.log("exception when querying the GraphQL API");
       console.log(e);
-      rollbarLogger(e, { variables });
+      // ignore user-not-logged errors
+      if (!e.message.includes("user-not-logged")) {
+        rollbarLogger(e, { variables });
+      }
       return undefined;
     });
   return query;
