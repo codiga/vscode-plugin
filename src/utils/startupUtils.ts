@@ -8,6 +8,7 @@ import {
   INFO_MESSAGE_CODIGA_FILE_KEY,
   VALUE_STRING_TRUE,
 } from "../constants";
+import { addCreateCodigaYamlRecord } from "../graphql-api/add-create-codiga-yaml-record";
 import { isRosieLanguageDetected } from "../rosie/rosieUtils";
 import getFileUri, { doesFileExist } from "./fileUtils";
 import { getFromLocalStorage, setToLocalStorage } from "./localStorage";
@@ -43,6 +44,7 @@ export async function checkCodigaFileSuggestion() {
               "utf-8"
             );
             await vscode.workspace.fs.writeFile(codigaUri, codigaFileContent);
+            await addCreateCodigaYamlRecord();
           }
         }
         if (selectedItem === INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE) {

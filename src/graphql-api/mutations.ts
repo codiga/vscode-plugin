@@ -12,7 +12,7 @@ export const USE_RECIPE: string = gql`
 `;
 
 export const USE_RULE_FIX: string = gql`
-  mutation recordAccess($fingerprint: String, $ruleId: Long!) {
+  mutation recordAccess($fingerprint: String, $ruleId: Long) {
     recordAccess(
       accessType: VsCode
       actionType: RuleFix
