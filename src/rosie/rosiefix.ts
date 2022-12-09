@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { getFixesForDocument } from "../diagnostics/diagnostics";
+import { addRuleFixRecord } from "../graphql-api/add-rule-fix-record";
 import { RosieFix, RosieFixEdit } from "./rosieTypes";
 
 /**
@@ -59,6 +60,7 @@ export const applyFix = async (
   const workspaceEdit = new vscode.WorkspaceEdit();
   workspaceEdit.set(document.uri, edits);
   await vscode.workspace.applyEdit(workspaceEdit);
+  await addRuleFixRecord();
 };
 
 export class RosieFixAction implements vscode.CodeActionProvider {
