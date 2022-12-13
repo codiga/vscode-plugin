@@ -13,7 +13,7 @@ import {
   autoComplete,
   recipeWithTransformVariables,
   testDataUri,
-} from "../testUtils";
+} from "../../testUtils";
 import * as localStorage from "../../../utils/localStorage";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub

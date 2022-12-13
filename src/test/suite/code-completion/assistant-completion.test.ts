@@ -28,7 +28,7 @@ import {
   javaRecipe,
   documentJavaRecipeImportsAfterPackageExpected,
   documentJavaRecipeImportsBetweenCommentsExpected,
-} from "../testUtils";
+} from "../../testUtils";
 import * as localStorage from "../../../utils/localStorage";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub

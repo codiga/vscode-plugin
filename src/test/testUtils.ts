@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { AssistantRecipe, AssistantRecipeOwner } from "../../graphql-api/types";
-import { decodeIndent } from "../../utils/indentationUtils";
-import os = require("os");
+import * as os from "os";
+import { decodeIndent } from "../utils/indentationUtils";
+import { AssistantRecipe } from "../graphql-api/types";
+
 export const testDataFolderCodeCompletion = "/code-completion/testdata/";
 
 export const documentRecipeExpected =
@@ -12,6 +13,7 @@ export const documentRecipeExpected =
   "  // thread code here" +
   os.EOL +
   "});";
+
 export const documentRecipeIndentExpectedWithFourSpaces = decodeIndent(
   "use std::thread;" +
     os.EOL +
