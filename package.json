@@ -33,6 +33,7 @@
   ],
   "version": "0.8.9",
   "engines": {
+    "node": "^16.0.0",
     "vscode": "^1.70.0"
   },
   "activationEvents": [
