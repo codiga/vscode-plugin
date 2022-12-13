@@ -237,6 +237,11 @@ export async function autoComplete() {
     true,
     vscode.ConfigurationTarget.Global
   );
+  configuration.update(
+    "editor.shortcutCompletion",
+    true,
+    vscode.ConfigurationTarget.Global
+  );
   await vscode.commands.executeCommand("editor.action.triggerSuggest");
   await wait(500);
   await vscode.commands.executeCommand("acceptSelectedSuggestion");

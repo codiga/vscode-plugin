@@ -18,7 +18,7 @@ export const isInlineCompletionEnabled = (): boolean => {
 export const isShortcutCompletionEnabled = (): boolean => {
   const preferenceValue = vscode.workspace
     .getConfiguration()
-    .get("codiga.editor.inlineCompletion") as boolean;
+    .get("codiga.editor.shortcutCompletion") as boolean;
   return preferenceValue;
 };
 
