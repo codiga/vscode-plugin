@@ -94,6 +94,11 @@ rulesets:
   - python-code-style
 `.trim();
 
+export const DEFAULT_JAVASCRIPT_RULESET_CONFIG = `
+rulesets:
+  - javascript-templates
+`.trim();
+
 export const ROSIE_SUPPORTED_LANGUAGES = [Language.Python];
 
 export const ROSIE_LANGUAGE_DETECT_MAX_RESULTS = 1;
