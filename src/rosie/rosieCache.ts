@@ -10,9 +10,9 @@ import {
 import { getRules, getRulesLastUpdatedTimestamp } from "../graphql-api/rules";
 import { wasActiveRecently } from "../utils/activity";
 import { getLanguageForDocument } from "../utils/fileUtils";
-import { GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE } from "./rosieConstants";
 import { Rule } from "./rosieTypes";
 import { rollbarLogger } from "../utils/rollbarUtils";
+import { Language } from "../graphql-api/types";
 
 interface CacheData {
   lastRefreshed: number; // last time we refreshed the data
@@ -201,6 +201,43 @@ const updateCacheForWorkspace = async (
 };
 
 /**
+ * Filters all the rules given to the ones we want to run for a single file
+ * @param languages all the languages that we want rules from
+ * @param rules all the cached rules on the workspace
+ * @returns an array containing all the rules to analyze a file
+ */
+export const filterRules = (languages: Language[], rules: Rule[]) => {
+  const rosieLanguages = languages.map((l) => l.toLowerCase());
+  return rules.filter((r) =>
+    rosieLanguages.includes(r.language.toLocaleLowerCase())
+  );
+};
+
+/**
+ * Gets all the rules for a file to run against
+ * @param language The language of the file
+ * @param rules An array of all cached rules
+ * @returns an array containing only the rules needed for a file to analyze
+ */
+export const getRosieRulesForLanguage = (
+  language: Language,
+  rules: Rule[] | undefined
+) => {
+  if (!rules) return [];
+
+  switch (language) {
+    case Language.Python:
+      return filterRules([Language.Python], rules);
+    case Language.Javascript:
+      return filterRules([Language.Javascript], rules);
+    case Language.Typescript:
+      return filterRules([Language.Javascript, Language.Typescript], rules);
+    default:
+      return [];
+  }
+};
+
+/**
  * Get the list of rules for a particular document from the cache.
  * @param doc
  * @returns
@@ -218,14 +255,8 @@ export const getRulesFromCache = async (
     const rules = RULES_CACHE.get(workspacefolder)?.rules;
     if (rules) {
       const language = getLanguageForDocument(doc);
-      const rosieLanguage = GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.get(language);
-      if (rosieLanguage) {
-        return rules.filter(
-          (r) => r.language.toLocaleLowerCase() === rosieLanguage
-        );
-      } else {
-        return [];
-      }
+      const allRules = getRosieRulesForLanguage(language, rules);
+      return allRules;
     } else {
       return [];
     }

@@ -113,6 +113,10 @@ rulesets:
   - javascript-templates
 `.trim();
 
-export const ROSIE_SUPPORTED_LANGUAGES = [Language.Python];
+export const ROSIE_SUPPORTED_LANGUAGES = [
+  Language.Python,
+  Language.Javascript,
+  Language.Typescript,
+];
 
 export const ROSIE_LANGUAGE_DETECT_MAX_RESULTS = 1;
