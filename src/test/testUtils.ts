@@ -232,12 +232,12 @@ export async function insertText(editor: vscode.TextEditor, code: string) {
 
 export async function autoComplete() {
   const configuration = vscode.workspace.getConfiguration("codiga");
-  configuration.update(
+  await configuration.update(
     "editor.inlineCompletion",
     true,
     vscode.ConfigurationTarget.Global
   );
-  configuration.update(
+  await configuration.update(
     "editor.shortcutCompletion",
     true,
     vscode.ConfigurationTarget.Global
