@@ -106,14 +106,14 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
+    await wait(750);
     const originalConfig = await updateConfig(rustUri, configDefaults);
 
     await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
@@ -132,13 +132,13 @@ suite("assistant-completion.ts test", () => {
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
 
-    await wait(500);
+    await wait(750);
 
     await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
@@ -160,13 +160,13 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
+    await wait(750);
 
     await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
     // const expectedValue = new vscode.SnippetString(
     //   documentRecipeIndentExpectedWithTabs
@@ -182,14 +182,14 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(rustUri);
     const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
+    await wait(750);
     const originalConfig = await updateConfig(rustUri, configDefaults);
 
     await insertText(editor, "spawn.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
@@ -206,16 +206,16 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(pythonUri);
     const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
+    await wait(750);
     const originalConfig = await updateConfig(pythonUri, configDefaults);
 
     await insertText(editor, "# First\n# Second\n");
-    await wait(500);
+    await wait(750);
     await insertText(editor, "requests.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
@@ -234,18 +234,18 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
+    await wait(750);
     const originalConfig = await updateConfig(pythonUri, configDefaults);
     await insertText(
       editor,
       `/*\n* Comment example\n*/\n\n// comment 2\n\npackage number;\n`
     );
-    await wait(500);
+    await wait(750);
     await insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
@@ -263,16 +263,16 @@ suite("assistant-completion.ts test", () => {
 
     const document = await vscode.workspace.openTextDocument(javaUri);
     const editor = await vscode.window.showTextDocument(document);
-    await wait(500);
+    await wait(750);
     const originalConfig = await updateConfig(javaUri, configDefaults);
 
     await insertText(editor, `/*\n* Comment example\n*/\n\n// comment 2\n`);
-    await wait(500);
+    await wait(750);
     await insertText(editor, "java.");
     await autoComplete();
     const documentTransformed = editor?.document.getText();
 
-    await wait(500);
+    await wait(750);
     await closeFile();
 
     assert.ok(usedRecipeMock.verify());
