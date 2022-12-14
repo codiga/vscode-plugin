@@ -13,9 +13,7 @@ import {
   autoComplete,
   recipeForUser,
   documentRecipeExpected,
-  documentRecipeIndentExpectedWithFourSpaces,
   documentRecipeIndentExpectedWithTwoSpaces,
-  documentRecipeIndentExpectedWithTabs,
   recipeWithIndentVariable,
   testDataUri,
   Config,
@@ -29,7 +27,6 @@ import {
   documentJavaRecipeImportsAfterPackageExpected,
   documentJavaRecipeImportsBetweenCommentsExpected,
 } from "../testUtils";
-import * as localStorage from "../../utils/localStorage";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints

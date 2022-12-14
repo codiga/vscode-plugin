@@ -14,7 +14,6 @@ import {
   recipeWithTransformVariables,
   testDataUri,
 } from "../testUtils";
-import * as localStorage from "../../utils/localStorage";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
