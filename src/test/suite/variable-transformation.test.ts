@@ -13,6 +13,7 @@ import {
   autoComplete,
   recipeWithTransformVariables,
   testDataUri,
+  updateConfig,
 } from "../testUtils";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
@@ -27,7 +28,7 @@ suite("variable transformation test", () => {
   let usedRecipeMock: sinon.SinonExpectation;
 
   // this is executed before each test
-  setup(() => {
+  setup(async () => {
     // define the stub and mock
     getRecipeStub = sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
@@ -38,12 +39,23 @@ suite("variable transformation test", () => {
       .expects("useRecipeCallback")
       .withArgs(42069)
       .once();
+
+    await updateConfig({} as vscode.Uri, {
+      "codiga.editor.shortcutCompletion": true,
+      "codiga.editor.inlineCompletion": true,
+    });
+    await wait(2000);
   });
 
   // this is executed after each test finishes
-  teardown(() => {
+  teardown(async () => {
     // things get messy really quick, do not remove this step
     sandbox.restore();
+
+    await updateConfig({} as vscode.Uri, {
+      "codiga.editor.shortcutCompletion": false,
+      "codiga.editor.inlineCompletion": false,
+    });
   });
 
   test("detect transformation variables are not present", async () => {

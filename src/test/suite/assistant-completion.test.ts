@@ -89,6 +89,12 @@ suite("assistant-completion.ts test", () => {
       .expects("useRecipeCallback")
       .withArgs(42069)
       .once();
+
+    await updateConfig({} as vscode.Uri, {
+      "codiga.editor.shortcutCompletion": true,
+      "codiga.editor.inlineCompletion": true,
+    });
+    await wait(2000);
   });
 
   // this is executed after each test finishes
@@ -96,6 +102,11 @@ suite("assistant-completion.ts test", () => {
     // things get messy really quick, do not remove this step
     // await updateConfig(rustUri, originalConfig);
     sandbox.restore();
+
+    await updateConfig({} as vscode.Uri, {
+      "codiga.editor.shortcutCompletion": false,
+      "codiga.editor.inlineCompletion": false,
+    });
   });
 
   test("test insert suggestion from completion widget works", async () => {
