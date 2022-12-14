@@ -1,18 +1,20 @@
 import * as vscode from "vscode";
-import { Extension } from "vscode";
-
 import {
   ROSIE_LANGUAGE_DETECT_MAX_RESULTS,
   ROSIE_SUPPORTED_LANGUAGES,
 } from "../constants";
-import { LANGUAGE_TO_EXTENSION } from "../utils/fileUtils";
+import { Language } from "../graphql-api/types";
+import {
+  EXTENSION_TO_LANGUAGE,
+  LANGUAGE_TO_EXTENSION,
+} from "../utils/fileUtils";
 
 /**
- * find out if the workspace contains files of
- * languages that rosie supports
- * @returns boolean
+ * get the first language that Rosie supports by looking
+ * through the workspace/files by file extensions
+ * returns null if no matching languages are found
  */
-export async function isRosieLanguageDetected(): Promise<boolean> {
+export async function getWorkspaceRosieLanguage(): Promise<Language | null> {
   /**
    * get an array of extensions (with the . removed)
    * for all supported rosie languages
@@ -25,20 +27,32 @@ export async function isRosieLanguageDetected(): Promise<boolean> {
   ).map((extension) => extension.substring(1));
 
   /**
-   * look through the workspace/files to see if
-   * it's using a language that codiga/rosie supports
-   * TODO - detect which languages are used to
-   *        improve ruleset suggestion
+   * get the first language that Rosie supports by looking
+   * through the workspace/files by file extensions
    */
-  const shouldSuggestCodiga = await vscode.workspace
+  return await vscode.workspace
     .findFiles(
       `**/*.{${rosieSupportedExtensions.join(",")}}`,
       "node_modules",
       ROSIE_LANGUAGE_DETECT_MAX_RESULTS
     )
-    .then(
-      (files) => files && files.length === ROSIE_LANGUAGE_DETECT_MAX_RESULTS
-    );
-
-  return shouldSuggestCodiga;
+    .then((files) => {
+      if (files && files.length === ROSIE_LANGUAGE_DETECT_MAX_RESULTS) {
+        const path = files[0].path;
+        const extDotIndex = path.lastIndexOf(".");
+        const ext = path.substring(extDotIndex);
+        const language = EXTENSION_TO_LANGUAGE[ext];
+        if (!language) {
+          return null;
+        } else {
+          /**
+           * TODO - remove this check when we have more JS
+           * rulesets so that we can suggest something good
+           */
+          if (language !== Language.Python) return null;
+          return language;
+        }
+      }
+      return null;
+    });
 }

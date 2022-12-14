@@ -46,7 +46,7 @@ import {
   IgnoreViolation,
   ignoreViolation,
 } from "./diagnostics/ignore-violation";
-import { checkCodigaFileSuggestion } from "./utils/startupUtils";
+import { checkCodigaFileSuggestion } from "./features/codiga-file-suggestion";
 import { rollbarLogger } from "./utils/rollbarUtils";
 
 // this method is called when your extension is activated
