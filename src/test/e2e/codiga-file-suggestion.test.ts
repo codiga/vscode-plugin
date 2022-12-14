@@ -1,23 +1,15 @@
 import * as assert from "assert";
-import * as vscode from "vscode";
-import * as sinon from "sinon";
 import {
-  CODIGA_RULES_FILE,
   DEFAULT_JAVASCRIPT_RULESET_CONFIG,
   DEFAULT_PYTHON_RULESET_CONFIG,
-  INFO_MESSAGE_CODIGA_FILE_KEY,
   VALUE_STRING_FALSE,
   VALUE_STRING_TRUE,
 } from "../../constants";
-import { getFromLocalStorage } from "../../utils/localStorage";
-import { wait } from "../testUtils";
-// import { isRosieLanguageDetected } from "../../rosie/rosieUtils";
 import {
   createCodigaFile,
   doesCodigaFileExists,
   hasUserIgnoredCodigaSuggestion,
   setUserIgnoreCodigaSuggestion,
-  runCodigaFileSuggestion,
   removeCodigaFile,
   isLanguageRosieSupported,
   getCodigaFileContent,
