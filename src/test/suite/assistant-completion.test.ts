@@ -2,9 +2,9 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as sinon from "sinon";
 
-import * as getRecipesApiCall from "../../../graphql-api/get-recipes-for-client";
-import * as usedRecipeApiCall from "../../../graphql-api/use-recipe";
-import { Language } from "../../../graphql-api/types";
+import * as getRecipesApiCall from "../../graphql-api/get-recipes-for-client";
+import * as usedRecipeApiCall from "../../graphql-api/use-recipe";
+import { Language } from "../../graphql-api/types";
 import {
   wait,
   closeFile,
@@ -28,8 +28,8 @@ import {
   javaRecipe,
   documentJavaRecipeImportsAfterPackageExpected,
   documentJavaRecipeImportsBetweenCommentsExpected,
-} from "../../testUtils";
-import * as localStorage from "../../../utils/localStorage";
+} from "../testUtils";
+import * as localStorage from "../../utils/localStorage";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints

@@ -2,9 +2,9 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as sinon from "sinon";
 
-import * as getRecipesApiCall from "../../../graphql-api/get-recipes-for-client";
-import * as usedRecipeApiCAll from "../../../graphql-api/use-recipe";
-import { Language } from "../../../graphql-api/types";
+import * as getRecipesApiCall from "../../graphql-api/get-recipes-for-client";
+import * as usedRecipeApiCAll from "../../graphql-api/use-recipe";
+import { Language } from "../../graphql-api/types";
 import {
   wait,
   closeFile,
@@ -13,8 +13,8 @@ import {
   autoComplete,
   recipeWithTransformVariables,
   testDataUri,
-} from "../../testUtils";
-import * as localStorage from "../../../utils/localStorage";
+} from "../testUtils";
+import * as localStorage from "../../utils/localStorage";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
