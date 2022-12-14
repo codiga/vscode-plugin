@@ -82,9 +82,8 @@ export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
 
 export const INFO_MESSAGE_CODIGA_FILE_KEY = "ignoreCodigaFile";
 export const INFO_MESSAGE_CODIGA_FILE =
-  "Check for security, code style in your Python code with Codiga";
-export const INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE =
-  "Create a codiga.yml file to check code";
+  "Check your code for security and code style issues with Codiga";
+export const INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE = "Create a codiga.yml now";
 export const INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE = "Never remind me";
 
 export const DEFAULT_PYTHON_RULESET_CONFIG = `
