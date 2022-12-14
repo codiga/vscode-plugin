@@ -55,7 +55,7 @@ export const CODIGA_RULES_DEBUGFILE = ".codigadebug";
 export const CODIGA_RULES_FILE = "codiga.yml";
 
 export const ELEMENT_CHECKED_FUNCTION_CALL = "functioncall";
-export const ELEMENT_CHECKED_IF_CONDITION = "ifconfition";
+export const ELEMENT_CHECKED_IF_CONDITION = "ifcondition";
 export const ELEMENT_CHECKED_FOR_LOOP = "forloop";
 export const ELEMENT_CHECKED_FUNCTION_DEFINITION = "functiondefinition";
 export const ELEMENT_CHECKED_TRYBLOCK = "tryblock";
@@ -63,7 +63,7 @@ export const ELEMENT_CHECKED_IMPORT = "import";
 export const ELEMENT_CHECKED_ASSIGNMENT = "assignment";
 
 export const ROSIE_ENTITY_CHECKED_FUNCTION_CALL = "functioncall";
-export const ROSIE_ENTITY_CHECKED_IF_CONDITION = "ifconfition";
+export const ROSIE_ENTITY_CHECKED_IF_CONDITION = "ifcondition";
 export const ROSIE_ENTITY_FOR_LOOP = "forloop";
 export const ROSIE_ENTITY_FUNCTION_DEFINITION = "functiondefinition";
 export const ROSIE_ENTITY_TRYBLOCK = "tryblock";
