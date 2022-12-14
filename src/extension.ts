@@ -46,7 +46,7 @@ import {
   IgnoreViolation,
   ignoreViolation,
 } from "./diagnostics/ignore-violation";
-import { checkCodigaFileSuggestion } from "./features/codiga-file-suggestion";
+import { runCodigaFileSuggestion } from "./features/codiga-file-suggestion";
 import { rollbarLogger } from "./utils/rollbarUtils";
 
 // this method is called when your extension is activated
@@ -228,7 +228,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(codeCompletionProvider);
   });
 
-  await checkCodigaFileSuggestion();
+  await runCodigaFileSuggestion();
 
   /**
    * Finally, attempt to get the current user. If the current user
