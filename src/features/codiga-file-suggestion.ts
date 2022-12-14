@@ -15,6 +15,7 @@ import { Language } from "../graphql-api/types";
 import { getWorkspaceRosieLanguage } from "../rosie/rosieUtils";
 import getFileUri, { doesFileExist } from "../utils/fileUtils";
 import { getFromLocalStorage, setToLocalStorage } from "../utils/localStorage";
+import { rollbarLogger } from "../utils/rollbarUtils";
 
 /**
  * check whether the user has ignored codiga file suggestion for their workspace
@@ -87,7 +88,8 @@ export async function createCodigaFile(language: Language): Promise<void> {
       await addCreateCodigaYamlRecord();
     }
   } else {
-    throw new Error(`${language} is not supported by Rosie`);
+    console.log(`${language} is not supported by Rosie`);
+    rollbarLogger(`Error: creating codiga.yml`, { language });
   }
 }
 
