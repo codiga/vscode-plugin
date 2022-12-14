@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { AssistantRecipe, AssistantRecipeOwner } from "../../graphql-api/types";
-import { decodeIndent } from "../../utils/indentationUtils";
-import os = require("os");
+import * as os from "os";
+import { decodeIndent } from "../utils/indentationUtils";
+import { AssistantRecipe } from "../graphql-api/types";
+
 export const testDataFolderCodeCompletion = "/code-completion/testdata/";
 
 export const documentRecipeExpected =
@@ -12,6 +13,7 @@ export const documentRecipeExpected =
   "  // thread code here" +
   os.EOL +
   "});";
+
 export const documentRecipeIndentExpectedWithFourSpaces = decodeIndent(
   "use std::thread;" +
     os.EOL +
@@ -88,7 +90,7 @@ export const recipeWithTransformVariables =
 export const recipeForUser =
   "dGhyZWFkOjpzcGF3bihtb3ZlIHx8IHsKICAvLyB0aHJlYWQgY29kZSBoZXJlCn0pOw==";
 
-export const wait = (ms: number) =>
+export const wait = async (ms: number) =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 
 export function testDataUri(file: string) {
@@ -229,12 +231,6 @@ export async function insertText(editor: vscode.TextEditor, code: string) {
 }
 
 export async function autoComplete() {
-  const configuration = vscode.workspace.getConfiguration("codiga");
-  configuration.update(
-    "editor.inlineCompletion",
-    true,
-    vscode.ConfigurationTarget.Global
-  );
   await vscode.commands.executeCommand("editor.action.triggerSuggest");
   await wait(500);
   await vscode.commands.executeCommand("acceptSelectedSuggestion");

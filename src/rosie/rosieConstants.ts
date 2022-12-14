@@ -14,6 +14,8 @@ export const ROSIE_ENDPOINT_STAGING =
 export const GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE: Map<Language, string> =
   new Map<Language, string>([
     [Language.Python, "python"],
+    [Language.Javascript, "javascript"],
+    [Language.Typescript, "typescript"],
     [Language.C, "c"],
     [Language.Csharp, "c#"],
     [Language.Java, "java"],

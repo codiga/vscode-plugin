@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { Language } from "../graphql-api/types";
 const pathModule = require("path");
 
-const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
+export const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".bash": Language.Shell,
   ".cls": Language.Apex,
   ".c": Language.C,

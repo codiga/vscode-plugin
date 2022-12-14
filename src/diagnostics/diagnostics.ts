@@ -156,21 +156,26 @@ export const getRuleResponses = async (
     logOutput: false,
   };
 
-  // Make the initial request to Rosie
-  const response = await axios.post<RosieReponse>(ROSIE_ENDPOINT_PROD, data, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    // Make the initial request to Rosie
+    const response = await axios.post<RosieReponse>(ROSIE_ENDPOINT_PROD, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (!response || !response.data) {
-    console.debug("no response from Rosie");
+    if (!response || !response.data) {
+      console.debug("no response from Rosie");
+      return [];
+    }
+
+    const responses = response.data.ruleResponses as RuleReponse[];
+
+    return responses;
+  } catch (err) {
+    console.log("ERROR: ", err);
     return [];
   }
-
-  const responses = response.data.ruleResponses as RuleReponse[];
-
-  return responses;
 };
 
 const mapRosieSeverityToVsCodeSeverity = (

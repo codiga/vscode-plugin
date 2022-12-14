@@ -18,7 +18,7 @@ import { testApi } from "./commands/test-api";
 import { initializeLocalStorage } from "./utils/localStorage";
 import { useRecipe } from "./commands/use-recipe";
 import { createRecipe } from "./commands/create-recipe";
-import { providesCodeCompletion } from "./code-completion/assistant-completion";
+import { providesCodeCompletion } from "./features/assistant-completion";
 import { useRecipeCallback } from "./graphql-api/use-recipe";
 import { UriHandler } from "./utils/uriHandler";
 import { getUser } from "./graphql-api/user";
@@ -35,7 +35,7 @@ import {
   showCodigaWebview,
   updateWebview,
 } from "./commands/webview";
-import { provideInlineComplextion } from "./code-completion/inline-completion";
+import { provideInlineComplextion } from "./features/inline-completion";
 import { AssistantRecipe } from "./graphql-api/types";
 import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
 import { applyFix, RosieFixAction } from "./rosie/rosiefix";
@@ -46,7 +46,7 @@ import {
   IgnoreViolation,
   ignoreViolation,
 } from "./diagnostics/ignore-violation";
-import { checkCodigaFileSuggestion } from "./utils/startupUtils";
+import { runCodigaFileSuggestion } from "./features/codiga-file-suggestion";
 import { rollbarLogger } from "./utils/rollbarUtils";
 
 // this method is called when your extension is activated
@@ -228,7 +228,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(codeCompletionProvider);
   });
 
-  await checkCodigaFileSuggestion();
+  await runCodigaFileSuggestion();
 
   /**
    * Finally, attempt to get the current user. If the current user

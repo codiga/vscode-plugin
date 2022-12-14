@@ -2,9 +2,9 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as sinon from "sinon";
 
-import * as getRecipesApiCall from "../../../graphql-api/get-recipes-for-client";
-import * as usedRecipeApiCAll from "../../../graphql-api/use-recipe";
-import { Language } from "../../../graphql-api/types";
+import * as getRecipesApiCall from "../../graphql-api/get-recipes-for-client";
+import * as usedRecipeApiCAll from "../../graphql-api/use-recipe";
+import { Language } from "../../graphql-api/types";
 import {
   wait,
   closeFile,
@@ -13,8 +13,8 @@ import {
   autoComplete,
   recipeWithTransformVariables,
   testDataUri,
+  updateConfig,
 } from "../testUtils";
-import * as localStorage from "../../../utils/localStorage";
 
 // test there's no recipe variable in the final recipe insertion, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
@@ -28,7 +28,7 @@ suite("variable transformation test", () => {
   let usedRecipeMock: sinon.SinonExpectation;
 
   // this is executed before each test
-  setup(() => {
+  setup(async () => {
     // define the stub and mock
     getRecipeStub = sandbox
       .stub(getRecipesApiCall, "getRecipesForClientByShorcut")
@@ -39,12 +39,23 @@ suite("variable transformation test", () => {
       .expects("useRecipeCallback")
       .withArgs(42069)
       .once();
+
+    await updateConfig({} as vscode.Uri, {
+      "codiga.editor.shortcutCompletion": true,
+      "codiga.editor.inlineCompletion": true,
+    });
+    await wait(2000);
   });
 
   // this is executed after each test finishes
-  teardown(() => {
+  teardown(async () => {
     // things get messy really quick, do not remove this step
     sandbox.restore();
+
+    await updateConfig({} as vscode.Uri, {
+      "codiga.editor.shortcutCompletion": false,
+      "codiga.editor.inlineCompletion": false,
+    });
   });
 
   test("detect transformation variables are not present", async () => {

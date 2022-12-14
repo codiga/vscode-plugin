@@ -17,7 +17,6 @@ jobs:
         with:
           node-version: 16.x
       - run: npm install
-      - run: npm install -g npm-run-all
       - name: Run tests
         uses: GabrielBB/xvfb-action@v1
         if: runner.os != 'Linux'
@@ -34,7 +33,6 @@ jobs:
         with:
           node-version: 16.x
       - run: npm install
-      - run: npm install -g npm-run-all
       - name: Publish
         run: npm run deploy
         env:

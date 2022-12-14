@@ -55,20 +55,30 @@ export const CODIGA_RULES_DEBUGFILE = ".codigadebug";
 export const CODIGA_RULES_FILE = "codiga.yml";
 
 export const ELEMENT_CHECKED_FUNCTION_CALL = "functioncall";
-export const ELEMENT_CHECKED_IF_CONDITION = "ifconfition";
+export const ELEMENT_CHECKED_IF_CONDITION = "ifcondition";
 export const ELEMENT_CHECKED_FOR_LOOP = "forloop";
 export const ELEMENT_CHECKED_FUNCTION_DEFINITION = "functiondefinition";
 export const ELEMENT_CHECKED_TRYBLOCK = "tryblock";
 export const ELEMENT_CHECKED_IMPORT = "import";
 export const ELEMENT_CHECKED_ASSIGNMENT = "assignment";
+export const ELEMENT_CHECKED_TYPE = "type";
+export const ELEMENT_CHECKED_INTERFACE = "interface";
+export const ELEMENT_CHECKED_HTML_ELEMENT = "htmlelement";
+export const ELEMENT_CHECKED_CLASS_DEFINITION = "classdefinition";
+export const ELEMENT_CHECKED_FUNCTION_EXPRESSION = "functionexpression";
 
 export const ROSIE_ENTITY_CHECKED_FUNCTION_CALL = "functioncall";
-export const ROSIE_ENTITY_CHECKED_IF_CONDITION = "ifconfition";
+export const ROSIE_ENTITY_CHECKED_IF_CONDITION = "ifcondition";
 export const ROSIE_ENTITY_FOR_LOOP = "forloop";
 export const ROSIE_ENTITY_FUNCTION_DEFINITION = "functiondefinition";
 export const ROSIE_ENTITY_TRYBLOCK = "tryblock";
 export const ROSIE_ENTITY_IMPORT = "import";
 export const ROSIE_ENTITY_ASSIGNMENT = "assign";
+export const ROSIE_ENTITY_TYPE = "type";
+export const ROSIE_ENTITY_INTERFACE = "interface";
+export const ROSIE_ENTITY_HTML_ELEMENT = "htmlelement";
+export const ROSIE_ENTITY_CLASS_DEFINITION = "classdefinition";
+export const ROSIE_ENTITY_FUNCTION_EXPRESSION = "functionexpression";
 
 export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
   [ELEMENT_CHECKED_FUNCTION_CALL, ROSIE_ENTITY_CHECKED_FUNCTION_CALL],
@@ -78,13 +88,17 @@ export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
   [ELEMENT_CHECKED_TRYBLOCK, ROSIE_ENTITY_TRYBLOCK],
   [ELEMENT_CHECKED_IMPORT, ROSIE_ENTITY_IMPORT],
   [ELEMENT_CHECKED_ASSIGNMENT, ROSIE_ENTITY_ASSIGNMENT],
+  [ELEMENT_CHECKED_TYPE, ROSIE_ENTITY_TYPE],
+  [ELEMENT_CHECKED_INTERFACE, ROSIE_ENTITY_INTERFACE],
+  [ELEMENT_CHECKED_HTML_ELEMENT, ROSIE_ENTITY_HTML_ELEMENT],
+  [ELEMENT_CHECKED_CLASS_DEFINITION, ROSIE_ENTITY_CLASS_DEFINITION],
+  [ELEMENT_CHECKED_FUNCTION_EXPRESSION, ROSIE_ENTITY_FUNCTION_EXPRESSION],
 ]);
 
 export const INFO_MESSAGE_CODIGA_FILE_KEY = "ignoreCodigaFile";
 export const INFO_MESSAGE_CODIGA_FILE =
-  "Check for security, code style in your Python code with Codiga";
-export const INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE =
-  "Create a codiga.yml file to check code";
+  "Check your code for security and code style issues with Codiga";
+export const INFO_MESSAGE_CODIGA_FILE_ACTION_CREATE = "Create a codiga.yml now";
 export const INFO_MESSAGE_CODIGA_FILE_ACTION_IGNORE = "Never remind me";
 
 export const DEFAULT_PYTHON_RULESET_CONFIG = `
@@ -94,6 +108,17 @@ rulesets:
   - python-code-style
 `.trim();
 
-export const ROSIE_SUPPORTED_LANGUAGES = [Language.Python];
+export const DEFAULT_JAVASCRIPT_RULESET_CONFIG = `
+rulesets:
+  - jsx-a11y
+  - jsx-react
+  - react-best-practices
+`.trim();
+
+export const ROSIE_SUPPORTED_LANGUAGES = [
+  Language.Python,
+  Language.Javascript,
+  Language.Typescript,
+];
 
 export const ROSIE_LANGUAGE_DETECT_MAX_RESULTS = 1;
