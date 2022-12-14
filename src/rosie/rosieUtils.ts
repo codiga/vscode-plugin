@@ -45,11 +45,6 @@ export async function getWorkspaceRosieLanguage(): Promise<Language | null> {
         if (!language) {
           return null;
         } else {
-          /**
-           * TODO - remove this check when we have more JS
-           * rulesets so that we can suggest something good
-           */
-          if (language !== Language.Python) return null;
           return language;
         }
       }

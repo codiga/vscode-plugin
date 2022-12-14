@@ -110,7 +110,9 @@ rulesets:
 
 export const DEFAULT_JAVASCRIPT_RULESET_CONFIG = `
 rulesets:
-  - javascript-templates
+  - jsx-a11y
+  - jsx-react
+  - react-best-practices
 `.trim();
 
 export const ROSIE_SUPPORTED_LANGUAGES = [
