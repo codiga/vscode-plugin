@@ -90,7 +90,7 @@ export const recipeWithTransformVariables =
 export const recipeForUser =
   "dGhyZWFkOjpzcGF3bihtb3ZlIHx8IHsKICAvLyB0aHJlYWQgY29kZSBoZXJlCn0pOw==";
 
-export const wait = (ms: number) =>
+export const wait = async (ms: number) =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 
 export function testDataUri(file: string) {
