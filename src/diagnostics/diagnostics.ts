@@ -61,15 +61,22 @@ const registerFixForDocument = (
   range: vscode.Range,
   fix: RosieFix
 ): void => {
+  // If there is no range or fix saved for this document, save the document
   if (!FIXES_BY_DOCUMENT.has(documentUri)) {
     FIXES_BY_DOCUMENT.set(documentUri, new Map());
   }
+
+  // Query the ranges saved for this document, and if the currently inspected range is not saved
+  // associate an empty list of fixes to it. Otherwise, add the fix for this range.
   const fixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
   if (!fixesForDocument?.has(range)) {
     FIXES_BY_DOCUMENT.get(documentUri)?.set(range, []);
   }
 
-  FIXES_BY_DOCUMENT.get(documentUri)?.get(range)?.push(fix);
+  // This aims to prevent adding the same fix more than once
+  if (!FIXES_BY_DOCUMENT.get(documentUri)?.get(range)?.includes(fix)) {
+    FIXES_BY_DOCUMENT.get(documentUri)?.get(range)?.push(fix);
+  }
 };
 
 /**
