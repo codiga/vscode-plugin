@@ -75,7 +75,7 @@ const registerFixForDocument = (
   // Query the ranges saved for this document, and if the currently inspected range is not saved,
   // associate an empty list of fixes to it. Otherwise, add the fix for this range.
   const rangeAndFixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
-  let rangeString = JSON.stringify(range);
+  const rangeString = JSON.stringify(range);
   if (!rangeAndFixesForDocument?.has(rangeString)) {
     rangeAndFixesForDocument?.set(rangeString, [range, []]);
   }
