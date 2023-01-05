@@ -21,7 +21,10 @@ import { getRulesFromCache } from "../rosie/rosieCache";
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
   vscode.Uri,
-  Map<vscode.Range, RosieFix[]>
+  //Uses a string key (the JSON stringified vscode.Range) because Map.has() works based on === equality.
+  // Having vscode.Range as key sometimes resulted in the same range added multiple times with the same
+  // fixes in 'registerFixForDocument'.
+  Map<string, [vscode.Range, RosieFix[]]>
 > = new Map();
 
 /**
@@ -39,9 +42,9 @@ export const getFixesForDocument = (
   const fixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
   const result: RosieFix[] = [];
   if (fixesForDocument) {
-    for (const k of fixesForDocument.keys()) {
-      if (k.contains(range)) {
-        fixesForDocument.get(k)?.forEach((f) => result.push(f));
+    for (const rangeAndFixes of fixesForDocument.values()) {
+      if (rangeAndFixes[0].contains(range)) {
+        rangeAndFixes[1]?.forEach((f) => result.push(f));
       }
     }
   }
@@ -52,24 +55,39 @@ export const getFixesForDocument = (
  * Register a fix for a document and a range. When we analyze the file,
  * we store all the quick fixes in a Map so that we can retrieve them
  * later when the user hover the fixes.
- * @param documentUri
- * @param range
- * @param fix
+ *
+ * It makes sure that no duplicate ranges, and no duplicate fixes are added.
+ *
+ * @param documentUri - the URI of the analyzed VS Code document
+ * @param range - the range we are at in the document
+ * @param fix - the quick fix to register for this document and range
  */
 const registerFixForDocument = (
   documentUri: vscode.Uri,
   range: vscode.Range,
   fix: RosieFix
 ): void => {
+  // If there is no range or fix saved for this document, save the document
   if (!FIXES_BY_DOCUMENT.has(documentUri)) {
     FIXES_BY_DOCUMENT.set(documentUri, new Map());
   }
-  const fixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
-  if (!fixesForDocument?.has(range)) {
-    FIXES_BY_DOCUMENT.get(documentUri)?.set(range, []);
+
+  // Query the ranges saved for this document, and if the currently inspected range is not saved,
+  // associate an empty list of fixes to it. Otherwise, add the fix for this range.
+  const rangeAndFixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
+  const rangeString = JSON.stringify(range);
+  if (!rangeAndFixesForDocument?.has(rangeString)) {
+    rangeAndFixesForDocument?.set(rangeString, [range, []]);
   }
 
-  FIXES_BY_DOCUMENT.get(documentUri)?.get(range)?.push(fix);
+  if (rangeAndFixesForDocument?.get(rangeString)) {
+    // @ts-ignore
+    let fixesForRange = rangeAndFixesForDocument?.get(rangeString)[1];
+    // If the fix hasn't been added to this range, add it.
+    if (fixesForRange?.filter(f => JSON.stringify(f) === JSON.stringify(fix)).length === 0) {
+      fixesForRange?.push(fix);
+    }
+  }
 };
 
 /**
