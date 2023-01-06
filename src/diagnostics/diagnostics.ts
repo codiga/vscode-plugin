@@ -31,6 +31,7 @@ const FIXES_BY_DOCUMENT: Map<
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
  * violation. We register the list of fixes when we analyze. Then, when the user
  * hover a quick fix, we get the list of quick fixes using this function.
+ *
  * @param documentUri - the URI of the VS Code document
  * @param range - the range we are at in the document
  * @returns - the list of fixes for the given range
@@ -93,7 +94,8 @@ const registerFixForDocument = (
 /**
  * Reset the quick fixes for a document. When we start another analysis, we reset
  * the list of fixes to only have a short list of quick fixes.
- * @param documentUri
+ *
+ * @param documentUri - the URI of the VS Code document
  */
 const resetFixesForDocument = (documentUri: vscode.Uri): void => {
   FIXES_BY_DOCUMENT.set(documentUri, new Map());
@@ -141,10 +143,10 @@ const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
 };
 
 /**
- * Get the rule responses from Rosie
- * @param document - the document being analyzed
- * @param rules - the list of rules
- * @returns
+ * Maps the argument Rosie severity to the VS Code specific DiagnosticSeverity,
+ * to have squiggles with proper severities displayed in the editor.
+ *
+ * @param rosieSeverity the severity to map
  */
 export const getRuleResponses = async (
   document: vscode.TextDocument,
@@ -209,6 +211,23 @@ const mapRosieSeverityToVsCodeSeverity = (
   return vscode.DiagnosticSeverity.Information;
 };
 
+/**
+ * Analyses the argument document and updates/overwrites the diagnostics for that document.
+ * This in turn updates the displayed squiggles in the editor.
+ *
+ * No update happens when
+ * <ul>
+ *   <li>The language of the document is unknown.</li>
+ *   <li>The language of the document is not supported by Rosie.</li>
+ *   <li>The user hasn't finished typing for at least 500ms.</li>
+ *   <li>The document is empty.</li>
+ *   <li>The document has less than 2 lines.</li>
+ *   <li>There is no rule cached for the current document's language.</li>
+ * </ul>
+ *
+ * @param doc - the currently analysed document
+ * @param diagnostics - the diagnostics collection in which the diagnostics are stored. See extension.ts#activate().
+ */
 export async function refreshDiagnostics(
   doc: vscode.TextDocument,
   diagnostics: vscode.DiagnosticCollection
@@ -292,6 +311,13 @@ export async function refreshDiagnostics(
   }
 }
 
+/**
+ * Subscribes to document and editor changes. Refreshes the diagnostics upon changes in the active text editor
+ * and in text documents, and deletes the diagnostics for a document when the editor of that document gets closed.
+ *
+ * @param context - the extension context
+ * @param diagnostics - the global diagnostics collection
+ */
 export function subscribeToDocumentChanges(
   context: vscode.ExtensionContext,
   diagnostics: vscode.DiagnosticCollection
