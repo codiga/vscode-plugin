@@ -49,9 +49,13 @@ import {
 import { runCodigaFileSuggestion } from "./features/codiga-file-suggestion";
 import { rollbarLogger } from "./utils/rollbarUtils";
 
+export var isInTestMode = false;
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+  isInTestMode = context.extensionMode === vscode.ExtensionMode.Test;
+
   initializeClient();
   initializeLocalStorage(context.workspaceState);
 
@@ -183,13 +187,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   allLanguages.forEach((lang) => {
     context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(
-        lang,
-        new IgnoreViolation(),
-        {
-          providedCodeActionKinds: IgnoreViolation.providedCodeActionKinds,
-        }
-      )
+      vscode.languages.registerCodeActionsProvider(lang,new IgnoreViolation(), {
+        providedCodeActionKinds: IgnoreViolation.providedCodeActionKinds,
+      })
     );
 
     context.subscriptions.push(
