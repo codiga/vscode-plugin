@@ -270,34 +270,32 @@ export async function refreshDiagnostics(
   resetFixesForDocument(doc.uri);
 
   if (rules && rules.length > 0) {
-    const ruleReponses = await getRuleResponses(doc, rules);
+    const ruleResponses = await rosieClient.getRuleResponses(doc, rules, isInTestMode);
     const diags: vscode.Diagnostic[] = [];
 
-    ruleReponses.forEach((ruleReponse) => {
-      // console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
-      ruleReponse.violations.forEach((v) => {
+    ruleResponses.forEach((ruleResponse) => {
+      // console.debug(`Response took ${ruleResponse.executionTimeMs} ms`);
+      ruleResponse.violations.forEach((violation) => {
         const range = new vscode.Range(
-          new vscode.Position(v.start.line - 1, v.start.col - 1),
-          new vscode.Position(v.end.line - 1, v.end.col - 1)
+          new vscode.Position(violation.start.line - 1, violation.start.col - 1),
+          new vscode.Position(violation.end.line - 1, violation.end.col - 1)
         );
 
         const diag = new vscode.Diagnostic(
           range,
-          v.message,
-          mapRosieSeverityToVsCodeSeverity(v.severity)
+          violation.message,
+          mapRosieSeverityToVsCodeSeverity(violation.severity)
         );
         diag.source = DIAGNOSTIC_SOURCE;
         diag.code = {
-          value: ruleReponse.identifier,
+          value: ruleResponse.identifier,
           target: vscode.Uri.parse(
-            `https://app.codiga.io/hub/ruleset/${ruleReponse.identifier}`
+            `https://app.codiga.io/hub/ruleset/${ruleResponse.identifier}`
           ),
         };
 
-        diag.relatedInformation;
-
-        if (v.fixes) {
-          v.fixes.forEach((fix) => {
+        if (violation.fixes) {
+          violation.fixes.forEach((fix) => {
             registerFixForDocument(doc.uri, range, fix);
           });
         }
