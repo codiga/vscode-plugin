@@ -202,7 +202,8 @@ const mapRosieSeverityToVsCodeSeverity = (
   if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_CRITICAL) {
     return vscode.DiagnosticSeverity.Error;
   }
-  if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_WARNING) {
+  if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_ERROR
+    || rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_WARNING) {
     return vscode.DiagnosticSeverity.Warning;
   }
   return vscode.DiagnosticSeverity.Information;
