@@ -90,8 +90,8 @@ suite("Rosie diagnostics", () => {
     await wait(2000);
 
     //Check if the diagnostics are display with their proper severities and messages
-    let diagnostics = vscode.languages.getDiagnostics();
-    let fileDiags = diagnostics[0][1];
+    const diagnostics = vscode.languages.getDiagnostics();
+    const fileDiags = diagnostics[0][1];
 
     assert.strictEqual(fileDiags[0].severity, DiagnosticSeverity.Error);
     assert.strictEqual(fileDiags[0].message, "critical_violation");
