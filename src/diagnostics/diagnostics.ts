@@ -148,56 +148,6 @@ const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
  *
  * @param rosieSeverity the severity to map
  */
-export const getRuleResponses = async (
-  document: vscode.TextDocument,
-  rules: Rule[]
-): Promise<RuleReponse[]> => {
-  const language = getLanguageForDocument(document);
-  const rosieLanguage = getRosieLanguage(language);
-
-  if (!rosieLanguage) {
-    console.debug("language not supported by Rosie");
-    return [];
-  }
-
-  const relativePath = vscode.workspace.asRelativePath(document.uri.path);
-
-  // Convert the code to Base64
-  const codeBuffer = Buffer.from(document.getText());
-  const codeBase64 = codeBuffer.toString("base64");
-
-  // Build the request post data
-  const data = {
-    filename: relativePath,
-    fileEncoding: "utf-8",
-    language: rosieLanguage,
-    codeBase64: codeBase64,
-    rules: rules,
-    logOutput: false,
-  };
-
-  try {
-    // Make the initial request to Rosie
-    const response = await axios.post<RosieReponse>(ROSIE_ENDPOINT_PROD, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response || !response.data) {
-      console.debug("no response from Rosie");
-      return [];
-    }
-
-    const responses = response.data.ruleResponses as RuleReponse[];
-
-    return responses;
-  } catch (err) {
-    console.log("ERROR: ", err);
-    return [];
-  }
-};
-
 const mapRosieSeverityToVsCodeSeverity = (
   rosieSeverity: string
 ): vscode.DiagnosticSeverity => {
