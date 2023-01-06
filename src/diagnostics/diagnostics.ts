@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-import { getLanguageForDocument, getLanguageForFile } from "../utils/fileUtils";
-import axios from "axios";
+import { getLanguageForFile } from "../utils/fileUtils";
+import * as rosieClient from "../rosie/rosieClient";
+import { isInTestMode } from "../extension";
 
 import {
   DIAGNOSTIC_SOURCE,
@@ -8,14 +9,13 @@ import {
 } from "../constants";
 import { Language } from "../graphql-api/types";
 import { getRulesDebug } from "../rosie/debug";
-import { RosieFix, RosieReponse, Rule, RuleReponse } from "../rosie/rosieTypes";
+import { RosieFix } from "../rosie/rosieTypes";
 import {
   GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
-  ROSIE_ENDPOINT_PROD,
   ROSIE_SEVERITY_CRITICAL,
+  ROSIE_SEVERITY_ERROR,
   ROSIE_SEVERITY_WARNING,
 } from "../rosie/rosieConstants";
-import { getRosieLanguage } from "../rosie/rosieLanguage";
 import { getRulesFromCache } from "../rosie/rosieCache";
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
