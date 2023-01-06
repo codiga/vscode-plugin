@@ -1,6 +1,24 @@
 import * as path from "path";
 import { runTests } from "@vscode/test-electron";
 
+async function runTestsOnWindows(extensionDevelopmentPath: string, extensionTestsPath: string, workspace: string) {
+  await runTests({
+    extensionDevelopmentPath,
+    extensionTestsPath,
+    version: "1.70.0",
+    platform: "win32-x64-archive",
+    launchArgs: [workspace, "--disable-extensions"],
+  });
+}
+
+async function runTestsOnNonWindows(extensionDevelopmentPath: string, extensionTestsPath: string, workspace: string) {
+  await runTests({
+    extensionDevelopmentPath,
+    extensionTestsPath,
+    launchArgs: [workspace, "--disable-extensions"],
+  });
+}
+
 async function main() {
   try {
     // The folder containing the Extension Manifest package.json
@@ -9,62 +27,38 @@ async function main() {
 
     // The path to test runner
     // Passed to --extensionTestsPath
-    const extensionTestsPath = path.resolve(__dirname, "./index");
+    const rosieDiagnosticsExtensionTestsPath = path.resolve(__dirname, "./rosieDiagnosticsTestRunner");
+    const rosieQuickFixesExtensionTestsPath = path.resolve(__dirname, "./rosieQuickFixesTestRunner");
+    const codigaFileSuggestionsExtensionTestsPath = path.resolve(__dirname, "./codigaFileSuggestionsTestRunner");
+    const allOtherExtensionTestsPath = path.resolve(__dirname, "./allOtherTestRunner");
 
-    const pythonWorkspace = path.resolve(
-      __dirname,
-      "../../test-fixtures/python-workspace"
-    );
-    const javascriptWorkspace = path.resolve(
-      __dirname,
-      "../../test-fixtures/javascript-workspace"
-    );
-    const typescriptWorkspace = path.resolve(
-      __dirname,
-      "../../test-fixtures/javascript-workspace"
-    );
+    const diagnosticsWorkspace = path.resolve(__dirname, "../../test-fixtures/diagnostics");
+    const quickFixesWorkspace = path.resolve(__dirname, "../../test-fixtures/quick-fixes");
+    const pythonWorkspace = path.resolve(__dirname, "../../test-fixtures/config-suggestions/python-workspace");
+    const javascriptWorkspace = path.resolve(__dirname, "../../test-fixtures/config-suggestions/javascript-workspace");
+    const typescriptWorkspace = path.resolve(__dirname, "../../test-fixtures/config-suggestions/typescript-workspace");
     /**
      * Use win64 instead of win32 for testing Windows
      */
     if (process.platform === "win32") {
-      await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        version: "1.70.0",
-        platform: "win32-x64-archive",
-        launchArgs: [pythonWorkspace, "--disable-extensions"],
-      });
-      await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        version: "1.70.0",
-        platform: "win32-x64-archive",
-        launchArgs: [javascriptWorkspace, "--disable-extensions"],
-      });
-      await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        version: "1.70.0",
-        platform: "win32-x64-archive",
-        launchArgs: [typescriptWorkspace, "--disable-extensions"],
-      });
+      await runTestsOnWindows(extensionDevelopmentPath, rosieDiagnosticsExtensionTestsPath, diagnosticsWorkspace);
+      await runTestsOnWindows(extensionDevelopmentPath, rosieQuickFixesExtensionTestsPath, quickFixesWorkspace);
+
+      await runTestsOnWindows(extensionDevelopmentPath, codigaFileSuggestionsExtensionTestsPath, pythonWorkspace);
+      await runTestsOnWindows(extensionDevelopmentPath, codigaFileSuggestionsExtensionTestsPath, javascriptWorkspace);
+      await runTestsOnWindows(extensionDevelopmentPath, codigaFileSuggestionsExtensionTestsPath, typescriptWorkspace);
+
+      await runTestsOnWindows(extensionDevelopmentPath, allOtherExtensionTestsPath, pythonWorkspace);
     } else {
       // Download VS Code, unzip it and run the integration test
-      await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        launchArgs: [pythonWorkspace, "--disable-extensions"],
-      });
-      await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        launchArgs: [javascriptWorkspace, "--disable-extensions"],
-      });
-      await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        launchArgs: [typescriptWorkspace, "--disable-extensions"],
-      });
+      await runTestsOnNonWindows(extensionDevelopmentPath, rosieDiagnosticsExtensionTestsPath, diagnosticsWorkspace);
+      await runTestsOnNonWindows(extensionDevelopmentPath, rosieQuickFixesExtensionTestsPath, quickFixesWorkspace);
+
+      await runTestsOnNonWindows(extensionDevelopmentPath, codigaFileSuggestionsExtensionTestsPath, pythonWorkspace);
+      await runTestsOnNonWindows(extensionDevelopmentPath, codigaFileSuggestionsExtensionTestsPath, javascriptWorkspace);
+      await runTestsOnNonWindows(extensionDevelopmentPath, codigaFileSuggestionsExtensionTestsPath, typescriptWorkspace);
+
+      await runTestsOnNonWindows(extensionDevelopmentPath, allOtherExtensionTestsPath, pythonWorkspace);
     }
   } catch (err) {
     console.error("Failed to run tests");

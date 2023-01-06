@@ -75,6 +75,16 @@ export const garbageCollection = (
 };
 
 /**
+ * Resets the cache with the provided data. Only to be used in tests.
+ */
+export const refreshCacheForWorkspace = async (
+  workspace: vscode.WorkspaceFolder, cacheData: CacheData
+): Promise<void> => {
+  RULES_CACHE.clear();
+  RULES_CACHE.set(workspace, cacheData);
+};
+
+/**
  * Actually refresh the cache for all workspaces
  * @param cache
  */
