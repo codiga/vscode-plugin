@@ -9,13 +9,20 @@ suite("Rosie quick fixes", () => {
 
   function assertNoEditHappened() {
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
+  }
+
+  /**
+   * Removes \r characters from the argument string, if the test is executed on a non-Windows platform.
+   */
+  function normalizeLineEndings(code: string): string {
+    return process.platform === "win32" ? code : code.replace("\r", "");
   }
 
   // Hooks
@@ -115,13 +122,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;Text added");
+      "const x = 6;Text added"));
   });
 
   test("No fix is applied when start line is negative for non-addition", async () => {
@@ -242,13 +249,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "Replacement");
+      "Replacement"));
   });
 
   test("No fix is applied when end position is less than start position", async () => {
@@ -283,13 +290,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "clasText addeds Duck {\r\n" +
+      normalizeLineEndings("clasText addeds Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Replaces text", async () => {
@@ -307,13 +314,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "clasReplacementk {\r\n" +
+      normalizeLineEndings("clasReplacementk {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Replaces text at the end of the document", async () => {
@@ -331,13 +338,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "coReplacement");
+      "coReplacement"));
   });
 
   test("Deletes text", async () => {
@@ -355,13 +362,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "clask {\r\n" +
+      normalizeLineEndings("clask {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Deletes text at the end of the document", async () => {
@@ -379,13 +386,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "co");
+      "co"));
   });
 
 
@@ -416,13 +423,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       " Replacementvate _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "co");
+      "co"));
   });
 
   test("Replaces text in multiple lines", async () => {
@@ -440,11 +447,11 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "Replacementnstructor(size: number) {\r\n" +
+      normalizeLineEndings("Replacementnstructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Deletes text in multiple lines", async () => {
@@ -462,11 +469,11 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "nstructor(size: number) {\r\n" +
+      normalizeLineEndings("nstructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Adds codiga-disable comment in the first row", async () => {
@@ -477,14 +484,14 @@ suite("Rosie quick fixes", () => {
       "ruleId");
 
     assert.strictEqual(file.getText(),
-      "// codiga-disable\r\n" +
+      normalizeLineEndings("// codiga-disable\r\n" +
       "class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Adds codiga-disable comment within the document", async () => {
@@ -495,14 +502,14 @@ suite("Rosie quick fixes", () => {
       "ruleId");
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    // codiga-disable\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Adds codiga-disable comment for violation in the last row", async () => {
@@ -513,14 +520,14 @@ suite("Rosie quick fixes", () => {
       "ruleId");
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
       "// codiga-disable\r\n" +
-      "const x = 6;");
+      "const x = 6;"));
   });
 
   test("Adds codiga-disable comment in python file", async () => {
@@ -542,8 +549,8 @@ suite("Rosie quick fixes", () => {
       "ruleId");
 
     assert.strictEqual(file.getText(),
-      "def some_function():\r\n" +
+      normalizeLineEndings("def some_function():\r\n" +
       "    # codiga-disable\r\n" +
-      "    y = \"some string\"\r\n");
+      "    y = \"some string\"\r\n"));
   });
 });
