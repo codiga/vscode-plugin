@@ -97,13 +97,13 @@ suite("Rosie quick fixes", () => {
       });
 
     assert.strictEqual(file.getText(),
-      "class Duck {\r\n" +
+      normalizeLineEndings("class Duck {\r\n" +
       "  private _size: number;\r\n" +
       "  constructor(size: number) {\r\n" +
       "    this._size = size;\r\n" +
       "  }\r\n" +
       "}\r\n" +
-      "const x = 6;Text added");
+      "const x = 6;Text added"));
   });
 
   //This is the behaviour on VS Code side and not on Codiga side
