@@ -22,7 +22,7 @@ suite("Rosie quick fixes", () => {
    * Removes \r characters from the argument string, if the test is executed on a non-Windows platform.
    */
   function normalizeLineEndings(code: string): string {
-    return process.platform === "win32" ? code : code.replace(/\r/, "");
+    return process.platform === "win32" ? code : code.replace(/\r/g, "");
   }
 
   // Hooks
