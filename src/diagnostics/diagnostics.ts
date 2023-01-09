@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-import { getLanguageForDocument, getLanguageForFile } from "../utils/fileUtils";
-import axios from "axios";
+import { getLanguageForFile } from "../utils/fileUtils";
+import * as rosieClient from "../rosie/rosieClient";
+import { isInTestMode } from "../extension";
 
 import {
   DIAGNOSTIC_SOURCE,
@@ -8,14 +9,13 @@ import {
 } from "../constants";
 import { Language } from "../graphql-api/types";
 import { getRulesDebug } from "../rosie/debug";
-import { RosieFix, RosieReponse, Rule, RuleReponse } from "../rosie/rosieTypes";
+import { RosieFix } from "../rosie/rosieTypes";
 import {
   GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
-  ROSIE_ENDPOINT_PROD,
   ROSIE_SEVERITY_CRITICAL,
+  ROSIE_SEVERITY_ERROR,
   ROSIE_SEVERITY_WARNING,
 } from "../rosie/rosieConstants";
-import { getRosieLanguage } from "../rosie/rosieLanguage";
 import { getRulesFromCache } from "../rosie/rosieCache";
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
@@ -31,6 +31,7 @@ const FIXES_BY_DOCUMENT: Map<
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
  * violation. We register the list of fixes when we analyze. Then, when the user
  * hover a quick fix, we get the list of quick fixes using this function.
+ *
  * @param documentUri - the URI of the VS Code document
  * @param range - the range we are at in the document
  * @returns - the list of fixes for the given range
@@ -93,7 +94,8 @@ const registerFixForDocument = (
 /**
  * Reset the quick fixes for a document. When we start another analysis, we reset
  * the list of fixes to only have a short list of quick fixes.
- * @param documentUri
+ *
+ * @param documentUri - the URI of the VS Code document
  */
 const resetFixesForDocument = (documentUri: vscode.Uri): void => {
   FIXES_BY_DOCUMENT.set(documentUri, new Map());
@@ -141,73 +143,41 @@ const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
 };
 
 /**
- * Get the rule responses from Rosie
- * @param document - the document being analyzed
- * @param rules - the list of rules
- * @returns
+ * Maps the argument Rosie severity to the VS Code specific DiagnosticSeverity,
+ * to have squiggles with proper severities displayed in the editor.
+ *
+ * @param rosieSeverity the severity to map
  */
-export const getRuleResponses = async (
-  document: vscode.TextDocument,
-  rules: Rule[]
-): Promise<RuleReponse[]> => {
-  const language = getLanguageForDocument(document);
-  const rosieLanguage = getRosieLanguage(language);
-
-  if (!rosieLanguage) {
-    console.debug("language not supported by Rosie");
-    return [];
-  }
-
-  const relativePath = vscode.workspace.asRelativePath(document.uri.path);
-
-  // Convert the code to Base64
-  const codeBuffer = Buffer.from(document.getText());
-  const codeBase64 = codeBuffer.toString("base64");
-
-  // Build the request post data
-  const data = {
-    filename: relativePath,
-    fileEncoding: "utf-8",
-    language: rosieLanguage,
-    codeBase64: codeBase64,
-    rules: rules,
-    logOutput: false,
-  };
-
-  try {
-    // Make the initial request to Rosie
-    const response = await axios.post<RosieReponse>(ROSIE_ENDPOINT_PROD, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response || !response.data) {
-      console.debug("no response from Rosie");
-      return [];
-    }
-
-    const responses = response.data.ruleResponses as RuleReponse[];
-
-    return responses;
-  } catch (err) {
-    console.log("ERROR: ", err);
-    return [];
-  }
-};
-
 const mapRosieSeverityToVsCodeSeverity = (
   rosieSeverity: string
 ): vscode.DiagnosticSeverity => {
   if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_CRITICAL) {
     return vscode.DiagnosticSeverity.Error;
   }
-  if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_WARNING) {
+  if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_ERROR
+    || rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_WARNING) {
     return vscode.DiagnosticSeverity.Warning;
   }
   return vscode.DiagnosticSeverity.Information;
 };
 
+/**
+ * Analyses the argument document and updates/overwrites the diagnostics for that document.
+ * This in turn updates the displayed squiggles in the editor.
+ *
+ * No update happens when
+ * <ul>
+ *   <li>The language of the document is unknown.</li>
+ *   <li>The language of the document is not supported by Rosie.</li>
+ *   <li>The user hasn't finished typing for at least 500ms.</li>
+ *   <li>The document is empty.</li>
+ *   <li>The document has less than 2 lines.</li>
+ *   <li>There is no rule cached for the current document's language.</li>
+ * </ul>
+ *
+ * @param doc - the currently analysed document
+ * @param diagnostics - the diagnostics collection in which the diagnostics are stored. See extension.ts#activate().
+ */
 export async function refreshDiagnostics(
   doc: vscode.TextDocument,
   diagnostics: vscode.DiagnosticCollection
@@ -250,34 +220,32 @@ export async function refreshDiagnostics(
   resetFixesForDocument(doc.uri);
 
   if (rules && rules.length > 0) {
-    const ruleReponses = await getRuleResponses(doc, rules);
+    const ruleResponses = await rosieClient.getRuleResponses(doc, rules, isInTestMode);
     const diags: vscode.Diagnostic[] = [];
 
-    ruleReponses.forEach((ruleReponse) => {
-      // console.debug(`Reponse took ${ruleReponse.executionTimeMs} ms`);
-      ruleReponse.violations.forEach((v) => {
+    ruleResponses.forEach((ruleResponse) => {
+      // console.debug(`Response took ${ruleResponse.executionTimeMs} ms`);
+      ruleResponse.violations.forEach((violation) => {
         const range = new vscode.Range(
-          new vscode.Position(v.start.line - 1, v.start.col - 1),
-          new vscode.Position(v.end.line - 1, v.end.col - 1)
+          new vscode.Position(violation.start.line - 1, violation.start.col - 1),
+          new vscode.Position(violation.end.line - 1, violation.end.col - 1)
         );
 
         const diag = new vscode.Diagnostic(
           range,
-          v.message,
-          mapRosieSeverityToVsCodeSeverity(v.severity)
+          violation.message,
+          mapRosieSeverityToVsCodeSeverity(violation.severity)
         );
         diag.source = DIAGNOSTIC_SOURCE;
         diag.code = {
-          value: ruleReponse.identifier,
+          value: ruleResponse.identifier,
           target: vscode.Uri.parse(
-            `https://app.codiga.io/hub/ruleset/${ruleReponse.identifier}`
+            `https://app.codiga.io/hub/ruleset/${ruleResponse.identifier}`
           ),
         };
 
-        diag.relatedInformation;
-
-        if (v.fixes) {
-          v.fixes.forEach((fix) => {
+        if (violation.fixes) {
+          violation.fixes.forEach((fix) => {
             registerFixForDocument(doc.uri, range, fix);
           });
         }
@@ -291,6 +259,13 @@ export async function refreshDiagnostics(
   }
 }
 
+/**
+ * Subscribes to document and editor changes. Refreshes the diagnostics upon changes in the active text editor
+ * and in text documents, and deletes the diagnostics for a document when the editor of that document gets closed.
+ *
+ * @param context - the extension context
+ * @param diagnostics - the global diagnostics collection
+ */
 export function subscribeToDocumentChanges(
   context: vscode.ExtensionContext,
   diagnostics: vscode.DiagnosticCollection

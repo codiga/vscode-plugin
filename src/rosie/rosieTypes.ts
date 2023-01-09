@@ -38,14 +38,14 @@ export interface Violation {
   fixes: RosieFix[];
 }
 
-export interface RuleReponse {
+export interface RuleResponse {
   errors: string[];
   identifier: string;
   violations: Violation[];
   executionTimeMs: number;
 }
 
-export interface RosieReponse {
-  ruleResponses: RuleReponse[];
+export interface RosieResponse {
+  ruleResponses: RuleResponse[];
   errors: string[];
 }

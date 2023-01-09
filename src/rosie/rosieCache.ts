@@ -13,8 +13,9 @@ import { getLanguageForDocument } from "../utils/fileUtils";
 import { Rule } from "./rosieTypes";
 import { rollbarLogger } from "../utils/rollbarUtils";
 import { Language } from "../graphql-api/types";
+import {isInTestMode} from "../extension";
 
-interface CacheData {
+export interface CacheData {
   lastRefreshed: number; // last time we refreshed the data
   lastTimestamp: number; // timestamp of all rules used
   fileLastModification: number; // last modification timestamp of the codiga file
@@ -27,9 +28,13 @@ const RULES_CACHE = new Map<vscode.WorkspaceFolder, CacheData>();
  * Periodically refresh the cache for all rules that have been used
  */
 export const refreshCachePeriodic = async (): Promise<void> => {
+  if (isInTestMode === true) {
+    return;
+  }
+
   await refreshCache(RULES_CACHE).catch((e) => {
     rollbarLogger(e);
-    console.error("error while fetching shortcuts");
+    console.error("error while fetching rules");
   });
   garbageCollection(RULES_CACHE);
   setTimeout(refreshCachePeriodic, RULES_POLLING_INTERVAL_MS);
@@ -67,6 +72,16 @@ export const garbageCollection = (
   keysToCollect.forEach((key) => {
     cache.delete(key);
   });
+};
+
+/**
+ * Resets the cache with the provided data. Only to be used in tests.
+ */
+export const refreshCacheForWorkspace = async (
+  workspace: vscode.WorkspaceFolder, cacheData: CacheData
+): Promise<void> => {
+  RULES_CACHE.clear();
+  RULES_CACHE.set(workspace, cacheData);
 };
 
 /**
