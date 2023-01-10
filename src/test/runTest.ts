@@ -55,12 +55,12 @@ async function main() {
 
     if (process.platform === "win32") {
       for (let testPathsToWorkspace of testPathsToWorkspaces) {
-        await runTestsOnWindows(extensionDevelopmentPath, testPathsToWorkspace[0], testPathsToWorkspace[1])
+        await runTestsOnWindows(extensionDevelopmentPath, testPathsToWorkspace[0], testPathsToWorkspace[1]);
       }
     } else {
       // Download VS Code, unzip it and run the integration test
       for (let testPathsToWorkspace of testPathsToWorkspaces) {
-        await runTestsOnNonWindows(extensionDevelopmentPath, testPathsToWorkspace[0], testPathsToWorkspace[1])
+        await runTestsOnNonWindows(extensionDevelopmentPath, testPathsToWorkspace[0], testPathsToWorkspace[1]);
       }
     }
   } catch (err) {
