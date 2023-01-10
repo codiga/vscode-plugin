@@ -43,13 +43,17 @@ async function main() {
     const rosieCacheUpdateWorkspace = path.resolve(__dirname, "../../test-fixtures/rosie-cache/update");
 
     const testPathsToWorkspaces = new Map<string, string>([
+      //Rosie analysis
       [rosieDiagnosticsExtensionTestsPath, diagnosticsWorkspace],
       [rosieQuickFixesExtensionTestsPath, quickFixesWorkspace],
+      //codiga.yml file suggestions
       [codigaFileSuggestionsExtensionTestsPath, pythonWorkspace],
       [codigaFileSuggestionsExtensionTestsPath, javascriptWorkspace],
       [codigaFileSuggestionsExtensionTestsPath, typescriptWorkspace],
+      //Rosie cache
       [rosieCacheExtensionTestsPath, rosieCacheWorkspace],
       [rosieCacheUpdateExtensionTestsPath, rosieCacheUpdateWorkspace],
+      //Inline and shortcut completion
       [completionExtensionTestsPath, pythonWorkspace]
     ]);
 
