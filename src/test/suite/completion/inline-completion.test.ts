@@ -1,6 +1,6 @@
 import * as assert from "assert";
 
-import { shouldAnalyze } from "../../features/inline-completion";
+import { shouldAnalyze } from "../../../features/inline-completion";
 
 // test recipe auto complete capabilities of the plugin, we create mocks and stub
 // for recipe fetch and recipe usage endpoints
