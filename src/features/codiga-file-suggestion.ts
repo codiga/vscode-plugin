@@ -16,6 +16,7 @@ import { getWorkspaceRosieLanguage } from "../rosie/rosieUtils";
 import getFileUri, { doesFileExist } from "../utils/fileUtils";
 import { getFromLocalStorage, setToLocalStorage } from "../utils/localStorage";
 import { rollbarLogger } from "../utils/rollbarUtils";
+import {isInTestMode} from "../extension";
 
 /**
  * check whether the user has ignored codiga file suggestion for their workspace
@@ -85,7 +86,8 @@ export async function createCodigaFile(language: Language): Promise<void> {
         "utf-8"
       );
       await vscode.workspace.fs.writeFile(codigaUri, codigaFileContent);
-      await addCreateCodigaYamlRecord();
+      if (isInTestMode === false)
+        await addCreateCodigaYamlRecord();
     }
   } else {
     console.log(`${language} is not supported by Rosie`);

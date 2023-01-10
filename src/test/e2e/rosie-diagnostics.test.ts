@@ -1,25 +1,18 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import {DiagnosticSeverity} from "vscode";
-import {closeFile, deleteText, getWorkspaceFolder, replaceText, testDataUriInWorkspace, wait} from "../testUtils";
+import {
+  closeFile,
+  createMockRule,
+  deleteText,
+  getWorkspaceFolder,
+  replaceText,
+  testDataUriInWorkspace,
+  wait
+} from "../testUtils";
 import {CacheData, refreshCacheForWorkspace} from "../../rosie/rosieCache";
-import {Rule} from "../../rosie/rosieTypes";
 
 suite("Rosie diagnostics", () => {
-  /**
-   * Creates a mock AST Rule for the given language with the given content.
-   */
-  function createMockRule(content: string, language: string): Rule {
-    return {
-      contentBase64: content,
-      entityChecked: null,
-      id: "1",
-      language: language,
-      pattern: null,
-      type: "ast"
-    };
-  }
-
   const jsRule1 = createMockRule("ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==", "javascript");
   const jsRule2 = createMockRule(
     "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGFkZEVycm9yKGJ1aWxkRXJyb3IobW9kZS5zdGFydC5saW5lLCBtb2RlLnN0YXJ0LmNvbCwgbW9kZS5lbmQubGluZSwgbW9kZS5lbmQuY29sLCAiZXJyb3IgbWVzc2FnZSIsICJDUklUSUNBTCIsICJzZWN1cml0eSIpKTsKICB9Cn0=",
