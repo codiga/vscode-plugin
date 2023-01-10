@@ -27,7 +27,7 @@ suite("Rosie cache", () => {
 
   teardown(async () => {
     //When `codigaYaml.fsPath` is equal to codiga.yml, that is an untitled document not existing on the file system.
-    if (codigaYaml && fs.existsSync(codigaYaml.fsPath) && codigaYaml.fsPath !== "codiga.yml")
+    if (codigaYaml && fs.existsSync(codigaYaml.fsPath) && codigaYaml.fsPath !== "c:\\codiga.yml")
       await vscode.workspace.fs.delete(codigaYaml);
   });
 
@@ -64,8 +64,7 @@ suite("Rosie cache", () => {
   // getRulesetsFromYamlFile
 
   test("getRulesetsFromYamlFile: returns empty array when no codiga.yml exists", async () => {
-    //Testing non-existent codiga.yml with an untitled document, that does not automatically exist in the workspace.
-    codigaYaml = testDataUri("codiga.yml");
+    codigaYaml = vscode.Uri.parse(`file:///C:/codiga.yml`);
 
     const rulesets = await getRulesetsFromYamlFile(codigaYaml);
 
