@@ -3,6 +3,7 @@ import * as os from "os";
 import { decodeIndent } from "../utils/indentationUtils";
 import { AssistantRecipe } from "../graphql-api/types";
 import {fail} from "assert";
+import {Rule} from "../rosie/rosieTypes";
 
 export const testDataFolderCodeCompletion = "/code-completion/testdata/";
 
@@ -119,6 +120,20 @@ export async function getWorkspaceFolder() {
     fail("No workspace folder available.");
   }
   return workspaceFolders[0];
+}
+
+/**
+ * Creates a mock AST Rule for the given language with the given content.
+ */
+export function createMockRule(content: string, language: string): Rule {
+  return {
+    contentBase64: content,
+    entityChecked: null,
+    id: "1",
+    language: language,
+    pattern: null,
+    type: "ast"
+  };
 }
 
 export function mockRecipe(code: string): Promise<AssistantRecipe[]> {

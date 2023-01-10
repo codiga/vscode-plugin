@@ -51,6 +51,8 @@ export const STARTUP_MESSAGE_WINDOWS =
 
 export const PREFIX_RECENTLY_ADDED_RECIPE = "recently-added-recipe";
 
+export const CODIGA_RULESET_NAME_PATTERN = /^[a-z0-9][a-z0-9-]{4,31}$/;
+
 export const CODIGA_RULES_DEBUGFILE = ".codigadebug";
 export const CODIGA_RULES_FILE = "codiga.yml";
 

@@ -2,8 +2,7 @@ import * as fs from "fs";
 import { parse } from "yaml";
 import * as vscode from "vscode";
 import {
-  CODIGA_RULES_FILE,
-  ELEMENT_CHECKED_TO_ENTITY_CHECKED,
+  CODIGA_RULES_FILE, CODIGA_RULESET_NAME_PATTERN,
   RULES_MAX_TIME_IN_CACHE_MS,
   RULES_POLLING_INTERVAL_MS,
 } from "../constants";
@@ -15,6 +14,9 @@ import { rollbarLogger } from "../utils/rollbarUtils";
 import { Language } from "../graphql-api/types";
 import {isInTestMode} from "../extension";
 
+/**
+ * All timestamps are in milliseconds.
+ */
 export interface CacheData {
   lastRefreshed: number; // last time we refreshed the data
   lastTimestamp: number; // timestamp of all rules used
@@ -25,7 +27,7 @@ export interface CacheData {
 const RULES_CACHE = new Map<vscode.WorkspaceFolder, CacheData>();
 
 /**
- * Periodically refresh the cache for all rules that have been used
+ * Periodically refresh the cache for all rules that have been used.
  */
 export const refreshCachePeriodic = async (): Promise<void> => {
   if (isInTestMode === true) {
@@ -41,36 +43,30 @@ export const refreshCachePeriodic = async (): Promise<void> => {
 };
 
 /**
- * Remove the rules that have not been used for a while
- * @param cache
+ * Remove the rules that have not been used for a while.
+ *
+ * @param cache the rules cache
  */
 export const garbageCollection = (
   cache: Map<vscode.WorkspaceFolder, CacheData>
 ): void => {
   const nowMs = Date.now();
-  const keysToCollect = [];
+  const workspacesToDelete = [];
 
-  /**
-   * First, look at the keys we need to collect/remove
-   * from the cache.
-   */
-  for (const key of cache.keys()) {
-    const cacheValue = cache.get(key);
-    if (cache.has(key) && cacheValue) {
-      /**
-       * Was the data in the cache long enough?
-       */
+  //First, look at the keys we need to collect/remove from the cache.
+  for (const workspace of cache.keys()) {
+    const cacheValue = cache.get(workspace);
+    if (cache.has(workspace) && cacheValue) {
+      //If the data has been in the cache for long enough, mark it for garbage collection.
       if (cacheValue.lastRefreshed < nowMs - RULES_MAX_TIME_IN_CACHE_MS) {
-        keysToCollect.push(key);
+        workspacesToDelete.push(workspace);
       }
     }
   }
 
-  /**
-   * Remove the data from the cache.
-   */
-  keysToCollect.forEach((key) => {
-    cache.delete(key);
+  //Remove data for all marked workspaces from the cache.
+  workspacesToDelete.forEach((workspace) => {
+    cache.delete(workspace);
   });
 };
 
@@ -80,13 +76,16 @@ export const garbageCollection = (
 export const refreshCacheForWorkspace = async (
   workspace: vscode.WorkspaceFolder, cacheData: CacheData
 ): Promise<void> => {
-  RULES_CACHE.clear();
-  RULES_CACHE.set(workspace, cacheData);
+    RULES_CACHE.clear();
+    RULES_CACHE.set(workspace, cacheData);
 };
 
 /**
- * Actually refresh the cache for all workspaces
- * @param cache
+ * Actually refresh the cache for all workspaces.
+ *
+ * No cache update is performed if the editor has not been active for a while.
+ *
+ * @param cache the rules cache.
  */
 export const refreshCache = async (
   cache: Map<vscode.WorkspaceFolder, CacheData>
@@ -97,11 +96,7 @@ export const refreshCache = async (
 
   const folders = vscode.workspace.workspaceFolders;
   folders?.forEach((workspaceFolder) => {
-    const codigaFile = vscode.Uri.joinPath(
-      workspaceFolder.uri,
-      CODIGA_RULES_FILE
-    );
-
+    const codigaFile = vscode.Uri.joinPath(workspaceFolder.uri, CODIGA_RULES_FILE);
     // If there is a Codiga file, let's fetch the rules
     if (fs.existsSync(codigaFile.fsPath)) {
       updateCacheForWorkspace(cache, workspaceFolder, codigaFile);
@@ -110,28 +105,33 @@ export const refreshCache = async (
 };
 
 /**
- * Get the rules from the YAML file
+ * Get the ruleset names from the codiga.yml file.
+ *
+ * Returns an empty set of ruleset names if the codiga.yml doesn't exist,
+ * the content of the file is malformed, or there was an error during reading the contents of the file.
+ *
+ * Exported for testing purposes.
  */
-const getRulesFromYamlFile = async (
+export const getRulesetsFromYamlFile = async (
   codigaFile: vscode.Uri
 ): Promise<string[]> => {
-  // check that the file exists
+  // If the codiga.yml doesn't exist, no ruleset name is returned
   if (!fs.existsSync(codigaFile.fsPath)) {
     return [];
   }
 
   // Read the YAML file content and get the rulesets
   try {
-    const fileContent = await vscode.workspace.fs
-      .readFile(codigaFile)
-      .then((f) => f.toString());
+    const fileContent = fs.readFileSync(codigaFile.fsPath, {encoding: "utf-8"});
     const yamlContent = parse(fileContent) as any;
     if (yamlContent && yamlContent["rulesets"]) {
-      return yamlContent["rulesets"] as string[];
+      const rulesets = yamlContent["rulesets"] as string[];
+      //Returns only the valid ruleset names
+      return rulesets.filter(ruleset => CODIGA_RULESET_NAME_PATTERN.test(ruleset));
     }
     return [];
   } catch (e) {
-    console.log("error when reading the updating the rules");
+    console.log("error when reading the rulesets");
     console.log(e);
     rollbarLogger(e);
     return [];
@@ -142,17 +142,21 @@ const getRulesFromYamlFile = async (
  * Refresh/update the cache for the workspace.
  * Update if and only if the update timestamp for all rules
  * is different than the previous one.
- * @param cache
- * @param workspace
- * @param codigaFile
- * @returns
+ *
+ * This is exported for testing, so that we can keep the async nature of
+ * this function when called in 'refreshCache', but can await it in tests, and test
+ * it separately.
+ *
+ * @param cache the rules cache
+ * @param workspace the current workspace
+ * @param codigaFile the URI of the codiga.yml file
  */
-const updateCacheForWorkspace = async (
+export const updateCacheForWorkspace = async (
   cache: Map<vscode.WorkspaceFolder, CacheData>,
   workspace: vscode.WorkspaceFolder,
   codigaFile: vscode.Uri
 ): Promise<void> => {
-  const rulesets = await getRulesFromYamlFile(codigaFile);
+  const rulesets = await getRulesetsFromYamlFile(codigaFile);
 
   // no rulesets to query, just exit
   if (!rulesets || rulesets.length === 0) {
@@ -180,8 +184,8 @@ const updateCacheForWorkspace = async (
     }
 
     /**
-     * If the existing cache timestamp is the same than the timestamp
-     * being retrieved, just exit but update the last refreshed data.
+     * If the existing cache timestamp is the same as the timestamp
+     * being retrieved, just exit, but update the last refreshed data.
      */
     const existingCacheData = cache.get(workspace);
     if (
@@ -195,7 +199,7 @@ const updateCacheForWorkspace = async (
     }
 
     /**
-     * The timestamp is different OR there is no data in the cache yet
+     * The timestamp is different OR there is no data in the cache yet,
      * so let's refresh all the rulesets.
      */
     const rules = await getRules(rulesets);
@@ -209,29 +213,31 @@ const updateCacheForWorkspace = async (
 
     cache.set(workspace, newCacheData);
   } catch (e) {
-    console.log("error when reading the updating the rules");
+    console.log("error when reading or updating the rules");
     console.log(e);
     rollbarLogger(e);
   }
 };
 
 /**
- * Filters all the rules given to the ones we want to run for a single file
+ * Filters all the rules given to the ones we want to run for a single file.
+ *
  * @param languages all the languages that we want rules from
  * @param rules all the cached rules on the workspace
  * @returns an array containing all the rules to analyze a file
  */
 export const filterRules = (languages: Language[], rules: Rule[]) => {
   const rosieLanguages = languages.map((l) => l.toLowerCase());
-  return rules.filter((r) =>
-    rosieLanguages.includes(r.language.toLocaleLowerCase())
+  return rules.filter((rule) =>
+    rosieLanguages.includes(rule.language.toLocaleLowerCase())
   );
 };
 
 /**
- * Gets all the rules for a file to run against
- * @param language The language of the file
- * @param rules An array of all cached rules
+ * Gets all the rules for a file to run against.
+ *
+ * @param language the language of the file
+ * @param rules an array of all cached rules
  * @returns an array containing only the rules needed for a file to analyze
  */
 export const getRosieRulesForLanguage = (
@@ -254,28 +260,20 @@ export const getRosieRulesForLanguage = (
 
 /**
  * Get the list of rules for a particular document from the cache.
- * @param doc
- * @returns
+ *
+ * @param doc the document to get the rules for
+ * @returns the array of rules for the language of the given document
  */
 export const getRulesFromCache = async (
   doc: vscode.TextDocument
 ): Promise<Rule[]> => {
-  const workspacefolder = vscode.workspace.getWorkspaceFolder(doc.uri);
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(doc.uri);
 
-  if (!workspacefolder) {
-    return [];
+  if (workspaceFolder && RULES_CACHE.has(workspaceFolder)) {
+    const rules = RULES_CACHE.get(workspaceFolder)?.rules;
+    return rules
+      ? getRosieRulesForLanguage(getLanguageForDocument(doc), rules)
+      : [];
   }
-
-  if (RULES_CACHE.has(workspacefolder)) {
-    const rules = RULES_CACHE.get(workspacefolder)?.rules;
-    if (rules) {
-      const language = getLanguageForDocument(doc);
-      const allRules = getRosieRulesForLanguage(language, rules);
-      return allRules;
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
+  return [];
 };

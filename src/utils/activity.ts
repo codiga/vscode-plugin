@@ -2,6 +2,7 @@
  * Set of functions to detect if the user was recently active (or not).
  */
 
+const tenMinutesInMilliseconds = 60 * 10 * 1000;
 let lastActivityTimestamp: number = Date.now();
 
 /**
@@ -10,7 +11,6 @@ let lastActivityTimestamp: number = Date.now();
  * @returns
  */
 export const wasActiveRecently = (): boolean => {
-  const tenMinutesInMilliseconds = 60 * 10 * 1000;
   const tenMinutesAgo = Date.now() - tenMinutesInMilliseconds;
   return lastActivityTimestamp > tenMinutesAgo;
 };
