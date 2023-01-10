@@ -26,7 +26,8 @@ suite("Rosie cache", () => {
   // Hooks
 
   teardown(async () => {
-    if (codigaYaml && fs.existsSync(codigaYaml.fsPath))
+    //When `codigaYaml.fsPath` is equal to codiga.yml, that is an untitled document not existing on the file system.
+    if (codigaYaml && fs.existsSync(codigaYaml.fsPath) && codigaYaml.fsPath !== "codiga.yml")
       await vscode.workspace.fs.delete(codigaYaml);
   });
 
