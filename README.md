@@ -5,11 +5,9 @@
 [![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 [![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 
-[Codiga](https://www.codiga.io): static code analysis on steroids 🚀
+# Codiga: Static Code Analysis on Steroids 🚀
 
-Analyze, check and automatically fix security vulnerabilities and coding mistakes from your IDE.
-
-- Works for Python, JavaScript and TypeScript.
+- Works for Python, JavaScript and TypeScript (C# and Java coming)
 - Fix security vulnerabilities and coding mistakes from your IDE
 - Let you write your own custom rules ([tutorial](https://app.codiga.io/hub/tutorial) or [documentation](https://doc.codiga.io/docs/rosie/rosie-introduction/))
 
