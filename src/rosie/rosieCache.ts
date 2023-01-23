@@ -76,8 +76,8 @@ export const garbageCollection = (
 export const refreshCacheForWorkspace = async (
   workspace: vscode.WorkspaceFolder, cacheData: CacheData
 ): Promise<void> => {
-    RULES_CACHE.clear();
-    RULES_CACHE.set(workspace, cacheData);
+  RULES_CACHE.clear();
+  RULES_CACHE.set(workspace, cacheData);
 };
 
 /**
@@ -112,29 +112,76 @@ export const refreshCache = async (
  *
  * Exported for testing purposes.
  */
-export const getRulesetsFromYamlFile = async (
+export const parseCodigaConfig = async (
   codigaFile: vscode.Uri
-): Promise<string[]> => {
+): Promise<CodigaYmlConfig> => {
   // If the codiga.yml doesn't exist, no ruleset name is returned
   if (!fs.existsSync(codigaFile.fsPath)) {
-    return [];
+    return CodigaYmlConfig.EMPTY;
   }
 
-  // Read the YAML file content and get the rulesets
+  // Read the YAML file content and get the rulesets, ignore and other configuration.
   try {
     const fileContent = fs.readFileSync(codigaFile.fsPath, {encoding: "utf-8"});
     const yamlContent = parse(fileContent) as any;
-    if (yamlContent && yamlContent["rulesets"]) {
-      const rulesets = yamlContent["rulesets"] as string[];
-      //Returns only the valid ruleset names
-      return rulesets.filter(ruleset => CODIGA_RULESET_NAME_PATTERN.test(ruleset));
+    if (yamlContent) {
+      const codigaYmlConfig = new CodigaYmlConfig();
+      setRulesets(codigaYmlConfig, yamlContent);
+      setIgnore(codigaYmlConfig, yamlContent);
+      return codigaYmlConfig;
     }
-    return [];
+    return CodigaYmlConfig.EMPTY;
   } catch (e) {
-    console.log("error when reading the rulesets");
+    console.log("Error when parsing the codiga.yml file.");
     console.log(e);
     rollbarLogger(e);
-    return [];
+    return CodigaYmlConfig.EMPTY;
+  }
+};
+
+/**
+ * Configures the rulesets in the argument {@link CodigaYmlConfig} based on the deserialized config data.
+ *
+ * @param codigaYmlConfig The Codiga config in which rulesets are being configured
+ * @param yamlContent The content of the codiga.yml file
+ */
+const setRulesets = (
+  codigaYmlConfig: CodigaYmlConfig,
+  yamlContent: any
+): void => {
+  if (yamlContent["rulesets"]) {
+    const rulesets = yamlContent["rulesets"] as string[];
+    //Returns only the valid ruleset names
+    codigaYmlConfig.rulesetNames = rulesets.filter(ruleset => CODIGA_RULESET_NAME_PATTERN.test(ruleset));
+  }
+};
+
+/**
+ * Configures the ignores in the argument {@link CodigaYmlConfig} based on the deserialized config data.
+ *
+ * @param codigaYmlConfig The Codiga config in which rulesets are being configured
+ * @param yamlContent The content of the codiga.yml file
+ */
+const setIgnore = (
+  codigaYmlConfig: CodigaYmlConfig,
+  yamlContent: any
+): void => {
+  if (yamlContent["ignore"] && Array.isArray(yamlContent["ignore"])) {
+    const rulesetIgnores = yamlContent["ignore"] as object[];
+    rulesetIgnores.filter(rulesetIgnore => rulesetIgnore !== null).forEach(rulesetIgnore => {
+      /*
+        When the ignore config is specified like this (with a string ruleset name):
+        ignore:
+          - my-python-ruleset
+
+        there would be a separate entry for each character of the ruleset name: {'0', 'm'}, {'1', 'y'}, ...
+        Thus, we prevent processing such entries by allowing only valid ruleset names to be saved.
+      */
+      for (const [rulesetName, ruleIgnores] of Object.entries(rulesetIgnore)) {
+        if (CODIGA_RULESET_NAME_PATTERN.test(rulesetName))
+          codigaYmlConfig.ignore.set(rulesetName, new RulesetIgnore(rulesetName, ruleIgnores));
+      }
+    });
   }
 };
 
@@ -156,10 +203,10 @@ export const updateCacheForWorkspace = async (
   workspace: vscode.WorkspaceFolder,
   codigaFile: vscode.Uri
 ): Promise<void> => {
-  const rulesets = await getRulesetsFromYamlFile(codigaFile);
+  const codigaConfig = await parseCodigaConfig(codigaFile);
 
   // no rulesets to query, just exit
-  if (!rulesets || rulesets.length === 0) {
+  if (!codigaConfig.rulesetNames || codigaConfig.rulesetNames.length === 0) {
     // if there was some data before, delete it
     if (cache.has(workspace)) {
       cache.delete(workspace);
@@ -173,7 +220,7 @@ export const updateCacheForWorkspace = async (
 
   try {
     // get the last update timestamp for all the rulesets
-    const rulesTimestamp = await getRulesLastUpdatedTimestamp(rulesets);
+    const rulesTimestamp = await getRulesLastUpdatedTimestamp(codigaConfig.rulesetNames);
 
     if (!rulesTimestamp) {
       // if there was some data before, delete it
@@ -202,7 +249,7 @@ export const updateCacheForWorkspace = async (
      * The timestamp is different OR there is no data in the cache yet,
      * so let's refresh all the rulesets.
      */
-    const rules = await getRules(rulesets);
+    const rules = await getRules(codigaConfig.rulesetNames);
 
     const newCacheData: CacheData = {
       rules: rules,
@@ -277,3 +324,177 @@ export const getRulesFromCache = async (
   }
   return [];
 };
+
+/**
+ * Represents a codiga.yml configuration file.
+ */
+export class CodigaYmlConfig {
+  static readonly EMPTY: CodigaYmlConfig = new CodigaYmlConfig();
+
+  rulesetNames: string[];
+  /**
+   * Stores [ruleset name -> ruleset ignore configuration] mappings.
+   *
+   * Using a Map instead of a `RulesetIgnore[]` array, so that we can query the ruleset
+   * configs by name, without having to filter the list by the ruleset name.
+   */
+  ignore: Map<string, RulesetIgnore>;
+
+  constructor(rulesetNames: string[] = [], ignore: Map<string, RulesetIgnore> = new Map<string, RulesetIgnore>()) {
+    this.rulesetNames = rulesetNames;
+    this.ignore = ignore;
+  }
+}
+
+/**
+ * Represents a ruleset ignore configuration element in the codiga.yml file.
+ *
+ * This is the element right under the root-level `ignore` property, e.g.:
+ * ```yaml
+ *   - my-python-ruleset:
+ *       - rule1:
+ *           - prefix: /path/to/file/to/ignore
+ * ```
+ */
+export class RulesetIgnore {
+  rulesetName: string;
+  /**
+   * Stores [rule name -> rule ignore configuration] mappings.
+   *
+   * Using a Map instead of a `RuleIgnore` array, so that we can query the ruleset
+   * configs by name, without having to filter the list by the ruleset name.
+   */
+  ruleIgnores: Map<string, RuleIgnore>;
+
+  constructor(rulesetName: string, ruleIgnores: object) {
+    this.rulesetName = rulesetName;
+    this.ruleIgnores = new Map<string, RuleIgnore>();
+
+    if (Array.isArray(ruleIgnores)) {
+      ruleIgnores.filter(ruleIgnore => ruleIgnore !== null).forEach(ruleIgnore => {
+        /*
+          A rule ignore config can be a single rule name without any prefix value:
+              - rulename
+        */
+        if (typeof ruleIgnore === "string") {
+          this.ruleIgnores.set(ruleIgnore, new RuleIgnore(ruleIgnore));
+        }
+        /*
+          A rule ignore config can be a Map of the rule name and its object value,
+          with one or more prefix values:
+              - rulename:
+                - prefix: /path/to/file/to/ignore
+
+              - rulename2:
+                - prefix:
+                  - /path1
+                  - /path2
+        */
+        else if (typeof ruleIgnore === "object") {
+          for (const [ruleName, prefixIgnores] of Object.entries(ruleIgnore)) {
+            this.ruleIgnores.set(ruleName, new RuleIgnore(ruleName, prefixIgnores as object));
+          }
+        }
+      });
+    }
+  }
+}
+
+/**
+ * Represents a rule ignore configuration element in the codiga.yml file.
+ *
+ * This is the element right under a ruleset name property, e.g.:
+ * ```yaml
+ *       - rule1:
+ *           - prefix: /path/to/file/to/ignore
+ * </pre>
+ * or
+ * <pre>
+ *       - rule2:
+ *           - prefix:
+ *               - /path1
+ *               - /path2
+ * ```
+ */
+export class RuleIgnore {
+  ruleName: string;
+  /**
+   * The list of prefix values under the `prefix` property.
+   *
+   * In case multiple `prefix` properties are defined under the same rule config,
+   * they are all added to this list.
+   *
+   * For example, in case of:
+   * ```yaml
+   * ignore:
+   *   - my-python-ruleset:
+   *     - rule1:
+   *       - prefix:
+   *         - /path1
+   *         - /path2
+   *       - prefix: /path3
+   * ```
+   * all of `/path1`, `/path2` and `/path3` are stored here.
+   *
+   * In case a `prefix` property contains the same value multiple times,
+   * they are deduplicated and only once instance is stored, for example:
+   * ```yaml
+   * ignore:
+   *   - my-python-ruleset:
+   *     - rule1:
+   *       - prefix:
+   *         - /path1
+   *         - /path1
+   * ```
+   */
+  prefixes: string[];
+
+  constructor(ruleName: string, prefixIgnores?: object) {
+    this.ruleName = ruleName;
+    this.prefixes = [];
+
+    if (Array.isArray(prefixIgnores)) {
+      prefixIgnores.filter(prefixIgnore => prefixIgnore !== null).forEach(prefixIgnore => {
+        for (const [prefixKey, prefixes] of Object.entries(prefixIgnore)) {
+          /*
+            When the ignore config is specified like this (with a string 'prefix'):
+            ignore:
+            - my-python-ruleset:
+              - rule1:
+                - prefix
+
+            there would be a separate entry for each character of the 'prefix' key: {'0', 'p'}, {'1', 'r'}, ...
+            Thus, we prevent processing such entries by allowing only keys named 'prefix'.
+          */
+          if (prefixKey !== "prefix")
+            return;
+
+          /*
+            A 'prefix' property can have a single String value:
+                - prefix: /path/to/file/to/ignore
+          */
+          if (typeof prefixes === "string") {
+            //This prevents adding the same prefix multiple times
+            if (this.prefixes.indexOf(prefixes) < 0) {
+              this.prefixes.push(prefixes);
+            }
+          }
+          /*
+            A 'prefix' property can also have multiple String values as a list:
+                - prefix:
+                  - /path1
+                  - /path2
+          */
+          else if (Array.isArray(prefixes)) {
+            (prefixes as string[]).forEach(prefix => {
+              //This prevents adding the same prefix multiple times
+              if (this.prefixes.indexOf(prefix) < 0) {
+                this.prefixes.push(prefix);
+              }
+            });
+          }
+        }
+      });
+    }
+  }
+}
