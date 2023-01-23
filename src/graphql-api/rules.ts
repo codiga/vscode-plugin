@@ -53,6 +53,8 @@ export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
       );
 
       return {
+        rulesetName: ruleset.name,
+        ruleName: rule.name,
         id: `${ruleset.name}/${rule.name}`,
         language: rule.language,
         type: rule.ruleType,

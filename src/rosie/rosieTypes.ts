@@ -4,6 +4,8 @@ export interface RuleSet {
 }
 
 export interface Rule {
+  rulesetName: string;
+  ruleName: string;
   id: string;
   language: string;
   type: string;

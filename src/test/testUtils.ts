@@ -125,11 +125,18 @@ export async function getWorkspaceFolder() {
 /**
  * Creates a mock AST Rule for the given language with the given content.
  */
-export function createMockRule(content: string, language: string): Rule {
+export function createMockRule(
+  content: string,
+  language: string,
+  rulesetName: string = "mock-ruleset",
+  ruleName: string = "mock-rule"
+): Rule {
   return {
+    rulesetName: rulesetName,
+    ruleName: ruleName,
     contentBase64: content,
     entityChecked: null,
-    id: "1",
+    id: `${rulesetName}/${ruleName}`,
     language: language,
     pattern: null,
     type: "ast"
