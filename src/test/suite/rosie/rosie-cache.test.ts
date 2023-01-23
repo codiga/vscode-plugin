@@ -8,10 +8,11 @@ import {
   getRosieRules,
   parseCodigaConfig,
   getRulesFromCache,
-  refreshCacheForWorkspace,
+  refreshCacheForWorkspace, CodigaYmlConfig,
 } from "../../../rosie/rosieCache";
 import * as fs from "fs";
 import {Language} from "../../../graphql-api/types";
+import {Rule} from "../../../rosie/rosieTypes";
 
 suite("Rosie cache", () => {
 
@@ -21,6 +22,27 @@ suite("Rosie cache", () => {
     codigaYaml = vscode.Uri.joinPath((await getWorkspaceFolder()).uri, "codiga.yml");
     const codigaFileContent = Buffer.from(content, "utf-8");
     await vscode.workspace.fs.writeFile(codigaYaml, codigaFileContent);
+  }
+
+  function createCacheData(codigaYmlConfig: CodigaYmlConfig) {
+    return {
+      codigaYmlConfig: codigaYmlConfig,
+      rules: [],
+      lastRefreshed: 0,
+      lastTimestamp: 1,
+      fileLastModification: 0
+    };
+  }
+
+  /**
+   * Validates the number of rules and their ids against the argument Rule array.
+   */
+  function validateRuleCountAndRuleIds(rules: Rule[], count: number, expectedRuleIds: string[]) {
+    assert.strictEqual(rules.length, count);
+
+    for (let i = 0; i < rules.length; i++) {
+      assert.strictEqual(rules[i].id, expectedRuleIds[i]);
+    }
   }
 
   // Hooks
@@ -37,6 +59,7 @@ suite("Rosie cache", () => {
     const cache = new Map<vscode.WorkspaceFolder, CacheData>();
     const workspace = await getWorkspaceFolder();
     cache.set(workspace, {
+      codigaYmlConfig: CodigaYmlConfig.EMPTY,
       fileLastModification: 0,
       lastRefreshed: Date.now() - 60 * 11 * 1000, //eleven minutes ago
       lastTimestamp: 0,
@@ -51,6 +74,7 @@ suite("Rosie cache", () => {
     const cache = new Map<vscode.WorkspaceFolder, CacheData>();
     const workspace = await getWorkspaceFolder();
     cache.set(workspace, {
+      codigaYmlConfig: CodigaYmlConfig.EMPTY,
       fileLastModification: 0,
       lastRefreshed: Date.now(),
       lastTimestamp: 0,
@@ -484,56 +508,516 @@ suite("Rosie cache", () => {
     assert.strictEqual(rules[1].language, "javascript");
   });
 
-  // getRosieRulesForLanguage
+  // getRosieRules
 
-  test("getRosieRulesForLanguage: returns empty array for no rule provided", async () => {
-    const rules = getRosieRulesForLanguage(Language.Python, []);
+  test("getRosieRules: returns empty array for no rule provided", async () => {
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
 
-    assert.strictEqual(rules.length, 0);
-  });
-
-  test("getRosieRulesForLanguage: returns empty array for unsupported language", async () => {
-    const rules = getRosieRulesForLanguage(Language.Docker, [createMockRule("", "python")]);
+    const rules = getRosieRules(Language.Python, [], pythonFile);
 
     assert.strictEqual(rules.length, 0);
   });
 
-  test("getRosieRulesForLanguage: returns rules for Python", async () => {
-    const rules = getRosieRulesForLanguage(Language.Python,
+  test("getRosieRules: returns empty array for unsupported language", async () => {
+    const dockerfile = await testDataUriInWorkspace("dockerfile");
+
+    const rules = getRosieRules(Language.Docker, [createMockRule("", "python")], dockerfile);
+
+    assert.strictEqual(rules.length, 0);
+  });
+
+  test("getRosieRules: returns rules for Python", async () => {
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    const rules = getRosieRules(Language.Python,
       [
         createMockRule("", "python"),
         createMockRule("", "javascript")
-      ]);
+      ], pythonFile);
 
     assert.strictEqual(rules.length, 1);
     assert.strictEqual(rules[0].language, "python");
   });
 
-  test("getRosieRulesForLanguage: returns rules for JavaScript", async () => {
-    const rules = getRosieRulesForLanguage(Language.Javascript,
+  test("getRosieRules: returns rules for JavaScript", async () => {
+    const jsFile = await testDataUriInWorkspace("javascript_file.js");
+
+    const rules = getRosieRules(Language.Javascript,
       [
         createMockRule("", "python"),
         createMockRule("", "javascript")
-      ]);
+      ], jsFile);
 
     assert.strictEqual(rules.length, 1);
     assert.strictEqual(rules[0].language, "javascript");
   });
 
-  test("getRosieRulesForLanguage: returns union of JS and TS rules for TypeScript", async () => {
-    const rules = getRosieRulesForLanguage(Language.Typescript,
+  test("getRosieRules: returns union of JS and TS rules for TypeScript", async () => {
+    const tsFile = await testDataUriInWorkspace("typescript_file.ts");
+
+    const rules = getRosieRules(Language.Typescript,
       [
         createMockRule("", "python"),
         createMockRule("", "javascript"),
         createMockRule("", "typescript")
-      ]);
+      ], tsFile);
 
     assert.strictEqual(rules.length, 2);
     assert.strictEqual(rules[0].language, "javascript");
     assert.strictEqual(rules[1].language, "typescript");
   });
 
-  // getRulesFromCache
+  test("getRosieRules: should return rules for empty ignore config", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+    ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules for ignore config with no ruleset", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  ");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules for ignore config with no rule", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules for ignore config with no prefix", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rule for ignore config with one matching prefix with leading slash", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: /python");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules with ignore config with one matching prefix without leading slash", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: python");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules with ignore config with one matching file path prefix", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: /python_file.py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules with ignore config with one matching directory path prefix", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: /directory");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("directory/python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules with ignore config with one prefix not matching", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: not-matching");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules with ignore config with one prefix containing double dots", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: python_file..py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules with ignore config with one prefix containing single dot as folder", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: directory/./python_file.py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("directory/sub/python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules with ignore config with one prefix containing double dots as folder", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: directory/../python_file.py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("directory/sub/python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules with ignore config with one matching prefix of multiple", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix:\n" +
+      "        - not/matching\n" +
+      "        - python_file.py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules with ignore config with multiple matching prefixes", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix:\n" +
+      "        - /python\n" +
+      "        - python_file.py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules with ignore config with multiple prefixes not matching", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix:\n" +
+      "        - not-matching\n" +
+      "        - also/not/matching");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should filter rules with ignore config with multiple rule ignore configurations", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: python_file..py\n" +
+      "    - python_rule_3:\n" +
+      "      - prefix:\n" +
+      "        - /python_fi");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      2,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2"]);
+  });
+
+  test("getRosieRules: should not filter rules when rule doesnt belong to ruleset", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - python-ruleset:\n" +
+      "    - non_python_rule:\n" +
+      "      - prefix: python_file..py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  test("getRosieRules: should not filter rules when ruleset ignore is not present in rulesets property", async () => {
+    await createCodigaYml(
+      "rulesets:\n" +
+      "  - python-ruleset\n" +
+      "ignore:\n" +
+      "  - not-configured-ruleset:\n" +
+      "    - python_rule_2:\n" +
+      "      - prefix: python_file.py");
+    const codigaConfig = await parseCodigaConfig(codigaYaml);
+    const pythonFile = await testDataUriInWorkspace("python_file.py");
+
+    await refreshCacheForWorkspace(await getWorkspaceFolder(), createCacheData(codigaConfig));
+
+    const rules = getRosieRules(Language.Python,
+      [
+        createMockRule("", "python", "python-ruleset", "python_rule_1"),
+        createMockRule("", "python", "python-ruleset", "python_rule_2"),
+        createMockRule("", "python", "python-ruleset", "python_rule_3")
+      ], pythonFile);
+
+    validateRuleCountAndRuleIds(rules,
+      3,
+      ["python-ruleset/python_rule_1", "python-ruleset/python_rule_2", "python-ruleset/python_rule_3"]);
+  });
+
+  //getRulesFromCache
 
   test("getRulesFromCache: returns empty array when there is no workspace for the document", async () => {
     //text_file.txt is not present in the workspace
@@ -555,6 +1039,7 @@ suite("Rosie cache", () => {
   test("getRulesFromCache: returns empty array when rules cache doesn't have rule for a workspace", async () => {
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: CodigaYmlConfig.EMPTY,
       lastRefreshed: 0,
       lastTimestamp: 1,
       fileLastModification: 0,
@@ -572,6 +1057,7 @@ suite("Rosie cache", () => {
   test("getRulesFromCache: returns empty array for document with unsupported language", async () => {
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: CodigaYmlConfig.EMPTY,
       lastRefreshed: 0,
       lastTimestamp: 1,
       fileLastModification: 0,
@@ -589,6 +1075,7 @@ suite("Rosie cache", () => {
   test("getRulesFromCache: returns rules for document", async () => {
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: CodigaYmlConfig.EMPTY,
       lastRefreshed: 0,
       lastTimestamp: 1,
       fileLastModification: 0,

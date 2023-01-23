@@ -18,6 +18,7 @@ import {isInTestMode} from "../extension";
  * All timestamps are in milliseconds.
  */
 export interface CacheData {
+  codigaYmlConfig: CodigaYmlConfig;
   lastRefreshed: number; // last time we refreshed the data
   lastTimestamp: number; // timestamp of all rules used
   fileLastModification: number; // last modification timestamp of the codiga file
@@ -252,6 +253,7 @@ export const updateCacheForWorkspace = async (
     const rules = await getRules(codigaConfig.rulesetNames);
 
     const newCacheData: CacheData = {
+      codigaYmlConfig: codigaConfig,
       rules: rules,
       lastRefreshed: nowMs,
       lastTimestamp: rulesTimestamp,
@@ -285,24 +287,76 @@ export const filterRules = (languages: Language[], rules: Rule[]) => {
  *
  * @param language the language of the file
  * @param rules an array of all cached rules
+ * @param pathOfAnalyzedFile the absolute path of the file being analyzed.
+ * Required to pass in for the `ignore` configuration.
  * @returns an array containing only the rules needed for a file to analyze
  */
-export const getRosieRulesForLanguage = (
+export const getRosieRules = (
   language: Language,
-  rules: Rule[] | undefined
+  rules: Rule[] | undefined,
+  pathOfAnalyzedFile: vscode.Uri
 ) => {
   if (!rules) return [];
 
+  let rosieRulesForLanguage: Rule[] = [];
   switch (language) {
     case Language.Python:
-      return filterRules([Language.Python], rules);
+      rosieRulesForLanguage = filterRules([Language.Python], rules);
+      break;
     case Language.Javascript:
-      return filterRules([Language.Javascript], rules);
+      rosieRulesForLanguage = filterRules([Language.Javascript], rules);
+      break;
     case Language.Typescript:
-      return filterRules([Language.Javascript, Language.Typescript], rules);
-    default:
-      return [];
+      rosieRulesForLanguage = filterRules([Language.Javascript, Language.Typescript], rules);
+      break;
   }
+
+  if (!rosieRulesForLanguage)
+    return [];
+
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(pathOfAnalyzedFile);
+  if (workspaceFolder) {
+    const relativePathOfAnalyzedFile = pathOfAnalyzedFile.fsPath
+      .replace(workspaceFolder?.uri.fsPath, "")
+      //Replaces backslash '\' symbols with forward slashes '/', so that in case of Windows specific paths,
+      // we still can compare the relative paths properly.
+      // Global match is applied to return all matches.
+      .replace(/\\/g, "/");
+
+    return rosieRulesForLanguage.filter(rosieRule => {
+      const ruleIgnore = RULES_CACHE.get(workspaceFolder)
+        ?.codigaYmlConfig
+        .ignore.get(rosieRule.rulesetName)
+        ?.ruleIgnores.get(rosieRule.ruleName);
+
+      //If there is no ruleset ignore or rule ignore for the current RosieRule,
+      // then we keep it/don't ignore it.
+      if (!ruleIgnore)
+        return true;
+
+      //If there is no prefix specified for the current rule ignore config,
+      // we don't keep the rule/ignore it.
+      if (!ruleIgnore.prefixes || ruleIgnore.prefixes.length === 0)
+        return false;
+
+      return ruleIgnore.prefixes
+        //Since the leading / is optional, we remove it
+        .map(removeLeadingSlash)
+        //./, /. and .. sequences are not allowed in prefixes, therefore we consider them not matching the file path.
+        //. symbols in general are allowed to be able to target exact file paths with their file extensions.
+        .every(prefix =>
+          prefix.includes("..")
+          || prefix.includes("./")
+          || prefix.includes("/.")
+          || !removeLeadingSlash(relativePathOfAnalyzedFile).startsWith(prefix));
+    });
+  }
+
+  return [];
+};
+
+const removeLeadingSlash = (path: string): string => {
+  return path.startsWith("/") ? path.replace("/", "") : path;
 };
 
 /**
@@ -319,7 +373,7 @@ export const getRulesFromCache = async (
   if (workspaceFolder && RULES_CACHE.has(workspaceFolder)) {
     const rules = RULES_CACHE.get(workspaceFolder)?.rules;
     return rules
-      ? getRosieRulesForLanguage(getLanguageForDocument(doc), rules)
+      ? getRosieRules(getLanguageForDocument(doc), rules, doc.uri)
       : [];
   }
   return [];

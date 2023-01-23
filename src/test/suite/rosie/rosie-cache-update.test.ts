@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import {createMockRule, getWorkspaceFolder} from "../../testUtils";
-import {CacheData, updateCacheForWorkspace} from "../../../rosie/rosieCache";
+import {CacheData, CodigaYmlConfig, updateCacheForWorkspace} from "../../../rosie/rosieCache";
 import * as fs from "fs";
 import {fail} from "assert";
 
@@ -31,6 +31,7 @@ suite("Rosie cache update", () => {
     const cache = new Map<vscode.WorkspaceFolder, CacheData>();
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: CodigaYmlConfig.EMPTY,
       lastRefreshed: 0,
       lastTimestamp: 1,
       fileLastModification: 0,
@@ -52,6 +53,7 @@ suite("Rosie cache update", () => {
     const cache = new Map<vscode.WorkspaceFolder, CacheData>();
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: new CodigaYmlConfig(["undefined-ruleset"]),
       lastRefreshed: 0,
       lastTimestamp: 1,
       fileLastModification: 0,
@@ -79,6 +81,7 @@ suite("Rosie cache update", () => {
       index: 10, name: "mock-workspace", uri: vscode.Uri.parse("untitled:mock-workspace")
     };
     const cacheData: CacheData = {
+      codigaYmlConfig: new CodigaYmlConfig(["actual-ruleset"]),
       lastRefreshed: 0,
       lastTimestamp: 1,
       fileLastModification: 0,
@@ -114,6 +117,7 @@ suite("Rosie cache update", () => {
     const cache = new Map<vscode.WorkspaceFolder, CacheData>();
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: new CodigaYmlConfig(["actual-ruleset"]),
       lastRefreshed: 0,
       lastTimestamp: 50, //see rules.ts#getRulesLastUpdatedTimestamp
       fileLastModification: 0,
@@ -148,6 +152,7 @@ suite("Rosie cache update", () => {
     const cache = new Map<vscode.WorkspaceFolder, CacheData>();
     const workspaceFolder = await getWorkspaceFolder();
     const cacheData: CacheData = {
+      codigaYmlConfig: new CodigaYmlConfig(["actual-ruleset"]),
       lastRefreshed: 0,
       lastTimestamp: 100, //see rules.ts#getRulesLastUpdatedTimestamp
       fileLastModification: 0, //the last modification will be the file's actual timestamp in updateCacheForWorkspace
@@ -184,6 +189,7 @@ suite("Rosie cache update", () => {
     const stats = fs.statSync(codigaYaml.fsPath);
 
     const cacheData: CacheData = {
+      codigaYmlConfig: new CodigaYmlConfig(["actual-ruleset"]),
       lastRefreshed: 0,
       lastTimestamp: 100, //see rules.ts#getRulesLastUpdatedTimestamp
       fileLastModification: stats.mtimeMs, //codiga.yml's actual last modification timestamp

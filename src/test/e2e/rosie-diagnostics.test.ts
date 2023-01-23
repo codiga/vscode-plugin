@@ -10,7 +10,7 @@ import {
   testDataUriInWorkspace,
   wait
 } from "../testUtils";
-import {CacheData, refreshCacheForWorkspace} from "../../rosie/rosieCache";
+import {CacheData, CodigaYmlConfig, refreshCacheForWorkspace} from "../../rosie/rosieCache";
 
 suite("Rosie diagnostics", () => {
   const jsRule1 = createMockRule("ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==", "javascript");
@@ -19,6 +19,7 @@ suite("Rosie diagnostics", () => {
     "javascript");
   const pythonRule1 = createMockRule("ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==", "python");
   const cacheData: CacheData = {
+    codigaYmlConfig: CodigaYmlConfig.EMPTY,
     lastRefreshed: 0,
     lastTimestamp: 1,
     fileLastModification: 0,
