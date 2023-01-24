@@ -35,8 +35,8 @@ export const AUTO_COMPLETION_CHARACTER_TRIGGER = "./";
 // 10 seconds
 export const CODING_ASSISTANT_SHORTCUTS_POLLING_MS = 10000;
 
-// 3 seconds
-export const RULES_POLLING_INTERVAL_MS = 3000;
+// 10 seconds
+export const RULES_POLLING_INTERVAL_MS = 10000;
 
 // time before we wait doing a code analysis
 export const TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS = 500;
