@@ -68,6 +68,8 @@ export const ELEMENT_CHECKED_INTERFACE = "interface";
 export const ELEMENT_CHECKED_HTML_ELEMENT = "htmlelement";
 export const ELEMENT_CHECKED_CLASS_DEFINITION = "classdefinition";
 export const ELEMENT_CHECKED_FUNCTION_EXPRESSION = "functionexpression";
+export const ELEMENT_CHECKED_VARIABLE_DECLARATION = "variabledeclaration";
+export const ELEMENT_CHECKED_ANY = "any";
 
 export const ROSIE_ENTITY_CHECKED_FUNCTION_CALL = "functioncall";
 export const ROSIE_ENTITY_CHECKED_IF_CONDITION = "ifcondition";
@@ -81,6 +83,8 @@ export const ROSIE_ENTITY_INTERFACE = "interface";
 export const ROSIE_ENTITY_HTML_ELEMENT = "htmlelement";
 export const ROSIE_ENTITY_CLASS_DEFINITION = "classdefinition";
 export const ROSIE_ENTITY_FUNCTION_EXPRESSION = "functionexpression";
+export const ROSIE_ENTITY_VARIABLE_DECLARATION = "variabledeclaration";
+export const ROSIE_ENTITY_ANY = "any";
 
 export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
   [ELEMENT_CHECKED_FUNCTION_CALL, ROSIE_ENTITY_CHECKED_FUNCTION_CALL],
@@ -95,6 +99,8 @@ export const ELEMENT_CHECKED_TO_ENTITY_CHECKED: Map<string, string> = new Map([
   [ELEMENT_CHECKED_HTML_ELEMENT, ROSIE_ENTITY_HTML_ELEMENT],
   [ELEMENT_CHECKED_CLASS_DEFINITION, ROSIE_ENTITY_CLASS_DEFINITION],
   [ELEMENT_CHECKED_FUNCTION_EXPRESSION, ROSIE_ENTITY_FUNCTION_EXPRESSION],
+  [ELEMENT_CHECKED_VARIABLE_DECLARATION, ROSIE_ENTITY_VARIABLE_DECLARATION],
+  [ELEMENT_CHECKED_ANY, ROSIE_ENTITY_ANY],
 ]);
 
 export const INFO_MESSAGE_CODIGA_FILE_KEY = "ignoreCodigaFile";
