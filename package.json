@@ -26,11 +26,10 @@
     "Ruby",
     "Java",
     "Javascript",
-    "C/C++",
     "React",
     "Typescript"
   ],
-  "version": "0.8.17",
+  "version": "0.9.0",
   "engines": {
     "node": "^16.0.0",
     "vscode": "^1.70.0"
