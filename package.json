@@ -171,7 +171,7 @@
     "esbuild-base": "esbuild ./client/src/extension.ts --bundle --outfile=/client/out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run -S esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run -S esbuild-base -- --sourcemap --watch",
-    "test-compile": "tsc -p ./",
+    "test-compile": "tsc -b ./",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
   },
   "devDependencies": {
