@@ -27,34 +27,23 @@ async function main() {
 
     // The path to test runner
     // Passed to --extensionTestsPath
-    const rosieDiagnosticsExtensionTestsPath = path.resolve(__dirname, "./rosieDiagnosticsTestRunner");
-    const rosieQuickFixesExtensionTestsPath = path.resolve(__dirname, "./rosieQuickFixesTestRunner");
     const codigaFileSuggestionsExtensionTestsPath = path.resolve(__dirname, "./codigaFileSuggestionsTestRunner");
-    const rosieCacheExtensionTestsPath = path.resolve(__dirname, "./rosieCacheTestRunner");
-    const rosieCacheUpdateExtensionTestsPath = path.resolve(__dirname, "./rosieCacheUpdateTestRunner");
     const completionExtensionTestsPath = path.resolve(__dirname, "./completionTestRunner");
+    const utilsExtensionTestsPath = path.resolve(__dirname, "./utilsTestRunner");
 
-    const diagnosticsWorkspace = path.resolve(__dirname, "../../test-fixtures/diagnostics");
-    const quickFixesWorkspace = path.resolve(__dirname, "../../test-fixtures/quick-fixes");
     const pythonWorkspace = path.resolve(__dirname, "../../test-fixtures/config-suggestions/python-workspace");
     const javascriptWorkspace = path.resolve(__dirname, "../../test-fixtures/config-suggestions/javascript-workspace");
     const typescriptWorkspace = path.resolve(__dirname, "../../test-fixtures/config-suggestions/typescript-workspace");
-    const rosieCacheWorkspace = path.resolve(__dirname, "../../test-fixtures/rosie-cache/default");
-    const rosieCacheUpdateWorkspace = path.resolve(__dirname, "../../test-fixtures/rosie-cache/update");
 
     const testPathsToWorkspaces = [
-      //Rosie analysis
-      // [rosieDiagnosticsExtensionTestsPath, diagnosticsWorkspace],
-      // [rosieQuickFixesExtensionTestsPath, quickFixesWorkspace],
       //codiga.yml file suggestions
       [codigaFileSuggestionsExtensionTestsPath, pythonWorkspace],
       [codigaFileSuggestionsExtensionTestsPath, javascriptWorkspace],
       [codigaFileSuggestionsExtensionTestsPath, typescriptWorkspace],
-      //Rosie cache
-      // [rosieCacheExtensionTestsPath, rosieCacheWorkspace],
-      // [rosieCacheUpdateExtensionTestsPath, rosieCacheUpdateWorkspace],
       //Inline and shortcut completion
-      [completionExtensionTestsPath, pythonWorkspace]
+      [completionExtensionTestsPath, pythonWorkspace],
+      //utils
+      [utilsExtensionTestsPath, pythonWorkspace]
     ];
 
     if (process.platform === "win32") {
