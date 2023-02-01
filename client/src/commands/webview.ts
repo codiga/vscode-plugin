@@ -14,7 +14,7 @@ import {
   resetRecipeHolder,
 } from "../utils/snippetUtils";
 import { getUser } from "../graphql-api/user";
-import { LANGUAGE_ENUMATION_TO_STRING } from "../utils/languageUtils";
+import { LANGUAGE_ENUMERATION_TO_STRING } from "../utils/languageUtils";
 import { favoriteSnippet, unfavoriteSnippet } from "../graphql-api/favorite";
 import {
   snippetVisibilityOnlyPrivate,
@@ -62,7 +62,7 @@ export async function showCodigaWebview(
         retainContextWhenHidden: true,
         localResourceRoots: [
           vscode.Uri.file(path.join(context.extensionPath, "client", "src", "webview")),
-          vscode.Uri.file(path.join(context.extensionPath, "client", "webview")),
+          vscode.Uri.file(path.join(context.extensionPath, "webview")),
         ],
       }
     );
@@ -75,14 +75,14 @@ export async function showCodigaWebview(
       light: faviconUri,
     };
 
-    const webviewContent = await getWebviewContent(
+    const webviewContent = getWebviewContent(
       panel.webview,
       context.extensionPath
     );
 
     panel.webview.html = webviewContent;
 
-    // Set up message receicing from the webview
+    // Set up message receiving from the webview
     panel.webview.onDidReceiveMessage(async (message) => {
       await handleMessage(message);
     });
@@ -282,7 +282,7 @@ export const updateWebview = async (
     await panel.webview.postMessage({
       command: "pageChanged",
       language: language,
-      languageString: LANGUAGE_ENUMATION_TO_STRING[language],
+      languageString: LANGUAGE_ENUMERATION_TO_STRING[language],
       snippets: snippets,
       resetSearch: resetSearch,
     });

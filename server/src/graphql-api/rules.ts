@@ -7,8 +7,8 @@ import {
   GET_RULESETS_LAST_UPDATED_TIMESTAMP,
 } from "./queries";
 import { RulesetType } from "./types";
-import {isInTestMode} from "../extension";
-import {getMockRules, getMockRulesLastUpdatedTimestamp} from "./rulesMocks";
+// import {isInTestMode} from "../extension";
+// import {getMockRules, getMockRulesLastUpdatedTimestamp} from "./rulesMocks";
 
 /**
  * Map the element checked value from the GraphQL API
@@ -29,9 +29,9 @@ const graphQlElementCheckedToRosieEntityCheck = (
 };
 
 export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
-  if (isInTestMode === true) {
-    return getMockRules(rulesetsNames);
-  }
+  // if (isInTestMode === true) {
+  //   return getMockRules(rulesetsNames);
+  // }
 
   const userFingerprint = getUserFingerprint();
 
@@ -41,7 +41,6 @@ export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
   };
 
   const data = await doQuery(GET_RULESETS_FOR_CLIENT, variables);
-
   if (!data) {
     return [];
   }
@@ -69,9 +68,9 @@ export async function getRules(rulesetsNames: string[]): Promise<Rule[]> {
 export async function getRulesLastUpdatedTimestamp(
   rulesetsNames: string[]
 ): Promise<number | undefined> {
-  if (isInTestMode === true) {
-    return getMockRulesLastUpdatedTimestamp(rulesetsNames);
-  }
+  // if (isInTestMode === true) {
+  //   return getMockRulesLastUpdatedTimestamp(rulesetsNames);
+  // }
 
   const userFingerprint = getUserFingerprint();
 

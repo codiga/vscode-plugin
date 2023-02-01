@@ -1,10 +1,11 @@
-import * as vscode from "vscode";
 import {RosieResponse, Rule, RuleResponse} from "./rosieTypes";
-import {getLanguageForDocument} from "../utils/fileUtils";
+import { asRelativePath, getLanguageForDocument } from '../utils/fileUtils';
 import {getRosieLanguage} from "./rosieLanguage";
 import axios from "axios";
 import {ROSIE_ENDPOINT_PROD} from "./rosieConstants";
-import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { connection } from '../server';
+// import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
 
 /**
  * Sends a request to Rosie for the current document, and returns the received rule responses.
@@ -18,19 +19,18 @@ import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
  *
  * @param document - the document being analyzed
  * @param rules - the list of rules
- * @param isInTestMode - whether the extension runs in test mode
  * @returns - the list of rule responses received from Rosie, or empty
  */
 export const getRuleResponses = async (
-  document: vscode.TextDocument,
-  rules: Rule[],
-  isInTestMode: boolean
+  document: TextDocument,
+  rules: Rule[]
+  // isInTestMode: boolean
 ): Promise<RuleResponse[]> => {
-  if (isInTestMode === true) {
-    return await getMockRuleResponses(document);
-  }
+  // if (isInTestMode === true) {
+  //   return await getMockRuleResponses(document);
+  // }
 
-  const language = getLanguageForDocument(document);
+  const language = await getLanguageForDocument(document, connection);
   const rosieLanguage = getRosieLanguage(language);
 
   if (!rosieLanguage) {
@@ -38,7 +38,7 @@ export const getRuleResponses = async (
     return [];
   }
 
-  const relativePath = vscode.workspace.asRelativePath(document.uri.path);
+  const relativePath = await asRelativePath(connection, document);
 
   // Convert the code to Base64
   const codeBuffer = Buffer.from(document.getText());

@@ -1,14 +1,12 @@
-import * as vscode from "vscode";
-import { getLanguageForFile } from "../utils/fileUtils";
+import { asRelativePath, getLanguageForFile } from '../utils/fileUtils';
 import * as rosieClient from "../rosie/rosieClient";
-import { isInTestMode } from "../extension";
+// import { isInTestMode } from "../extension";
 
 import {
   DIAGNOSTIC_SOURCE,
   TIME_BEFORE_STARTING_ANALYSIS_MILLISECONDS,
 } from "../constants";
 import { Language } from "../graphql-api/types";
-import { getRulesDebug } from "../rosie/debug";
 import { RosieFix } from "../rosie/rosieTypes";
 import {
   GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE,
@@ -17,14 +15,18 @@ import {
   ROSIE_SEVERITY_WARNING,
 } from "../rosie/rosieConstants";
 import { getRulesFromCache } from "../rosie/rosieCache";
+import {URI} from "vscode-uri";
+import { Range, Position, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
+import { DocumentUri, TextDocument } from 'vscode-languageserver-textdocument';
+import { connection } from '../server';
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
-  vscode.Uri,
+  DocumentUri,
   //Uses a string key (the JSON stringified vscode.Range) because Map.has() works based on === equality.
   // Having vscode.Range as key sometimes resulted in the same range added multiple times with the same
   // fixes in 'registerFixForDocument'.
-  Map<string, [vscode.Range, RosieFix[]]>
+  Map<string, [Range, RosieFix[]]>
 > = new Map();
 
 /**
@@ -37,19 +39,60 @@ const FIXES_BY_DOCUMENT: Map<
  * @returns - the list of fixes for the given range
  */
 export const getFixesForDocument = (
-  documentUri: vscode.Uri,
-  range: vscode.Range
+  documentUri: DocumentUri,
+  range: Range
 ): RosieFix[] => {
   const fixesForDocument = FIXES_BY_DOCUMENT.get(documentUri);
   const result: RosieFix[] = [];
   if (fixesForDocument) {
     for (const rangeAndFixes of fixesForDocument.values()) {
-      if (rangeAndFixes[0].contains(range)) {
+      if (contains(rangeAndFixes[0], range)) {
         rangeAndFixes[1]?.forEach((f) => result.push(f));
       }
     }
   }
   return result;
+};
+
+/**
+ * Replaces the logic of vscode.Range.contains().
+ *
+ * The implementation is adopted from https://github.com/microsoft/vscode/blob/main/src/vs/workbench/api/common/extHostTypes.ts.
+ *
+ * @param container the Range/Position that should contain 'containee'
+ * @param containee the Range/Position that should be contained by 'container'
+ */
+const contains = (container: Position | Range, containee: Position | Range): boolean => {
+  if (Range.is(container) && Range.is(containee)) {
+    return contains(container, containee.start) && contains(container, containee.end);
+  }
+
+  if (Range.is(container) && Position.is(containee)) {
+    if (isBefore(Position.create(containee.line, containee.character), container.start)) {
+      return false;
+    }
+    if (isBefore(container.end, containee)) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Returns whether the 'first' position is located before the 'second' one.
+ *
+ * @param first a position
+ * @param second another position
+ */
+const isBefore = (first: Position, second: Position): boolean => {
+  if (first.line < second.line) {
+    return true;
+  }
+  if (second.line < first.line) {
+    return false;
+  }
+  return first.character < second.character;
 };
 
 /**
@@ -64,8 +107,8 @@ export const getFixesForDocument = (
  * @param fix - the quick fix to register for this document and range
  */
 const registerFixForDocument = (
-  documentUri: vscode.Uri,
-  range: vscode.Range,
+  documentUri: DocumentUri,
+  range: Range,
   fix: RosieFix
 ): void => {
   // If there is no range or fix saved for this document, save the document
@@ -83,7 +126,7 @@ const registerFixForDocument = (
 
   if (rangeAndFixesForDocument?.get(rangeString)) {
     // @ts-ignore
-    let fixesForRange = rangeAndFixesForDocument?.get(rangeString)[1];
+    const fixesForRange = rangeAndFixesForDocument?.get(rangeString)[1];
     // If the fix hasn't been added to this range, add it.
     if (fixesForRange?.filter(f => JSON.stringify(f) === JSON.stringify(fix)).length === 0) {
       fixesForRange?.push(fix);
@@ -97,7 +140,7 @@ const registerFixForDocument = (
  *
  * @param documentUri - the URI of the VS Code document
  */
-const resetFixesForDocument = (documentUri: vscode.Uri): void => {
+const resetFixesForDocument = (documentUri: DocumentUri): void => {
   FIXES_BY_DOCUMENT.set(documentUri, new Map());
 };
 
@@ -110,8 +153,8 @@ const resetFixesForDocument = (documentUri: vscode.Uri): void => {
  * @param doc - the document we are trying to update
  * @returns - if we should run the analysis or not
  */
-const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
-  const filename = doc.uri.toString();
+const shouldProceed = async (doc: TextDocument): Promise<boolean> => {
+  const filename = URI.parse(doc.uri).toString();
   const currentTimestampMs = Date.now();
 
   /**
@@ -150,15 +193,15 @@ const shouldProceed = async (doc: vscode.TextDocument): Promise<boolean> => {
  */
 const mapRosieSeverityToVsCodeSeverity = (
   rosieSeverity: string
-): vscode.DiagnosticSeverity => {
+): DiagnosticSeverity => {
   if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_CRITICAL) {
-    return vscode.DiagnosticSeverity.Error;
+    return DiagnosticSeverity.Error;
   }
   if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_ERROR
     || rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_WARNING) {
-    return vscode.DiagnosticSeverity.Warning;
+    return DiagnosticSeverity.Warning;
   }
-  return vscode.DiagnosticSeverity.Information;
+  return DiagnosticSeverity.Information;
 };
 
 /**
@@ -176,24 +219,19 @@ const mapRosieSeverityToVsCodeSeverity = (
  * </ul>
  *
  * @param doc - the currently analysed document
- * @param diagnostics - the diagnostics collection in which the diagnostics are stored. See extension.ts#activate().
  */
-export async function refreshDiagnostics(
-  doc: vscode.TextDocument,
-  diagnostics: vscode.DiagnosticCollection
-): Promise<void> {
-  const path = doc.uri.path;
-  const relativePath = vscode.workspace.asRelativePath(path);
+export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[]> {
+  const relativePath = await asRelativePath(connection, doc);
   const language: Language = getLanguageForFile(relativePath);
 
   if (language === Language.Unknown) {
-    return;
+    return [];
   }
   const supportedLanguages = Array.from(
     GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys()
   );
   if (supportedLanguages.indexOf(language) === -1) {
-    return;
+    return [];
   }
 
   /**
@@ -201,48 +239,42 @@ export async function refreshDiagnostics(
    */
   const shouldDoAnalysis = await shouldProceed(doc);
   if (!shouldDoAnalysis) {
-    return;
+    return [];
   }
 
   if (doc.getText().length === 0) {
     console.debug("empty code");
-    return;
+    return [];
   }
 
   if (doc.lineCount < 2) {
     console.debug("not enough lines");
-    return;
+    return [];
   }
 
-  const rules = (await getRulesFromCache(doc)) || (await getRulesDebug(doc));
+  const rules = await getRulesFromCache(doc);
 
   // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
 
   if (rules && rules.length > 0) {
-    const ruleResponses = await rosieClient.getRuleResponses(doc, rules, isInTestMode);
-    const diags: vscode.Diagnostic[] = [];
+    const ruleResponses = await rosieClient.getRuleResponses(doc, rules);
+    const diags: Diagnostic[] = [];
 
     ruleResponses.forEach((ruleResponse) => {
       // console.debug(`Response took ${ruleResponse.executionTimeMs} ms`);
       ruleResponse.violations.forEach((violation) => {
-        const range = new vscode.Range(
-          new vscode.Position(violation.start.line - 1, violation.start.col - 1),
-          new vscode.Position(violation.end.line - 1, violation.end.col - 1)
+        const range = Range.create(
+          Position.create(violation.start.line - 1, violation.start.col - 1),
+          Position.create(violation.end.line - 1, violation.end.col - 1)
         );
 
-        const diag = new vscode.Diagnostic(
+        const diag = Diagnostic.create(
           range,
           violation.message,
-          mapRosieSeverityToVsCodeSeverity(violation.severity)
-        );
-        diag.source = DIAGNOSTIC_SOURCE;
-        diag.code = {
-          value: ruleResponse.identifier,
-          target: vscode.Uri.parse(
-            `https://app.codiga.io/hub/ruleset/${ruleResponse.identifier}`
-          ),
-        };
+          mapRosieSeverityToVsCodeSeverity(violation.severity),
+          ruleResponse.identifier,
+          DIAGNOSTIC_SOURCE);
 
         if (violation.fixes) {
           violation.fixes.forEach((fix) => {
@@ -253,51 +285,9 @@ export async function refreshDiagnostics(
       });
     });
 
-    diagnostics.set(doc.uri, diags);
+    return diags;
   } else {
     console.debug("no ruleset to use");
   }
-}
-
-/**
- * Subscribes to document and editor changes. Refreshes the diagnostics upon changes in the active text editor
- * and in text documents, and deletes the diagnostics for a document when the editor of that document gets closed.
- *
- * @param context - the extension context
- * @param diagnostics - the global diagnostics collection
- */
-export function subscribeToDocumentChanges(
-  context: vscode.ExtensionContext,
-  diagnostics: vscode.DiagnosticCollection
-): void {
-  if (vscode.window.activeTextEditor) {
-    // console.debug("refreshing diagnostics because new editor");
-
-    refreshDiagnostics(vscode.window.activeTextEditor.document, diagnostics);
-  }
-  context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor((editor) => {
-      if (editor) {
-        // console.debug("refreshing diagnostics because editor changed");
-
-        refreshDiagnostics(editor.document, diagnostics);
-      }
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument((e) => {
-      // console.debug("new analysis because of document changes");
-
-      refreshDiagnostics(e.document, diagnostics);
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.workspace.onDidCloseTextDocument((doc) => {
-      // console.debug("deleting diagnostics because document closes");
-
-      diagnostics.delete(doc.uri);
-    })
-  );
+  return [];
 }

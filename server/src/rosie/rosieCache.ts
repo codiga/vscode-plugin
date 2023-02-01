@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import { parse } from "yaml";
-import * as vscode from "vscode";
 import {
   CODIGA_RULES_FILE, CODIGA_RULESET_NAME_PATTERN,
   RULES_MAX_TIME_IN_CACHE_MS,
@@ -8,11 +7,14 @@ import {
 } from "../constants";
 import { getRules, getRulesLastUpdatedTimestamp } from "../graphql-api/rules";
 import { wasActiveRecently } from "../utils/activity";
-import { getLanguageForDocument } from "../utils/fileUtils";
+import { getLanguageForDocument } from '../utils/fileUtils';
 import { Rule } from "./rosieTypes";
-import { rollbarLogger } from "../utils/rollbarUtils";
+// import { rollbarLogger } from "../utils/rollbarUtils";
 import { Language } from "../graphql-api/types";
-import {isInTestMode} from "../extension";
+import { URI } from 'vscode-languageserver-types';
+import { URI as vsUri, Utils } from 'vscode-uri';
+import { connection } from '../server';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 
 /**
  * All timestamps are in milliseconds.
@@ -25,18 +27,17 @@ export interface CacheData {
   rules: Rule[];
 }
 
-const RULES_CACHE = new Map<vscode.WorkspaceFolder, CacheData>();
+//Have to use URI (the URI of the Workspace folder) instead of WorkspaceFolder,
+// because otherwise the Map.has() call doesn't find the WorkspaceFolder.
+const RULES_CACHE = new Map<URI, CacheData>();
 
 /**
  * Periodically refresh the cache for all rules that have been used.
  */
 export const refreshCachePeriodic = async (): Promise<void> => {
-  if (isInTestMode === true) {
-    return;
-  }
-
   await refreshCache(RULES_CACHE).catch((e) => {
-    rollbarLogger(e);
+    // rollbarLogger(e);
+    console.error(e);
     console.error("error while fetching rules");
   });
   garbageCollection(RULES_CACHE);
@@ -49,7 +50,7 @@ export const refreshCachePeriodic = async (): Promise<void> => {
  * @param cache the rules cache
  */
 export const garbageCollection = (
-  cache: Map<vscode.WorkspaceFolder, CacheData>
+  cache: Map<URI, CacheData>
 ): void => {
   const nowMs = Date.now();
   const workspacesToDelete = [];
@@ -71,36 +72,37 @@ export const garbageCollection = (
   });
 };
 
-/**
- * Resets the cache with the provided data. Only to be used in tests.
- */
-export const refreshCacheForWorkspace = async (
-  workspace: vscode.WorkspaceFolder, cacheData: CacheData
-): Promise<void> => {
-  RULES_CACHE.clear();
-  RULES_CACHE.set(workspace, cacheData);
-};
+// /**
+//  * Resets the cache with the provided data. Only to be used in tests.
+//  */
+// export const refreshCacheForWorkspace = async (
+//   workspace: WorkspaceFolder, cacheData: CacheData
+// ): Promise<void> => {
+//   RULES_CACHE.clear();
+//   RULES_CACHE.set(workspace, cacheData);
+// };
 
 /**
  * Actually refresh the cache for all workspaces.
  *
  * No cache update is performed if the editor has not been active for a while.
  *
- * @param cache the rules cache.
+ * @param cache the rules cache
+ * @param connection the language server connection
  */
 export const refreshCache = async (
-  cache: Map<vscode.WorkspaceFolder, CacheData>
+  cache: Map<URI, CacheData>
 ): Promise<void> => {
   if (!wasActiveRecently()) {
     return;
   }
-
-  const folders = vscode.workspace.workspaceFolders;
-  folders?.forEach((workspaceFolder) => {
-    const codigaFile = vscode.Uri.joinPath(workspaceFolder.uri, CODIGA_RULES_FILE);
+  const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+  workspaceFolders?.forEach((workspaceFolder) => {
+    const workspaceUri = vsUri.parse(workspaceFolder.uri);
+    const codigaFile = Utils.joinPath(workspaceUri, CODIGA_RULES_FILE);
     // If there is a Codiga file, let's fetch the rules
-    if (fs.existsSync(codigaFile.fsPath)) {
-      updateCacheForWorkspace(cache, workspaceFolder, codigaFile);
+    if (fs.existsSync(codigaFile.fsPath)) { //existsSync() doesn't work with actual URIs. Needs file system path.
+      updateCacheForWorkspace(cache, workspaceFolder.uri, codigaFile);
     }
   });
 };
@@ -114,7 +116,7 @@ export const refreshCache = async (
  * Exported for testing purposes.
  */
 export const parseCodigaConfig = async (
-  codigaFile: vscode.Uri
+  codigaFile: vsUri
 ): Promise<CodigaYmlConfig> => {
   // If the codiga.yml doesn't exist, no ruleset name is returned
   if (!fs.existsSync(codigaFile.fsPath)) {
@@ -135,7 +137,7 @@ export const parseCodigaConfig = async (
   } catch (e) {
     console.log("Error when parsing the codiga.yml file.");
     console.log(e);
-    rollbarLogger(e);
+    // rollbarLogger(e);
     return CodigaYmlConfig.EMPTY;
   }
 };
@@ -200,9 +202,9 @@ const setIgnore = (
  * @param codigaFile the URI of the codiga.yml file
  */
 export const updateCacheForWorkspace = async (
-  cache: Map<vscode.WorkspaceFolder, CacheData>,
-  workspace: vscode.WorkspaceFolder,
-  codigaFile: vscode.Uri
+  cache: Map<URI, CacheData>,
+  workspace: URI,
+  codigaFile: vsUri
 ): Promise<void> => {
   const codigaConfig = await parseCodigaConfig(codigaFile);
 
@@ -264,7 +266,7 @@ export const updateCacheForWorkspace = async (
   } catch (e) {
     console.log("error when reading or updating the rules");
     console.log(e);
-    rollbarLogger(e);
+    // rollbarLogger(e);
   }
 };
 
@@ -291,10 +293,10 @@ export const filterRules = (languages: Language[], rules: Rule[]) => {
  * Required to pass in for the `ignore` configuration.
  * @returns an array containing only the rules needed for a file to analyze
  */
-export const getRosieRules = (
+export const getRosieRules = async (
   language: Language,
   rules: Rule[] | undefined,
-  pathOfAnalyzedFile: vscode.Uri
+  pathOfAnalyzedFile: URI
 ) => {
   if (!rules) return [];
 
@@ -314,17 +316,18 @@ export const getRosieRules = (
   if (!rosieRulesForLanguage)
     return [];
 
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(pathOfAnalyzedFile);
-  if (workspaceFolder) {
-    const relativePathOfAnalyzedFile = pathOfAnalyzedFile.fsPath
-      .replace(workspaceFolder?.uri.fsPath, "")
+  // const workspaceFolder = vscode.workspace.getWorkspaceFolder(pathOfAnalyzedFile);
+  const workspaceFolder = (await connection.workspace.getWorkspaceFolders())?.filter(folder => pathOfAnalyzedFile.startsWith(folder.uri));
+  if (workspaceFolder && workspaceFolder.length === 1) {
+    const relativePathOfAnalyzedFile = vsUri.parse(pathOfAnalyzedFile).fsPath
+      .replace(vsUri.parse(workspaceFolder[0].uri).fsPath, "")
       //Replaces backslash '\' symbols with forward slashes '/', so that in case of Windows specific paths,
       // we still can compare the relative paths properly.
       // Global match is applied to return all matches.
       .replace(/\\/g, "/");
 
-    return rosieRulesForLanguage.filter(rosieRule => {
-      const ruleIgnore = RULES_CACHE.get(workspaceFolder)
+    const rulesToReturn = rosieRulesForLanguage.filter(rosieRule => {
+      const ruleIgnore = RULES_CACHE.get(workspaceFolder[0].uri)
         ?.codigaYmlConfig
         .ignore.get(rosieRule.rulesetName)
         ?.ruleIgnores.get(rosieRule.ruleName);
@@ -350,6 +353,8 @@ export const getRosieRules = (
           || prefix.includes("/.")
           || !removeLeadingSlash(relativePathOfAnalyzedFile).startsWith(prefix));
     });
+
+    return rulesToReturn;
   }
 
   return [];
@@ -366,14 +371,13 @@ const removeLeadingSlash = (path: string): string => {
  * @returns the array of rules for the language of the given document
  */
 export const getRulesFromCache = async (
-  doc: vscode.TextDocument
+  doc: TextDocument
 ): Promise<Rule[]> => {
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(doc.uri);
-
-  if (workspaceFolder && RULES_CACHE.has(workspaceFolder)) {
-    const rules = RULES_CACHE.get(workspaceFolder)?.rules;
+  const workspaceFolder = (await connection.workspace.getWorkspaceFolders())?.filter(folder => doc.uri.startsWith(folder.uri));
+  if (workspaceFolder && workspaceFolder.length === 1 && RULES_CACHE.has(workspaceFolder[0].uri)) {
+    const rules = RULES_CACHE.get(workspaceFolder[0].uri)?.rules;
     return rules
-      ? getRosieRules(getLanguageForDocument(doc), rules, doc.uri)
+      ? getRosieRules(await getLanguageForDocument(doc, connection), rules, doc.uri)
       : [];
   }
   return [];

@@ -10,9 +10,7 @@ import {
   MESSAGE_STARTUP_DO_NOT_SHOW_AGAIN,
   STARTUP_MESSAGE_MACOS,
   STARTUP_MESSAGE_WINDOWS,
-  DIAGNOSTICS_COLLECTION_NAME,
-  LEARN_MORE_COMMAND,
-  IGNORE_VIOLATION_COMMAND,
+  LEARN_MORE_COMMAND
 } from "./constants";
 import { testApi } from "./commands/test-api";
 import { initializeLocalStorage } from "./utils/localStorage";
@@ -37,18 +35,20 @@ import {
 } from "./commands/webview";
 import { provideInlineComplextion } from "./features/inline-completion";
 import { AssistantRecipe } from "./graphql-api/types";
-import { subscribeToDocumentChanges } from "./diagnostics/diagnostics";
-import { applyFix, RosieFixAction } from "./rosie/rosiefix";
-import { RosieFix } from "./rosie/rosieTypes";
-import { refreshCachePeriodic } from "./rosie/rosieCache";
 import { recordLastActivity } from "./utils/activity";
-import {
-  IgnoreViolation,
-  ignoreViolation,
-} from "./diagnostics/ignore-violation";
 import { runCodigaFileSuggestion } from "./features/codiga-file-suggestion";
 import { rollbarLogger } from "./utils/rollbarUtils";
 
+import * as path from "path";
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  ServerOptions,
+  TransportKind
+} from 'vscode-languageclient';
+import { getUserFingerprint } from "./utils/configurationUtils";
+
+let client: LanguageClient;
 export var isInTestMode = false;
 
 // this method is called when your extension is activated
@@ -61,14 +61,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // ALWAYS record the first editor FIRST
   recordLastEditor();
-
-  // Create diagnostics and register them
-  const diagnostics = vscode.languages.createDiagnosticCollection(
-    DIAGNOSTICS_COLLECTION_NAME
-  );
-  context.subscriptions.push(diagnostics);
-
-  subscribeToDocumentChanges(context, diagnostics);
 
   const codigaStatusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
@@ -131,17 +123,6 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   /**
-   * Action to apply a fix for Rosie. This action is called
-   * by the code analysis handler.
-   */
-  vscode.commands.registerCommand(
-    "codiga.applyFix",
-    async (document: vscode.TextDocument, fix: RosieFix) => {
-      await applyFix(document, fix);
-    }
-  );
-
-  /**
    * Remove a line from the current active text editor. Used for the line
    * code completion
    */
@@ -169,35 +150,9 @@ export async function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  /**
-   * Command to ignore a violation
-   */
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      IGNORE_VIOLATION_COMMAND,
-      async (
-        document: vscode.TextDocument,
-        range: vscode.Range,
-        ruleIdentifier: string
-      ) => await ignoreViolation(document, range, ruleIdentifier)
-    )
-  );
-
   vscode.window.registerUriHandler(new UriHandler());
 
   allLanguages.forEach((lang) => {
-    context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(lang,new IgnoreViolation(), {
-        providedCodeActionKinds: IgnoreViolation.providedCodeActionKinds,
-      })
-    );
-
-    context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(lang, new RosieFixAction(), {
-        providedCodeActionKinds: RosieFixAction.providedCodeActionKinds,
-      })
-    );
-
     const inlineProvider: vscode.InlineCompletionItemProvider = {
       provideInlineCompletionItems: async (
         document,
@@ -280,7 +235,6 @@ export async function activate(context: vscode.ExtensionContext) {
   }
   enableShortcutsPolling();
   fetchPeriodicShortcuts(); // refresh available shortcuts periodically
-  refreshCachePeriodic(); // refresh rules available for all workspaces
 
   /**
    * Whenever we open a document, we attempt to fetch the shortcuts
@@ -318,12 +272,64 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeTextDocument(() => {
     recordLastActivity();
   });
+
+  initializeLanguageClient(context);
 }
 
-// this method is called when your extension is deactivated
+/**
+ * Initializes and launches the language client.
+ *
+ * @param context the vscode extension context
+ */
+function initializeLanguageClient(context: vscode.ExtensionContext) {
+  // The compiled artifact from our server/server.ts is our server that this client executes.
+  const serverModule = context.asAbsolutePath(
+      path.join('server', 'out', 'server.js')
+  );
+  // If the extension is launched in debug mode then the debug server options are used, otherwise the run options are used.
+  // Since we have a plugin as a client application here, the fingerprint is generated and passed in as a command line argument.
+  const serverOptions: ServerOptions = {
+    run: { module: serverModule, transport: TransportKind.ipc, args: [`fingerprint=${getUserFingerprint()}`] },
+    debug: { module: serverModule, transport: TransportKind.ipc, args: [`fingerprint=${getUserFingerprint()}`] }
+  };
+
+  // Options to control the language client
+  const clientOptions: LanguageClientOptions = {
+    //Lists the document languages that are targeted and selected by the language client
+    // Language identifiers: https://code.visualstudio.com/docs/languages/identifiers
+    // An alternative to this is using a file extension pattern based selector, e.g.:
+    // documentSelector: [{ scheme: 'file', pattern: '**/*.{js,jsx,ts,tsx,py,py3}' }]*/
+    documentSelector: [
+      { scheme: 'file', language: 'javascript' },
+      { scheme: 'file', language: 'javascriptreact' },
+      { scheme: 'file', language: 'typescript' },
+      { scheme: 'file', language: 'typescriptreact' },
+      { scheme: 'file', language: 'python' }
+    ]
+  };
+
+  // Create the language client and start the client.
+  client = new LanguageClient(
+      'codigaLanguageServer',
+      'Codiga Language Server',
+      serverOptions,
+      clientOptions
+  );
+
+  // Start the client. This will also launch the server.
+  client.start();
+}
+
+/**
+ * This method is called when your extension is deactivated.
+ */
 export function deactivate() {
-  /**
-   * Disable shortcut polling
-   */
+  //Disable shortcut polling
   disableShortcutsPolling();
+
+  //Stop the language client
+  if (!client) {
+    return undefined;
+  }
+  return client.stop();
 }

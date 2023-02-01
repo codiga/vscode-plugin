@@ -1,4 +1,13 @@
-import { getFromLocalStorage, setToLocalStorage } from "./localStorage";
+let currentFingerprint: string | undefined;
+
+/**
+ * Caches the user fingerprint regardless if it is generated on the client or on server side.
+ *
+ * @param fingerprint
+ */
+export function cacheUserFingerprint(fingerprint: string | undefined) {
+  currentFingerprint = fingerprint;
+}
 
 const generateRandomString = (length: number) => {
   // Declare all characters
@@ -15,18 +24,16 @@ const generateRandomString = (length: number) => {
 
 /**
  * Get the user fingerprint from the configuration.
+ *
+ * Currently, if the fingerprint is generated on server side, it is re-generated for each launch of the language server.
  */
 export function getUserFingerprint(): string {
-  const currentFingerprint: string | undefined =
-    getFromLocalStorage("fingerprint");
-
   if (currentFingerprint) {
     return currentFingerprint;
   }
 
   const newFingerprint = generateRandomString(10);
-
-  setToLocalStorage("fingerprint", newFingerprint);
+  currentFingerprint = newFingerprint;
 
   return newFingerprint;
 }

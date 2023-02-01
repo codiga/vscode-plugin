@@ -1,4 +1,4 @@
-export const LANGUAGE_ENUMATION_TO_STRING: Record<string, string> = {
+export const LANGUAGE_ENUMERATION_TO_STRING: Record<string, string> = {
   Shell: "Shell",
   Apex: "Apex",
   C: "C",
@@ -77,46 +77,5 @@ export const isLineComment = (line: string, language: string): boolean => {
       return filteredLine.startsWith("{#");
     default:
       return false;
-  }
-};
-
-/**
- * Get the comment sign for a language
- * @param line
- * @param language
- * @returns
- */
-export const getCommentSign = (language: string): string => {
-  switch (language.toLocaleLowerCase()) {
-    case "javascript":
-    case "typescript":
-    case "c":
-    case "apex":
-    case "cpp":
-    case "scala":
-    case "dart":
-    case "go":
-    case "objective-c":
-    case "kotlin":
-    case "java":
-    case "swift":
-    case "solidity":
-    case "rust":
-    case "sass":
-    case "scss":
-      return "//";
-    case "python":
-    case "shell":
-    case "perl":
-    case "yaml":
-      return "#";
-    case "coldfusion":
-      return "<!---";
-    case "haskell":
-      return "--";
-    case "twig":
-      return "{#";
-    default:
-      return "//";
   }
 };

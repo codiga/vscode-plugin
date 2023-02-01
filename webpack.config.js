@@ -5,7 +5,7 @@ module.exports = {
     webview: "./client/src/webview/index.tsx",
   },
   output: {
-    path: path.resolve(__dirname, "client", "webview"),
+    path: path.resolve(__dirname, "webview"),
     filename: "[name].js",
   },
   devtool: "eval-source-map",
