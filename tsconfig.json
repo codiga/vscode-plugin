@@ -2,10 +2,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES6",
-    "outDir": "out",
+    "outDir": "client/out",
     "lib": ["es6"],
     "sourceMap": true,
-    "rootDir": "src",
+    "rootDir": "client/src",
     "skipLibCheck": true,
     "strict": true /* enable all strict type-checking options */
     /* Additional Checks */
@@ -13,5 +13,7 @@
     // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
     // "noUnusedParameters": true,  /* Report errors on unused parameters. */
   },
-  "exclude": ["node_modules", ".vscode-test", "resources", "**/webview/**", "test-fixtures"]
+  "exclude": ["node_modules", ".vscode-test", "resources", "**/webview/**",
+    "client/test-fixtures"
+  ]
 }

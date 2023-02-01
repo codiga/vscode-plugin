@@ -61,8 +61,8 @@ export async function showCodigaWebview(
         enableScripts: true,
         retainContextWhenHidden: true,
         localResourceRoots: [
-          vscode.Uri.file(path.join(context.extensionPath, "src", "webview")),
-          vscode.Uri.file(path.join(context.extensionPath, "webview")),
+          vscode.Uri.file(path.join(context.extensionPath, "client", "src", "webview")),
+          vscode.Uri.file(path.join(context.extensionPath, "client", "webview")),
         ],
       }
     );

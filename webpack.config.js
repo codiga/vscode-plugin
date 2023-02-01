@@ -2,10 +2,10 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    webview: "./src/webview/index.tsx",
+    webview: "./client/src/webview/index.tsx",
   },
   output: {
-    path: path.resolve(__dirname, "webview"),
+    path: path.resolve(__dirname, "client", "webview"),
     filename: "[name].js",
   },
   devtool: "eval-source-map",
