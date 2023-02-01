@@ -1,15 +1,15 @@
-import * as assert from "assert";
-import * as vscode from "vscode";
-import {DiagnosticSeverity} from "vscode";
-import {
-  closeFile,
-  // createMockRule,
-  deleteText,
-  getWorkspaceFolder,
-  replaceText,
-  testDataUriInWorkspace,
-  wait
-} from "../testUtils";
+// import * as assert from "assert";
+// import * as vscode from "vscode";
+// import {DiagnosticSeverity} from "vscode";
+// import {
+//   closeFile,
+//   // createMockRule,
+//   deleteText,
+//   getWorkspaceFolder,
+//   replaceText,
+//   testDataUriInWorkspace,
+//   wait
+// } from "../testUtils";
 // import {CacheData, CodigaYmlConfig, refreshCacheForWorkspace} from "../../rosie/rosieCache";
 
 // suite("Rosie diagnostics", () => {
