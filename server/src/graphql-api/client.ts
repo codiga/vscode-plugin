@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import { API_TOKEN_HEADER_KEY, GRAPHQL_ENDPOINT_PROD, USER_AGENT_HEADER_KEY } from '../constants';
 import { getApiToken } from './configuration';
-// import { rollbarLogger } from "../utils/rollbarUtils";
+import { rollbarLogger } from "../utils/rollbarUtils";
 
 let client: GraphQLClient;
 let languageClientName: string | undefined;
@@ -56,7 +56,7 @@ export async function doQuery(
       console.log(e);
       // ignore user-not-logged errors
       if (!e.message.includes("user-not-logged")) {
-        // rollbarLogger(e, { variables });
+        rollbarLogger(e, { variables });
       }
       return undefined;
     });
@@ -78,7 +78,7 @@ export async function doMutation(
     .catch((e) => {
       console.error("exception");
       console.debug(e);
-      // rollbarLogger(e, { variables });
+      rollbarLogger(e, { variables });
       return undefined;
     });
   return query;

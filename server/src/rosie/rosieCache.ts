@@ -9,7 +9,7 @@ import {getRules, getRulesLastUpdatedTimestamp} from "../graphql-api/rules";
 import {wasActiveRecently} from "../utils/activity";
 import {getLanguageForDocument} from '../utils/fileUtils';
 import {Rule} from "./rosieTypes";
-// import { rollbarLogger } from "../utils/rollbarUtils";
+import { rollbarLogger } from "../utils/rollbarUtils";
 import {Language} from "../graphql-api/types";
 import {URI} from 'vscode-languageserver-types';
 import {URI as vsUri, Utils} from 'vscode-uri';
@@ -36,7 +36,7 @@ const RULES_CACHE = new Map<URI, CacheData>();
  */
 export const refreshCachePeriodic = async (): Promise<void> => {
   await refreshCache(RULES_CACHE).catch((e) => {
-    // rollbarLogger(e);
+    rollbarLogger(e);
     console.error(e);
     console.error("error while fetching rules");
   });
@@ -137,7 +137,7 @@ export const parseCodigaConfig = async (
   } catch (e) {
     console.log("Error when parsing the codiga.yml file.");
     console.log(e);
-    // rollbarLogger(e);
+    rollbarLogger(e);
     return CodigaYmlConfig.EMPTY;
   }
 };
@@ -266,7 +266,7 @@ export const updateCacheForWorkspace = async (
   } catch (e) {
     console.log("error when reading or updating the rules");
     console.log(e);
-    // rollbarLogger(e);
+    rollbarLogger(e);
   }
 };
 
