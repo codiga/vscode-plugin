@@ -72,7 +72,11 @@ suite("Rosie cache", () => {
   setup(async () => {
     //Uses an arbitrary URI based on the OS-specific temp directory.
     console.debug(`tmpdir: ${path.join(os.tmpdir(), "workspaceFolder")}`);
-    workspaceFolder = vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
+    if (process.platform === 'darwin') {
+      workspaceFolder = vsUri.parse(`file://${path.join(os.tmpdir(), "workspaceFolder")}`);
+    } else {
+      workspaceFolder = vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
+    }
     console.debug(`workspaceFolder: ${workspaceFolder.path}`);
     initWorkspaceFolder(workspaceFolder);
   });
