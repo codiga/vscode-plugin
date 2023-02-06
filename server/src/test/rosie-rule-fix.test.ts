@@ -47,7 +47,7 @@ suite("Rosie quick fixes", () => {
     const changes = codeAction.edit?.changes;
 
     if (changes) {
-      assert.strictEqual(TextDocument.applyEdits(document, changes?.[document.uri]), normalizeLineEndings(expectedContent));
+      assert.strictEqual(TextDocument.applyEdits(document, changes?.[document.uri]), expectedContent);
     } else {
       assert.fail("No Code Action edit change was available.");
     }

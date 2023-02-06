@@ -72,6 +72,8 @@ suite("Rosie cache", () => {
   setup(async () => {
     //Uses an arbitrary URI based on the OS-specific temp directory.
     workspaceFolder = vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
+    console.log(`tmpdir: ${path.join(os.tmpdir(), "workspaceFolder")}`);
+    console.log(`workspaceFolder: ${workspaceFolder.path}`);
     initWorkspaceFolder(workspaceFolder);
   });
 
