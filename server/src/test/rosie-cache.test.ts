@@ -53,7 +53,9 @@ suite("Rosie cache", () => {
    * @param paths the path segments
    */
   function createInWorkspacePath(...paths: string[]): string {
-    return vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder", ...paths)}`).path;
+    return process.platform === 'darwin'
+      ? vsUri.parse(`file://${path.join(os.tmpdir(), "workspaceFolder", ...paths)}`).path
+      : vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder", ...paths)}`).path;
   }
 
   /**
@@ -71,13 +73,10 @@ suite("Rosie cache", () => {
 
   setup(async () => {
     //Uses an arbitrary URI based on the OS-specific temp directory.
-    console.debug(`tmpdir: ${path.join(os.tmpdir(), "workspaceFolder")}`);
-    if (process.platform === 'darwin') {
-      workspaceFolder = vsUri.parse(`file://${path.join(os.tmpdir(), "workspaceFolder")}`);
-    } else {
-      workspaceFolder = vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
-    }
-    console.debug(`workspaceFolder: ${workspaceFolder.path}`);
+    workspaceFolder = process.platform === 'darwin'
+      ? vsUri.parse(`file://${path.join(os.tmpdir(), "workspaceFolder")}`)
+      : vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
+
     initWorkspaceFolder(workspaceFolder);
   });
 

@@ -28,7 +28,9 @@ suite("Rosie cache update", () => {
 
   setup(async () => {
     //Uses an arbitrary URI based on the OS-specific temp directory.
-    workspaceFolder = vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
+    workspaceFolder = process.platform === 'darwin'
+      ? vsUri.parse(`file://${path.join(os.tmpdir(), "workspaceFolder")}`)
+      : vsUri.parse(`file:///${path.join(os.tmpdir(), "workspaceFolder")}`);
     initWorkspaceFolder(workspaceFolder);
   });
 
