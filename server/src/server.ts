@@ -14,16 +14,27 @@ import { cacheUserFingerprint } from './utils/configurationUtils';
 import { provideApplyFixCodeActions } from './rosie/rosiefix';
 import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 import { addRuleFixRecord } from './graphql-api/add-rule-fix-record';
-import { InitializeResult } from 'vscode-languageserver';
+import { _Connection, InitializeResult } from 'vscode-languageserver';
 import { provideIgnoreFixCodeActions } from './diagnostics/ignore-violation';
 import { cacheCodigaApiToken } from './graphql-api/configuration';
+import { createMockConnection, MockConnection } from "./test/connectionMocks";
 
-//Retrieves the 'fingerprint' command line argument
+/**
+ * Retrieves the 'fingerprint' command line argument, so that later we can determine whether the
+ * fingerprint has to be generated on server side, or there is already one generated in the client application.
+ */
 const fingerprintArgs = process.argv.filter(arg => arg.match('fingerprint=.*'));
 
-//Creates a connection for the server. The connection uses Node's IPC as a transport mechanism.
-//Includes all preview / proposed LSP features.
-export const connection = createConnection(ProposedFeatures.all);
+/**
+ * Creates a connection for the server. The connection uses Node's IPC as a transport mechanism.
+ * Includes all preview / proposed LSP features.
+ *
+ * In case of unit test execution it creates a MockConnection, so that we don't need to have (and deal with)
+ * and actual language server connection.
+ */
+export const connection: _Connection | MockConnection = !global.isInTestMode
+  ? createConnection(ProposedFeatures.all)
+  : createMockConnection();
 
 //Creates a simple text document manager
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -46,7 +57,6 @@ connection.onInitialize((_params: InitializeParams) => {
   hasDiagnosticCapability = !!(
     _params.capabilities.textDocument &&
     _params.capabilities.textDocument.publishDiagnostics
-    // && capabilities.textDocument.publishDiagnostics.relatedInformation
   );
 
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_executeCommand
@@ -205,6 +215,7 @@ async function validateTextDocument(textDocument: TextDocument) {
 }
 
 // Make the text document manager listen on the connection for open, change and close text document events.
-documents.listen(connection);
-
-connection.listen();
+if (!global.isInTestMode) {
+  documents.listen(connection as _Connection);
+  (connection as _Connection).listen();
+}
