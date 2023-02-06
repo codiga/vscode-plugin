@@ -28,12 +28,6 @@ export interface RuleType {
   elementChecked: string | undefined;
 }
 
-export interface RulesetType {
-  id: number;
-  name: string;
-  rules: RuleType[];
-}
-
 export interface AssistantRecipe {
   id: number;
   name: string;
