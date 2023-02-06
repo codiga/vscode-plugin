@@ -5,7 +5,7 @@ import axios from "axios";
 import {ROSIE_ENDPOINT_PROD} from "./rosieConstants";
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { connection } from '../server';
-// import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
+import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
 
 /**
  * Sends a request to Rosie for the current document, and returns the received rule responses.
@@ -24,11 +24,10 @@ import { connection } from '../server';
 export const getRuleResponses = async (
   document: TextDocument,
   rules: Rule[]
-  // isInTestMode: boolean
 ): Promise<RuleResponse[]> => {
-  // if (isInTestMode === true) {
-  //   return await getMockRuleResponses(document);
-  // }
+  if (global.isInTestMode) {
+    return await getMockRuleResponses(document);
+  }
 
   const language = await getLanguageForDocument(document, connection);
   const rosieLanguage = getRosieLanguage(language);

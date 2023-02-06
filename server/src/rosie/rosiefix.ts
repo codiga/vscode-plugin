@@ -102,20 +102,20 @@ export const provideApplyFixCodeActions = (
 ): CodeAction[] => {
   const fixes = getFixesForDocument(document.uri, range);
   return fixes
-    ? fixes?.map((f) => createRuleFix(document, range, f))
+    ? fixes?.map(rosieFix => createRuleFix(document, rosieFix))
     : [];
 };
 
 /**
  * Creates a rule fix CodeAction from the argument RosieFix.
  *
+ * Exported for testing purposes.
+ *
  * @param document the document in which the CodeAction is being registered
- * @param range the range where the CodeAction is being registered
  * @param rosieFix the Rosie specific fix to convert
  */
-const createRuleFix = (
+export const createRuleFix = (
   document: TextDocument,
-  range: Range,
   rosieFix: RosieFix
 ): CodeAction => {
   const edits = rosieFix.edits

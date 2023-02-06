@@ -38,7 +38,7 @@ export const provideIgnoreFixCodeActions = async (
  * @param diagnostic the Diagnostic object for which the ignore fix is created
  * @param document the document in which the CodeAction is being registered
  */
-const createIgnoreFix = async (
+export const createIgnoreFix = async (
   diagnostic: Diagnostic,
   document: TextDocument
 ): Promise<CodeAction> => {

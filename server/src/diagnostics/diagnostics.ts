@@ -1,6 +1,5 @@
 import { asRelativePath, getLanguageForFile } from '../utils/fileUtils';
 import * as rosieClient from "../rosie/rosieClient";
-// import { isInTestMode } from "../extension";
 
 import {
   DIAGNOSTIC_SOURCE,
@@ -23,8 +22,8 @@ import { connection } from '../server';
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
   DocumentUri,
-  //Uses a string key (the JSON stringified vscode.Range) because Map.has() works based on === equality.
-  // Having vscode.Range as key sometimes resulted in the same range added multiple times with the same
+  //Uses a string key (the JSON stringified Range) because Map.has() works based on === equality.
+  // Having Range as key sometimes resulted in the same range added multiple times with the same
   // fixes in 'registerFixForDocument'.
   Map<string, [Range, RosieFix[]]>
 > = new Map();
@@ -32,7 +31,7 @@ const FIXES_BY_DOCUMENT: Map<
 /**
  * This function is a helper for the quick fixes. It retrieves the quickfix for a
  * violation. We register the list of fixes when we analyze. Then, when the user
- * hover a quick fix, we get the list of quick fixes using this function.
+ * hovers a quick fix, we get the list of quick fixes using this function.
  *
  * @param documentUri - the URI of the VS Code document
  * @param range - the range we are at in the document
@@ -55,14 +54,18 @@ export const getFixesForDocument = (
 };
 
 /**
- * Replaces the logic of vscode.Range.contains().
+ * Validates whether on Range or Position contains another one.
+ * This is a replacement for vscode.Range.contains() as vscode-languageserver doesn't have
+ * a corresponding logic or method.
  *
  * The implementation is adopted from https://github.com/microsoft/vscode/blob/main/src/vs/workbench/api/common/extHostTypes.ts.
+ *
+ * Exported for testing purposes.
  *
  * @param container the Range/Position that should contain 'containee'
  * @param containee the Range/Position that should be contained by 'container'
  */
-const contains = (container: Position | Range, containee: Position | Range): boolean => {
+export const contains = (container: Position | Range, containee: Position | Range): boolean => {
   if (Range.is(container) && Range.is(containee)) {
     return contains(container, containee.start) && contains(container, containee.end);
   }
@@ -102,11 +105,13 @@ const isBefore = (first: Position, second: Position): boolean => {
  *
  * It makes sure that no duplicate ranges, and no duplicate fixes are added.
  *
+ * Exported for testing purposes.
+ *
  * @param documentUri - the URI of the analyzed VS Code document
  * @param range - the range we are at in the document
  * @param fix - the quick fix to register for this document and range
  */
-const registerFixForDocument = (
+export const registerFixForDocument = (
   documentUri: DocumentUri,
   range: Range,
   fix: RosieFix
@@ -142,6 +147,13 @@ const registerFixForDocument = (
  */
 const resetFixesForDocument = (documentUri: DocumentUri): void => {
   FIXES_BY_DOCUMENT.set(documentUri, new Map());
+};
+
+/**
+ * Clears all documents and fixes. Only for testing purposes.
+ */
+export const resetFixes = (): void => {
+  FIXES_BY_DOCUMENT.clear();
 };
 
 /**

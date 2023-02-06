@@ -296,7 +296,7 @@ function initializeLanguageClient(context: vscode.ExtensionContext) {
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     //Lists the document languages that are targeted and selected by the language client
-    // Language identifiers: https://code.visualstudio.com/docs/languages/identifiers
+    // Language identifiers: https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers
     // An alternative to this is using a file extension pattern based selector, e.g.:
     // documentSelector: [{ scheme: 'file', pattern: '**/*.{js,jsx,ts,tsx,py,py3}' }]*/
     documentSelector: [

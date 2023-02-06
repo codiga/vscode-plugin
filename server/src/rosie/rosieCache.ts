@@ -1,20 +1,20 @@
 import * as fs from "fs";
-import { parse } from "yaml";
+import {parse} from "yaml";
 import {
   CODIGA_RULES_FILE, CODIGA_RULESET_NAME_PATTERN,
   RULES_MAX_TIME_IN_CACHE_MS,
   RULES_POLLING_INTERVAL_MS,
 } from "../constants";
-import { getRules, getRulesLastUpdatedTimestamp } from "../graphql-api/rules";
-import { wasActiveRecently } from "../utils/activity";
-import { getLanguageForDocument } from '../utils/fileUtils';
-import { Rule } from "./rosieTypes";
+import {getRules, getRulesLastUpdatedTimestamp} from "../graphql-api/rules";
+import {wasActiveRecently} from "../utils/activity";
+import {getLanguageForDocument} from '../utils/fileUtils';
+import {Rule} from "./rosieTypes";
 // import { rollbarLogger } from "../utils/rollbarUtils";
-import { Language } from "../graphql-api/types";
-import { URI } from 'vscode-languageserver-types';
-import { URI as vsUri, Utils } from 'vscode-uri';
-import { connection } from '../server';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import {Language} from "../graphql-api/types";
+import {URI} from 'vscode-languageserver-types';
+import {URI as vsUri, Utils} from 'vscode-uri';
+import {connection} from '../server';
+import {TextDocument} from 'vscode-languageserver-textdocument';
 
 /**
  * All timestamps are in milliseconds.
@@ -72,15 +72,15 @@ export const garbageCollection = (
   });
 };
 
-// /**
-//  * Resets the cache with the provided data. Only to be used in tests.
-//  */
-// export const refreshCacheForWorkspace = async (
-//   workspace: WorkspaceFolder, cacheData: CacheData
-// ): Promise<void> => {
-//   RULES_CACHE.clear();
-//   RULES_CACHE.set(workspace, cacheData);
-// };
+/**
+ * Resets the cache with the provided data. Only to be used in tests.
+ */
+export const refreshCacheForWorkspace = async (
+  uri: URI, cacheData: CacheData
+): Promise<void> => {
+  RULES_CACHE.clear();
+  RULES_CACHE.set(uri, cacheData);
+};
 
 /**
  * Actually refresh the cache for all workspaces.
@@ -96,7 +96,7 @@ export const refreshCache = async (
   if (!wasActiveRecently()) {
     return;
   }
-  const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+  const workspaceFolders = await connection?.workspace.getWorkspaceFolders();
   workspaceFolders?.forEach((workspaceFolder) => {
     const workspaceUri = vsUri.parse(workspaceFolder.uri);
     const codigaFile = Utils.joinPath(workspaceUri, CODIGA_RULES_FILE);
@@ -316,8 +316,8 @@ export const getRosieRules = async (
   if (!rosieRulesForLanguage)
     return [];
 
-  // const workspaceFolder = vscode.workspace.getWorkspaceFolder(pathOfAnalyzedFile);
-  const workspaceFolder = (await connection.workspace.getWorkspaceFolders())?.filter(folder => pathOfAnalyzedFile.startsWith(folder.uri));
+  const workspaceFolders = await connection?.workspace.getWorkspaceFolders();
+  const workspaceFolder = workspaceFolders?.filter(folder => pathOfAnalyzedFile.startsWith(folder.uri));
   if (workspaceFolder && workspaceFolder.length === 1) {
     const relativePathOfAnalyzedFile = vsUri.parse(pathOfAnalyzedFile).fsPath
       .replace(vsUri.parse(workspaceFolder[0].uri).fsPath, "")
@@ -326,7 +326,7 @@ export const getRosieRules = async (
       // Global match is applied to return all matches.
       .replace(/\\/g, "/");
 
-    const rulesToReturn = rosieRulesForLanguage.filter(rosieRule => {
+    return rosieRulesForLanguage.filter(rosieRule => {
       const ruleIgnore = RULES_CACHE.get(workspaceFolder[0].uri)
         ?.codigaYmlConfig
         .ignore.get(rosieRule.rulesetName)
@@ -353,8 +353,6 @@ export const getRosieRules = async (
           || prefix.includes("/.")
           || !removeLeadingSlash(relativePathOfAnalyzedFile).startsWith(prefix));
     });
-
-    return rulesToReturn;
   }
 
   return [];
@@ -373,7 +371,7 @@ const removeLeadingSlash = (path: string): string => {
 export const getRulesFromCache = async (
   doc: TextDocument
 ): Promise<Rule[]> => {
-  const workspaceFolder = (await connection.workspace.getWorkspaceFolders())?.filter(folder => doc.uri.startsWith(folder.uri));
+  const workspaceFolder = (await connection?.workspace.getWorkspaceFolders())?.filter(folder => doc.uri.startsWith(folder.uri));
   if (workspaceFolder && workspaceFolder.length === 1 && RULES_CACHE.has(workspaceFolder[0].uri)) {
     const rules = RULES_CACHE.get(workspaceFolder[0].uri)?.rules;
     return rules
