@@ -48,13 +48,6 @@ export function createTextDocument(workspaceFolder: vsUri, fileName: string, lan
 }
 
 /**
- * Removes \r characters from the argument string, if the test is executed on a non-Windows platform.
- */
-export function normalizeLineEndings(code: string): string {
-  return process.platform === "win32" ? code : code.replace(/\r/g, "");
-}
-
-/**
  * Creates a mock AST Rule for the given language with the given content.
  */
 export function createMockRule(

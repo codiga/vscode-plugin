@@ -6,9 +6,9 @@ import * as assert from "assert";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {URI, Utils} from "vscode-uri";
 import * as os from "os";
-import {createRange, createTextDocument, normalizeLineEndings} from "./testUtils";
+import {createRange, createTextDocument} from "./testUtils";
 
-suite("Rosie quick fixes", () => {
+suite("Rosie ignore violation quick fixes", () => {
   const typescriptFileContent =
     "class Duck {\r\n" +
     "  private _size: number;\r\n" +
@@ -38,7 +38,7 @@ suite("Rosie quick fixes", () => {
     const changes = codeAction.edit?.changes;
 
     if (changes) {
-      assert.strictEqual(TextDocument.applyEdits(document, changes?.[document.uri]), normalizeLineEndings(expectedContent));
+      assert.strictEqual(TextDocument.applyEdits(document, changes?.[document.uri]), expectedContent);
     } else {
       assert.fail("No Code Action edit change was available.");
     }

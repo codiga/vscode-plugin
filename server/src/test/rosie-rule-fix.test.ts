@@ -6,9 +6,9 @@ import {RosieFix} from "../rosie/rosieTypes";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {URI, Utils} from "vscode-uri";
 import * as os from "os";
-import {createTextDocument, normalizeLineEndings} from "./testUtils";
+import {createTextDocument} from "./testUtils";
 
-suite("Rosie quick fixes", () => {
+suite("Rosie rule fix quick fixes", () => {
   const typescriptFileContent =
     "class Duck {\r\n" +
     "  private _size: number;\r\n" +
@@ -114,13 +114,13 @@ suite("Rosie quick fixes", () => {
           }
         ]
       },
-      normalizeLineEndings("class Duck {\r\n" +
+      "class Duck {\r\n" +
         "  private _size: number;\r\n" +
         "  constructor(size: number) {\r\n" +
         "    this._size = size;\r\n" +
         "  }\r\n" +
         "}\r\n" +
-        "const x = 6;Text added"));
+        "const x = 6;Text added");
   });
 
   // This is the behaviour on VS Code/language server side and not on Codiga side
@@ -137,13 +137,13 @@ suite("Rosie quick fixes", () => {
           }
         ]
       },
-      normalizeLineEndings("class Duck {\r\n" +
+      "class Duck {\r\n" +
         "  private _size: number;\r\n" +
         "  constructor(size: number) {\r\n" +
         "    this._size = size;\r\n" +
         "  }\r\n" +
         "}\r\n" +
-        "const x = 6;Text added"));
+        "const x = 6;Text added");
   });
 
   test("No fix is applied when start line is negative for non-addition", async () => {
