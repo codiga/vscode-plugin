@@ -88,7 +88,6 @@ export const refreshCacheForWorkspace = async (
  * No cache update is performed if the editor has not been active for a while.
  *
  * @param cache the rules cache
- * @param connection the language server connection
  */
 export const refreshCache = async (
   cache: Map<URI, CacheData>

@@ -1,7 +1,7 @@
 import { getFixesForDocument } from '../diagnostics/diagnostics';
 import { RosieFix, RosieFixEdit } from './rosieTypes';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { Position, Range, CodeAction, CodeActionKind, WorkspaceEdit, TextEdit } from 'vscode-languageserver-types';
+import { Position, Range, CodeAction, CodeActionKind, TextEdit } from 'vscode-languageserver-types';
 
 /**
  * Returns whether either the start line or col of the argument Rosie fix edit is negative.

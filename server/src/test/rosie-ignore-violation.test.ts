@@ -30,7 +30,7 @@ suite("Rosie ignore violation quick fixes", () => {
    * Validates that fix edits are applied on the target document for the argument Rosie fix,
    * according to the provided expected content.
    *
-   * @param rosieFix the Rosie fix
+   * @param diagnostic the diagnostic for which the fix is applied
    * @param expectedContent the file content that is expected after the edits are applied
    */
   async function testFixIsApplied(diagnostic: Diagnostic, expectedContent: string = typescriptFileContent) {

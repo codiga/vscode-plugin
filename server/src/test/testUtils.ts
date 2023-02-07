@@ -13,6 +13,7 @@ export const wait = async (ms: number) =>
 /**
  * Creates a codiga.yml file in the current workspace folder with the given content.
  *
+ * @param workspaceFolder the workspace folder in which the codiga.yml is created
  * @param content the file content
  */
 export function createCodigaYml(workspaceFolder: vsUri, content: string): vsUri {
