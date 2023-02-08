@@ -96,7 +96,7 @@ section of `server.ts`.
 
 ## GraphQL client, queries and mutations
 
-Both the client and the server uses a GraphQL client to send queries and mutations to Codiga and the Rosie service.
+Both the client and the server uses a GraphQL client to send queries and mutations to Codiga.
 
 The queries are used to fetch timestamp-, snippet- and ruleset related data from Codiga, while mutations are used to send metrics to Codiga
 of the usage of certain functionality, for example when a Rosie fix is applied.
@@ -105,7 +105,7 @@ These are available in both the client and the server at `/src/graphql-api/clien
 
 ### User-Agent
 
-The User-Agent header is sent in order to identify the client application the GraphQL request are sent from.
+The User-Agent header is sent in order to identify the client application the GraphQL requests are sent from.
 
 It is in the form `<product>/<version>`, e.g. `VsCode/1.70.0`:
 - On client side the product name is fix (`VsCode`), while the version is fetched from the `vscode` api.
@@ -193,6 +193,13 @@ the tests and avoids handling file creation, cleanup, etc.
 - Currently, the Rosie quick fixes are displayed in ignore-apply order instead of the desired apply-ignore order.
 
 ## How to guide
+
+### Compile and run the extension
+
+In the extension's root directory:
+- Run `npm install` to install dependencies.
+- Run `npm run compile` to compile both the client and server side sources, as well as to generate the webview for the snippets.
+- Hit F5 in VS Code to launch the extension host instance.
 
 ### Add support for a new Rosie language
 
