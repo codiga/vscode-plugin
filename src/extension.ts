@@ -318,6 +318,16 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeTextDocument(() => {
     recordLastActivity();
   });
+
+
+  /**
+   * Whenever the user switches to a different tab, we record the new active text editor,
+   * so that Codiga Assistant preview/insert has a target editor to work with.
+   */
+  vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor)
+      recordLastEditor();
+  });
 }
 
 // this method is called when your extension is deactivated
