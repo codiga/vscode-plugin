@@ -65,19 +65,13 @@ export const getFixesForDocument = (
  * @param container the Range/Position that should contain 'containee'
  * @param containee the Range/Position that should be contained by 'container'
  */
-export const contains = (container: Position | Range, containee: Position | Range): boolean => {
+export const contains = (container: Range | Position, containee: Range | Position): boolean => {
   if (Range.is(container) && Range.is(containee)) {
     return contains(container, containee.start) && contains(container, containee.end);
   }
 
   if (Range.is(container) && Position.is(containee)) {
-    if (isBefore(Position.create(containee.line, containee.character), container.start)) {
-      return false;
-    }
-    if (isBefore(container.end, containee)) {
-      return false;
-    }
-    return true;
+    return !(isBefore(Position.create(containee.line, containee.character), container.start) || isBefore(container.end, containee));
   }
   return false;
 };
