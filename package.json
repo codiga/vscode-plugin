@@ -29,7 +29,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.9.0",
+  "version": "0.9.1",
   "engines": {
     "node": "^16.0.0",
     "vscode": "^1.70.0"
