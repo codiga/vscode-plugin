@@ -189,8 +189,8 @@ suite("Rosie diagnostics", () => {
 
   // refreshDiagnostics: no diagnostics cases
 
-  async function testNoDiagnostics(fileName: string) {
-    const diagnostics = await refreshDiagnostics(createTextDocument(workspaceFolder, fileName));
+  async function testNoDiagnostics(fileName: string, content: string = "") {
+    const diagnostics = await refreshDiagnostics(createTextDocument(workspaceFolder, fileName, "plaintext", content));
 
     assert.strictEqual(diagnostics.length, 0);
   }
@@ -208,7 +208,7 @@ suite("Rosie diagnostics", () => {
   });
 
   test("refreshDiagnostics: No diagnostic for one-line document", async () => {
-    await testNoDiagnostics("oneLineFile.js");
+    await testNoDiagnostics("oneLineFile.js", "a single-line document");
   });
 
   // refreshDiagnostics: diagnostics cases
