@@ -11,13 +11,14 @@ import { initializeClient } from './graphql-api/client';
 import { refreshDiagnostics } from './diagnostics/diagnostics';
 import { recordLastActivity } from './utils/activity';
 import { cacheUserFingerprint } from './utils/configurationUtils';
-import { provideApplyFixCodeActions } from './rosie/rosiefix';
+import { provideApplyFixCodeActions, createAndSetCodeActionEdit } from './rosie/rosiefix';
 import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 import { addRuleFixRecord } from './graphql-api/add-rule-fix-record';
 import { _Connection, InitializeResult } from 'vscode-languageserver';
 import { provideIgnoreFixCodeActions } from './diagnostics/ignore-violation';
 import { cacheCodigaApiToken } from './graphql-api/configuration';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
+import { RosieFixEdit } from "./rosie/rosieTypes";
 
 /**
  * Retrieves the 'fingerprint' command line argument, so that later we can determine whether the
@@ -42,6 +43,8 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasDiagnosticCapability: boolean;
 let hasApplyEditCapability: boolean;
 let hasCodeActionLiteralSupport: boolean;
+let hasCodeActionResolveSupport: boolean;
+let hasCodeActionDataSupport: boolean;
 
 let clientName: string | undefined;
 let clientVersion: string | undefined;
@@ -70,6 +73,8 @@ connection.onInitialize((_params: InitializeParams) => {
    * https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeAction
    */
   hasCodeActionLiteralSupport = !!(_params.capabilities.textDocument?.codeAction?.codeActionLiteralSupport);
+  hasCodeActionResolveSupport = !!(_params.capabilities.textDocument?.codeAction?.resolveSupport);
+  hasCodeActionDataSupport = !!(_params.capabilities.textDocument?.codeAction?.dataSupport);
 
   //If there is no support for diagnostics, which is the core functionality and purpose of the Rosie platform,
   // return with no capability, and don't register any further event handler.
@@ -110,7 +115,20 @@ connection.onInitialize((_params: InitializeParams) => {
     return codeActions;
   });
 
+  /**
+   * Invoked when the user actually uses/invokes a code action.
+   *
+   * It computes the 'edit' property of the CodeAction in this handler, so that it is evaluated
+   * only when we actually need that information.
+   */
   connection.onCodeActionResolve(codeAction => {
+    if (codeAction.data && codeAction.data.fixKind === "rosie.rule.fix") {
+      const document = documents.get(codeAction.data.documentUri);
+      if (document) {
+        const rosieFixEdits = codeAction.data.rosieFixEdits as RosieFixEdit[];
+        createAndSetCodeActionEdit(codeAction, document, rosieFixEdits);
+      }
+    }
     return codeAction;
   });
 
@@ -167,9 +185,12 @@ connection.onInitialize((_params: InitializeParams) => {
       };
     }
     initResult.capabilities.codeActionProvider = {
-      codeActionKinds: [CodeActionKind.QuickFix],
-      resolveProvider: true
+      codeActionKinds: [CodeActionKind.QuickFix]
     };
+
+    if (hasCodeActionResolveSupport && hasCodeActionDataSupport) {
+      initResult.capabilities.codeActionProvider.resolveProvider = true;
+    }
   }
   return initResult;
 });

@@ -1,7 +1,7 @@
 global.isInTestMode = true;
 
 import * as assert from "assert";
-import {createRuleFix} from "../rosie/rosiefix";
+import {createRuleFix, createAndSetCodeActionEdit} from "../rosie/rosiefix";
 import {RosieFix} from "../rosie/rosieTypes";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {URI, Utils} from "vscode-uri";
@@ -44,6 +44,7 @@ suite("Rosie rule fix quick fixes", () => {
 
   function testFix(rosieFix: RosieFix, expectedContent: string = typescriptFileContent) {
     const codeAction = createRuleFix(document, rosieFix);
+    createAndSetCodeActionEdit(codeAction, document, rosieFix.edits);
     const changes = codeAction.edit?.changes;
 
     if (changes) {

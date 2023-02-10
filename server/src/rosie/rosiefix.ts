@@ -22,7 +22,30 @@ const hasInvalidEndOffset = (
 };
 
 /**
- * Maps the Rosie specific RosieFixEdit to a VS Code specific vscode.TextEdit,
+ * Creates the provided CodeAction's underlying WorkspaceEdit, and sets it based on the given RosieFixEdits.
+ *
+ * @param codeAction the code action to compute the 'edit' property of
+ * @param document the document in which the code action is being invoked
+ * @param rosieFixEdits the code edits from the RosieFix
+ */
+export const createAndSetCodeActionEdit = (
+    codeAction: CodeAction,
+    document: TextDocument,
+    rosieFixEdits: RosieFixEdit[]
+) => {
+  const textEdits = rosieFixEdits
+      .map(fixEdit => mapFixEditToTextEdit(fixEdit, document))
+      .filter(textEdit => textEdit !== undefined) as TextEdit[];
+  //Stores the list of code edits that this quick fix will apply
+  codeAction.edit = {
+    changes: {
+      [document.uri]: textEdits
+    }
+  };
+};
+
+/**
+ * Maps the Rosie specific RosieFixEdit to an LSP specific TextEdit,
  * so that it can later be applied in a document.
  *
  * It returns undefined in the following cases:
@@ -65,7 +88,7 @@ const mapFixEditToTextEdit = (
 /**
  * Validates the fix edit for negative line and col values, as well as whether the
  * start offset is less than the end offset. If all is well, creates the appropriate
- * vscode.TextEdit based on the given callback.
+ * TextEdit based on the given callback.
  */
 const validateOffsetsAndCreateTextEdit = (
   fixEdit: RosieFixEdit,
@@ -118,10 +141,6 @@ export const createRuleFix = (
   document: TextDocument,
   rosieFix: RosieFix
 ): CodeAction => {
-  const edits = rosieFix.edits
-    .map((fixEdit) => mapFixEditToTextEdit(fixEdit, document))
-    .filter((p) => p !== undefined) as TextEdit[];
-
   /*
     From CodeAction's documentation:
       If a code action provides an edit and a command, first the edit is executed and then the command.
@@ -129,18 +148,21 @@ export const createRuleFix = (
   return {
     title: `Fix: ${rosieFix.description}`,
     kind: CodeActionKind.QuickFix,
-    //Stores the list of code edits that this quick fix will apply
-    edit: {
-      changes: {
-        [document.uri]: edits
-      }
-    },
     //Registers the 'codiga.applyFix' command for this CodeAction, so that we can execute further
     // logic when the quick fix gets invoked, e.g. to record the rule fix mutation.
     command: {
       command: 'codiga.applyFix',
       title: 'Apply Fix'
     },
-    isPreferred: true
+    isPreferred: true,
+    //Data the is reserved between 'onCodeAction()' and 'onCodeActionResolve()'.
+    data: {
+      fixKind: "rosie.rule.fix",
+      //Don't need to send the whole document, the URI is enough.
+      //Also, sending the entire document object is problematic because some properties of that object
+      // are lost, for some reason, between 'onCodeAction()' and 'onCodeActionResolve()'.
+      documentUri: document.uri,
+      rosieFixEdits: rosieFix.edits
+    }
   };
 };

@@ -210,7 +210,7 @@
     "remark": "^14.0.2",
     "remark-html": "^15.0.1",
     "rollbar": "^2.26.0",
-    "vscode-languageclient": "^6.1.3"
+    "vscode-languageclient": "^8.0.2"
   },
   "__metadata": {
     "id": "251775d3-1b6c-426f-bb28-419880a36f83",
