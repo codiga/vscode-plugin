@@ -192,6 +192,11 @@ the tests and avoids handling file creation, cleanup, etc.
 
 - Currently, the Rosie quick fixes are displayed in ignore-apply order instead of the desired apply-ignore order.
 
+## Limitations
+
+- There is no configuration at the moment to debug the server-side code.
+- Neither console nor language client based logging emits any log entry, for some reason.
+
 ## How to guide
 
 ### Compile and run the extension
