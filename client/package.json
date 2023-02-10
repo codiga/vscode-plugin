@@ -17,7 +17,7 @@
 		"react": "^16.14.0",
 		"react-dom": "^16.14.0",
 		"@vscode/webview-ui-toolkit": "^1.0.0",
-		"vscode-languageclient": "^6.1.3"
+		"vscode-languageclient": "^8.0.2"
 	},
 	"devDependencies": {
 		"vsce": "^2.6.7",

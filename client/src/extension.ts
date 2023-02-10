@@ -45,7 +45,7 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind
-} from 'vscode-languageclient';
+} from 'vscode-languageclient/node';
 import { getUserFingerprint } from "./utils/configurationUtils";
 
 let client: LanguageClient;
