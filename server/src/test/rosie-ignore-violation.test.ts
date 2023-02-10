@@ -1,7 +1,7 @@
 global.isInTestMode = true;
 
 import {Diagnostic} from "vscode-languageserver";
-import {createIgnoreFix, provideIgnoreFixCodeActions} from "../diagnostics/ignore-violation";
+import {createIgnoreFix, createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from "../diagnostics/ignore-violation";
 import * as assert from "assert";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {URI, Utils} from "vscode-uri";
@@ -35,6 +35,7 @@ suite("Rosie ignore violation quick fixes", () => {
    */
   async function testFixIsApplied(diagnostic: Diagnostic, expectedContent: string = typescriptFileContent) {
     const codeAction = await createIgnoreFix(diagnostic, document);
+    codeAction.edit = await createIgnoreWorkspaceEdit(document, diagnostic.range);
     const changes = codeAction.edit?.changes;
 
     if (changes) {

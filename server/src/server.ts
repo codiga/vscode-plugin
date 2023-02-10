@@ -11,11 +11,11 @@ import { initializeClient } from './graphql-api/client';
 import { refreshDiagnostics } from './diagnostics/diagnostics';
 import { recordLastActivity } from './utils/activity';
 import { cacheUserFingerprint } from './utils/configurationUtils';
-import { provideApplyFixCodeActions, createAndSetCodeActionEdit } from './rosie/rosiefix';
+import { provideApplyFixCodeActions, createAndSetRuleFixCodeActionEdit } from './rosie/rosiefix';
 import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 import { addRuleFixRecord } from './graphql-api/add-rule-fix-record';
 import { _Connection, InitializeResult } from 'vscode-languageserver';
-import { provideIgnoreFixCodeActions } from './diagnostics/ignore-violation';
+import {createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from './diagnostics/ignore-violation';
 import { cacheCodigaApiToken } from './graphql-api/configuration';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
 import { RosieFixEdit } from "./rosie/rosieTypes";
@@ -119,14 +119,22 @@ connection.onInitialize((_params: InitializeParams) => {
    * Invoked when the user actually uses/invokes a code action.
    *
    * It computes the 'edit' property of the CodeAction in this handler, so that it is evaluated
-   * only when we actually need that information.
+   * only when we actually need that information, kind of lazy evaluation.
    */
-  connection.onCodeActionResolve(codeAction => {
-    if (codeAction.data && codeAction.data.fixKind === "rosie.rule.fix") {
-      const document = documents.get(codeAction.data.documentUri);
-      if (document) {
-        const rosieFixEdits = codeAction.data.rosieFixEdits as RosieFixEdit[];
-        createAndSetCodeActionEdit(codeAction, document, rosieFixEdits);
+  connection.onCodeActionResolve(async codeAction => {
+    if (codeAction.data) {
+      if (codeAction.data.fixKind === "rosie.rule.fix") {
+        const document = documents.get(codeAction.data.documentUri);
+        if (document) {
+          const rosieFixEdits = codeAction.data.rosieFixEdits as RosieFixEdit[];
+          createAndSetRuleFixCodeActionEdit(codeAction, document, rosieFixEdits);
+        }
+      } else if (codeAction.data.fixKind === "rosie.ignore.violation.fix") {
+        const document = documents.get(codeAction.data.documentUri);
+        if (document && codeAction.diagnostics) {
+          //codeAction.diagnostics[0] is alright because there is only one Diagnostic saved per ignore-violation CodeAction.
+          codeAction.edit = await createIgnoreWorkspaceEdit(document, codeAction.diagnostics[0]?.range);
+        }
       }
     }
     return codeAction;

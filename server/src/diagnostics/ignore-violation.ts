@@ -65,9 +65,14 @@ export const createIgnoreFix = async (
      *
      * FullTextDocument: https://github.com/microsoft/vscode-languageserver-node/blob/main/types/src/main.ts#L4304
      */
-    edit: await createIgnoreWorkspaceEdit(document, diagnostic.range),
     diagnostics: [diagnostic],
-    isPreferred: false
+    isPreferred: false,
+    //Data the is reserved between 'onCodeAction()' and 'onCodeActionResolve()'.
+    data: {
+      fixKind: "rosie.ignore.violation.fix",
+      //Don't need to send the whole document, the URI is enough.
+      documentUri: document.uri
+    }
   };
 };
 

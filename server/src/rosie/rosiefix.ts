@@ -28,7 +28,7 @@ const hasInvalidEndOffset = (
  * @param document the document in which the code action is being invoked
  * @param rosieFixEdits the code edits from the RosieFix
  */
-export const createAndSetCodeActionEdit = (
+export const createAndSetRuleFixCodeActionEdit = (
     codeAction: CodeAction,
     document: TextDocument,
     rosieFixEdits: RosieFixEdit[]
