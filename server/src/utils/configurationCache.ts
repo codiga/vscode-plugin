@@ -56,7 +56,7 @@ export function getApiToken(): any {
 /**
  * Caches the api token on server side to minimize the server to client calls.
  */
-export async function cacheCodigaApiToken(apiToken: any) {
+export function cacheCodigaApiToken(apiToken: any) {
   codigaApiToken = apiToken;
 }
 

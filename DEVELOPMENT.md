@@ -233,6 +233,8 @@ codiga.yml file content.
 #### Server
 
 The steps are the following:
+- related the server, but still on client side, in `initializeLanguageClient()` in `extension.ts`, add the new language's identifier to the
+`LanguageClientOptions`' `documentSelector` property.
 - add a new Map entry to `GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE` in [`/server/src/rosie/rosieConstants.ts`](/server/src/rosie/rosieConstants.ts)
 mapping the Rosie language string to the `Language` enum.
 - add a new branch/case in `getRosieRules(Language, Rule[], URI)` in [`server/src/rosie/rosieCache.ts`](/server/src/rosie/rosieCache.ts) to
