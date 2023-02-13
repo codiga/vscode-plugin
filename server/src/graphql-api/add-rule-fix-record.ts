@@ -1,4 +1,4 @@
-import { getUserFingerprint } from "../utils/configurationUtils";
+import { getUserFingerprint } from "../utils/configurationCache";
 import { doMutation } from "./client";
 import { USE_RULE_FIX } from "./mutations";
 

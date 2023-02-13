@@ -1,6 +1,6 @@
 import { ELEMENT_CHECKED_TO_ENTITY_CHECKED } from "../constants";
 import { Rule } from "../rosie/rosieTypes";
-import { getUserFingerprint } from "../utils/configurationUtils";
+import { getUserFingerprint } from "../utils/configurationCache";
 import { doQuery } from "./client";
 import {
   GET_RULESETS_FOR_CLIENT,

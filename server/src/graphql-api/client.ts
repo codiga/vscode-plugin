@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { API_TOKEN_HEADER_KEY, GRAPHQL_ENDPOINT_PROD, USER_AGENT_HEADER_KEY } from '../constants';
-import { getApiToken } from './configuration';
+import { getApiToken } from '../utils/configurationCache';
 import { rollbarLogger } from "../utils/rollbarUtils";
 
 let client: GraphQLClient;

@@ -10,16 +10,14 @@ import { refreshCachePeriodic } from './rosie/rosieCache';
 import { initializeClient } from './graphql-api/client';
 import { refreshDiagnostics } from './diagnostics/diagnostics';
 import { recordLastActivity } from './utils/activity';
-import { cacheUserFingerprint } from './utils/configurationUtils';
+import { cacheUserFingerprint, cacheCodigaApiToken, cacheWorkspaceFolders } from './utils/configurationCache';
 import { provideApplyFixCodeActions, createAndSetRuleFixCodeActionEdit } from './rosie/rosiefix';
 import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 import { addRuleFixRecord } from './graphql-api/add-rule-fix-record';
 import {_Connection, DidChangeConfigurationNotification, InitializeResult} from 'vscode-languageserver';
 import {createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from './diagnostics/ignore-violation';
-import { cacheCodigaApiToken } from './graphql-api/configuration';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
 import { RosieFixEdit } from "./rosie/rosieTypes";
-import {cacheWorkspaceFolders} from "./utils/workspaceCache";
 
 /**
  * Retrieves the 'fingerprint' command line argument, so that later we can determine whether the

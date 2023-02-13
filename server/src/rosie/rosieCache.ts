@@ -14,7 +14,7 @@ import {Language} from "../graphql-api/types";
 import {URI} from 'vscode-languageserver-types';
 import {URI as vsUri, Utils} from 'vscode-uri';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {getWorkspaceFolders} from "../utils/workspaceCache";
+import {getWorkspaceFolders} from "../utils/configurationCache";
 
 /**
  * All timestamps are in milliseconds.

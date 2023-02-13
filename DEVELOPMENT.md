@@ -94,6 +94,16 @@ The rule fix is provided by [`rosieFix.ts`](/server/src/rosie/rosiefix.ts), whil
 `CodeAction` objects returned by both providers are handled and propagated towards the client in the `connection.onCodeAction()`
 section of `server.ts`.
 
+### Configuration cache
+
+A handful of configuration and client side related data is cached on server side, so that the number of communication
+between the language client and the language server is minimized.
+
+You can find this cache at [`/server/src/utils/configurationCache.ts`](/server/src/utils/configurationCache.ts), and it stores:
+- the user fingerprint
+- the up-to-date Codiga API token,
+- the workspace folders currently open
+
 ## GraphQL client, queries and mutations
 
 Both the client and the server uses a GraphQL client to send queries and mutations to Codiga.

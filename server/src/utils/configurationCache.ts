@@ -1,4 +1,10 @@
+import {WorkspaceFolder} from "vscode-languageserver";
+
 let currentFingerprint: string | undefined;
+let codigaApiToken: any;
+let workspaceFolders: WorkspaceFolder[] = [];
+
+// -------- Fingerprint --------
 
 /**
  * Caches the user fingerprint regardless if it is generated on the client or on server side.
@@ -36,4 +42,38 @@ export function getUserFingerprint(): string {
   currentFingerprint = newFingerprint;
 
   return newFingerprint;
+}
+
+// -------- Codiga API Token --------
+
+/**
+ * Get the Codiga API Token from the client application preferences.
+ */
+export function getApiToken(): any {
+  return codigaApiToken;
+}
+
+/**
+ * Caches the api token on server side to minimize the server to client calls.
+ */
+export async function cacheCodigaApiToken(apiToken: any) {
+  codigaApiToken = apiToken;
+}
+
+// -------- Workspace folders --------
+
+/**
+ * Saves the argument workspace folders. If null is provided, then an empty list is cached.
+ *
+ * @param folders the workspacefolders to cache
+ */
+export function cacheWorkspaceFolders(folders: WorkspaceFolder[] | null) {
+  workspaceFolders = folders ?? [];
+}
+
+/**
+ * Returns the workspace folders from this cache.
+ */
+export function getWorkspaceFolders(): WorkspaceFolder[] {
+  return workspaceFolders;
 }

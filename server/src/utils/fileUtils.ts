@@ -2,7 +2,7 @@ import { Language } from "../graphql-api/types";
 import * as pathModule from 'path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
-import {getWorkspaceFolders} from "./workspaceCache";
+import {getWorkspaceFolders} from "./configurationCache";
 
 export const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".bash": Language.Shell,
