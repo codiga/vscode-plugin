@@ -233,6 +233,8 @@ suite("Rosie diagnostics", () => {
     //Check if the diagnostics are display with their proper severities and messages
     assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Error);
     assert.strictEqual(diagnostics[0].message, "critical_violation");
+    // @ts-ignore
+    assert.strictEqual(diagnostics[0].codeDescription.href, "https://app.codiga.io/hub/ruleset/some_id");
     assert.strictEqual(diagnostics[1].severity, DiagnosticSeverity.Warning);
     assert.strictEqual(diagnostics[1].message, "error_violation");
     assert.strictEqual(diagnostics[2].severity, DiagnosticSeverity.Warning);
