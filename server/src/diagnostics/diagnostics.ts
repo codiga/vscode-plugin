@@ -281,6 +281,11 @@ export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[
           ruleResponse.identifier,
           DIAGNOSTIC_SOURCE);
 
+        //The URL to open the rule in the browser
+        diag.codeDescription = {
+          href: `https://app.codiga.io/hub/ruleset/${ruleResponse.identifier}`
+        };
+
         if (violation.fixes) {
           violation.fixes.forEach((fix) => {
             registerFixForDocument(doc.uri, range, fix);
