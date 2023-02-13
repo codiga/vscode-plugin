@@ -1,9 +1,8 @@
 import { Language } from "../graphql-api/types";
 import * as pathModule from 'path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { _Connection } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
-import { MockConnection } from "../test/connectionMocks";
+import {getWorkspaceFolders} from "./workspaceCache";
 
 export const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".bash": Language.Shell,
@@ -56,16 +55,16 @@ export const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
   ".yaml": Language.Yaml,
 };
 
-export async function asRelativePath(connection: _Connection | MockConnection, document: TextDocument) {
-  const wsFolder = (await connection.workspace.getWorkspaceFolders())?.filter(folder => document.uri?.startsWith(folder.uri));
+export function asRelativePath(document: TextDocument) {
+  const wsFolder = getWorkspaceFolders().filter(folder => document.uri?.startsWith(folder.uri));
   const documentPath = URI.parse(document.uri).path;
   return wsFolder && wsFolder.length === 1
     ? documentPath.replace(URI.parse(wsFolder[0].uri).path, "")
     : documentPath;
 }
 
-export async function getLanguageForDocument(document: TextDocument, _connection: _Connection | MockConnection): Promise<Language> {
-  return getLanguageForFile(await asRelativePath(_connection, document));
+export function getLanguageForDocument(document: TextDocument): Language {
+  return getLanguageForFile(asRelativePath(document));
 }
 
 export function getLanguageForFile(filename: string): Language {

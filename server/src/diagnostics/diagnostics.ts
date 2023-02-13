@@ -17,7 +17,6 @@ import { getRulesFromCache } from "../rosie/rosieCache";
 import {URI} from "vscode-uri";
 import { Range, Position, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { DocumentUri, TextDocument } from 'vscode-languageserver-textdocument';
-import { connection } from '../server';
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
@@ -227,7 +226,7 @@ const mapRosieSeverityToVsCodeSeverity = (
  * @param doc - the currently analysed document
  */
 export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[]> {
-  const relativePath = await asRelativePath(connection, doc);
+  const relativePath = asRelativePath(doc);
   const language: Language = getLanguageForFile(relativePath);
 
   if (language === Language.Unknown) {

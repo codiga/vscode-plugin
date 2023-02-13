@@ -542,26 +542,26 @@ suite("Rosie cache", () => {
 
   // getRosieRules
 
-  test("getRosieRules: returns empty array for no rule provided", async () => {
+  test("getRosieRules: returns empty array for no rule provided", () => {
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python, [], pythonFile);
+    const rules = getRosieRules(Language.Python, [], pythonFile);
 
     assert.strictEqual(rules.length, 0);
   });
 
-  test("getRosieRules: returns empty array for unsupported language", async () => {
+  test("getRosieRules: returns empty array for unsupported language", () => {
     const dockerfile = createInWorkspacePath("dockerfile");
 
-    const rules = await getRosieRules(Language.Docker, [createMockPythonRule()], dockerfile);
+    const rules = getRosieRules(Language.Docker, [createMockPythonRule()], dockerfile);
 
     assert.strictEqual(rules.length, 0);
   });
 
-  test("getRosieRules: returns rules for Python", async () => {
+  test("getRosieRules: returns rules for Python", () => {
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule(),
         createMockRule("javascript")
@@ -571,10 +571,10 @@ suite("Rosie cache", () => {
     assert.strictEqual(rules[0].language, "python");
   });
 
-  test("getRosieRules: returns rules for JavaScript", async () => {
+  test("getRosieRules: returns rules for JavaScript", () => {
     const jsFile = createInWorkspacePath("javascript_file.js");
 
-    const rules = await getRosieRules(Language.Javascript,
+    const rules = getRosieRules(Language.Javascript,
       [
         createMockPythonRule(),
         createMockRule("javascript")
@@ -584,10 +584,10 @@ suite("Rosie cache", () => {
     assert.strictEqual(rules[0].language, "javascript");
   });
 
-  test("getRosieRules: returns union of JS and TS rules for TypeScript", async () => {
+  test("getRosieRules: returns union of JS and TS rules for TypeScript", () => {
     const tsFile = createInWorkspacePath("typescript_file.js");
 
-    const rules = await getRosieRules(Language.Typescript,
+    const rules = getRosieRules(Language.Typescript,
       [
         createMockPythonRule(),
         createMockRule("javascript"),
@@ -606,7 +606,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -627,7 +627,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -648,7 +648,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -670,7 +670,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -693,7 +693,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -716,7 +716,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -739,7 +739,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -762,7 +762,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("directory", "python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -785,7 +785,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -808,7 +808,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -831,7 +831,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("directory", "sub", "python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -854,7 +854,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("directory", "sub", "python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -879,7 +879,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -904,7 +904,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -929,7 +929,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -955,7 +955,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -978,7 +978,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -1001,7 +1001,7 @@ suite("Rosie cache", () => {
 
     const pythonFile = createInWorkspacePath("python_file.py");
 
-    const rules = await getRosieRules(Language.Python,
+    const rules = getRosieRules(Language.Python,
       [
         createMockPythonRule("python-ruleset", "python_rule_1"),
         createMockPythonRule("python-ruleset", "python_rule_2"),
@@ -1019,7 +1019,7 @@ suite("Rosie cache", () => {
     //text_file.txt is not present in the workspace
     const document = createTextDocument(vsUri.parse("file:///C:/workspace"), "text_file.txt");
 
-    const rules = await getRulesFromCache(document);
+    const rules = getRulesFromCache(document);
 
     assert.strictEqual(rules.length, 0);
   });
@@ -1027,7 +1027,7 @@ suite("Rosie cache", () => {
   test("getRulesFromCache: returns empty array when rules cache doesn't have the workspace stored", async () => {
     const document = createTextDocument(workspaceFolder, "python_file.py", "python");
 
-    const rules = await getRulesFromCache(document);
+    const rules = getRulesFromCache(document);
 
     assert.strictEqual(rules.length, 0);
   });
@@ -1038,7 +1038,7 @@ suite("Rosie cache", () => {
       createCacheData(CodigaYmlConfig.EMPTY, [createMockRule("typescript")]));
 
     const document = createTextDocument(workspaceFolder, "python_file.py", "python");
-    const rules = await getRulesFromCache(document);
+    const rules = getRulesFromCache(document);
 
     assert.strictEqual(rules.length, 0);
   });
@@ -1049,7 +1049,7 @@ suite("Rosie cache", () => {
       createCacheData(CodigaYmlConfig.EMPTY, [createMockPythonRule()]));
 
     const document = createTextDocument(workspaceFolder, "unsupported.configuration");
-    const rules = await getRulesFromCache(document);
+    const rules = getRulesFromCache(document);
 
     assert.strictEqual(rules.length, 0);
   });
@@ -1065,7 +1065,7 @@ suite("Rosie cache", () => {
         ]));
 
     const document = createTextDocument(workspaceFolder, "python_file.py", "python", "");
-    const rules = await getRulesFromCache(document);
+    const rules = getRulesFromCache(document);
 
     assert.strictEqual(rules.length, 2);
     assert.strictEqual(rules[0].language, "python");

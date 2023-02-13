@@ -1,6 +1,6 @@
 import {ServerRequestHandler} from "vscode-languageserver/lib/common/server";
 import {InitializeParams} from "vscode-languageserver/node";
-import {InitializeResult, WorkspaceFolder} from "vscode-languageserver";
+import {Event, InitializeResult, WorkspaceFolder, WorkspaceFoldersChangeEvent} from "vscode-languageserver";
 import {
   CodeAction,
   CodeActionParams, Command,
@@ -32,6 +32,7 @@ interface MockWorkspace {
   workspaceFolders: WorkspaceFolder[];
   getConfiguration(section: string): Promise<any>;
   getWorkspaceFolders(): Promise<WorkspaceFolder[]>;
+  onDidChangeWorkspaceFolders: Event<WorkspaceFoldersChangeEvent>;
 }
 
 /**
@@ -68,6 +69,9 @@ export function createMockConnection(): MockConnection {
       },
       getConfiguration(section: string): Promise<any> {
         return Promise.resolve({});
+      },
+      onDidChangeWorkspaceFolders: e => {
+        return {} as Disposable;
       }
     }
   };

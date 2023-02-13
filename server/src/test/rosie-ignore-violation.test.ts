@@ -33,9 +33,9 @@ suite("Rosie ignore violation quick fixes", () => {
    * @param diagnostic the diagnostic for which the fix is applied
    * @param expectedContent the file content that is expected after the edits are applied
    */
-  async function testFixIsApplied(diagnostic: Diagnostic, expectedContent: string = typescriptFileContent) {
-    const codeAction = await createIgnoreFix(diagnostic, document);
-    codeAction.edit = await createIgnoreWorkspaceEdit(document, diagnostic.range);
+  function testFixIsApplied(diagnostic: Diagnostic, expectedContent: string = typescriptFileContent) {
+    const codeAction = createIgnoreFix(diagnostic, document);
+    codeAction.edit = createIgnoreWorkspaceEdit(document, diagnostic.range);
     const changes = codeAction.edit?.changes;
 
     if (changes) {
@@ -60,9 +60,9 @@ suite("Rosie ignore violation quick fixes", () => {
 
   // provideIgnoreFixCodeActions
 
-  test("provideIgnoreFixCodeActions: returns no CodeAction for no diagnostic", async () => {
+  test("provideIgnoreFixCodeActions: returns no CodeAction for no diagnostic", () => {
     const range = createRange(0, 2, 0, 6);
-    const codeActions = await provideIgnoreFixCodeActions(
+    const codeActions = provideIgnoreFixCodeActions(
       document,
       range,
       {
@@ -74,9 +74,9 @@ suite("Rosie ignore violation quick fixes", () => {
     assert.strictEqual(codeActions.length, 0);
   });
 
-  test("provideIgnoreFixCodeActions: returns no CodeAction for no Codiga diagnostic", async () => {
+  test("provideIgnoreFixCodeActions: returns no CodeAction for no Codiga diagnostic", () => {
     const range = createRange(0, 2, 0, 6);
-    const codeActions = await provideIgnoreFixCodeActions(
+    const codeActions = provideIgnoreFixCodeActions(
       document,
       range,
       {
@@ -88,9 +88,9 @@ suite("Rosie ignore violation quick fixes", () => {
     assert.strictEqual(codeActions.length, 0);
   });
 
-  test("provideIgnoreFixCodeActions: returns CodeActions for Codiga diagnostics", async () => {
+  test("provideIgnoreFixCodeActions: returns CodeActions for Codiga diagnostics", () => {
     const range = createRange(0, 2, 0, 6);
-    const codeActions = await provideIgnoreFixCodeActions(
+    const codeActions = provideIgnoreFixCodeActions(
       document,
       range,
       {
@@ -109,8 +109,8 @@ suite("Rosie ignore violation quick fixes", () => {
 
   // createIgnoreFix
 
-  test("createIgnoreFix: Adds codiga-disable comment in the first row", async () => {
-    await testFixIsApplied({
+  test("createIgnoreFix: Adds codiga-disable comment in the first row", () => {
+    testFixIsApplied({
         range: createRange(0, 2, 0, 6),
         message: "Diagnostic message"
       },
@@ -124,8 +124,8 @@ suite("Rosie ignore violation quick fixes", () => {
       "const x = 6;");
   });
 
-  test("createIgnoreFix: Adds codiga-disable comment within the document", async () => {
-    await testFixIsApplied(
+  test("createIgnoreFix: Adds codiga-disable comment within the document", () => {
+    testFixIsApplied(
       {
         range: createRange(3, 2, 3, 10),
         message: "Diagnostic message"
@@ -141,8 +141,8 @@ suite("Rosie ignore violation quick fixes", () => {
     );
   });
 
-  test("createIgnoreFix: Adds codiga-disable comment for violation in the last row", async () => {
-    await testFixIsApplied(
+  test("createIgnoreFix: Adds codiga-disable comment for violation in the last row", () => {
+    testFixIsApplied(
       {
         range: createRange(6, 1, 6, 6),
         message: "Diagnostic message"
@@ -158,10 +158,10 @@ suite("Rosie ignore violation quick fixes", () => {
     );
   });
 
-  test("createIgnoreFix: Adds codiga-disable comment in python file", async () => {
+  test("createIgnoreFix: Adds codiga-disable comment in python file", () => {
     document = createTextDocument(workspaceFolder, "python.py", "python", pythonFileContent);
 
-    await testFixIsApplied(
+    testFixIsApplied(
       {
         range: createRange(1, 1, 1, 6),
         message: "Diagnostic message"

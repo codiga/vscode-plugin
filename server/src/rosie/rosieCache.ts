@@ -13,8 +13,8 @@ import { rollbarLogger } from "../utils/rollbarUtils";
 import {Language} from "../graphql-api/types";
 import {URI} from 'vscode-languageserver-types';
 import {URI as vsUri, Utils} from 'vscode-uri';
-import {connection} from '../server';
 import {TextDocument} from 'vscode-languageserver-textdocument';
+import {getWorkspaceFolders} from "../utils/workspaceCache";
 
 /**
  * All timestamps are in milliseconds.
@@ -95,8 +95,7 @@ export const refreshCache = async (
   if (!wasActiveRecently()) {
     return;
   }
-  const workspaceFolders = await connection?.workspace.getWorkspaceFolders();
-  workspaceFolders?.forEach((workspaceFolder) => {
+  getWorkspaceFolders().forEach((workspaceFolder) => {
     const workspaceUri = vsUri.parse(workspaceFolder.uri);
     const codigaFile = Utils.joinPath(workspaceUri, CODIGA_RULES_FILE);
     // If there is a Codiga file, let's fetch the rules
@@ -292,7 +291,7 @@ export const filterRules = (languages: Language[], rules: Rule[]) => {
  * Required to pass in for the `ignore` configuration.
  * @returns an array containing only the rules needed for a file to analyze
  */
-export const getRosieRules = async (
+export const getRosieRules = (
   language: Language,
   rules: Rule[] | undefined,
   pathOfAnalyzedFile: URI
@@ -315,8 +314,7 @@ export const getRosieRules = async (
   if (!rosieRulesForLanguage)
     return [];
 
-  const workspaceFolders = await connection?.workspace.getWorkspaceFolders();
-  const workspaceFolder = workspaceFolders?.filter(folder => pathOfAnalyzedFile.startsWith(folder.uri));
+  const workspaceFolder = getWorkspaceFolders().filter(folder => pathOfAnalyzedFile.startsWith(folder.uri));
   if (workspaceFolder && workspaceFolder.length === 1) {
     const relativePathOfAnalyzedFile = vsUri.parse(pathOfAnalyzedFile).fsPath
       .replace(vsUri.parse(workspaceFolder[0].uri).fsPath, "")
@@ -367,14 +365,14 @@ const removeLeadingSlash = (path: string): string => {
  * @param doc the document to get the rules for
  * @returns the array of rules for the language of the given document
  */
-export const getRulesFromCache = async (
+export const getRulesFromCache = (
   doc: TextDocument
-): Promise<Rule[]> => {
-  const workspaceFolder = (await connection?.workspace.getWorkspaceFolders())?.filter(folder => doc.uri.startsWith(folder.uri));
+): Rule[] => {
+  const workspaceFolder = getWorkspaceFolders().filter(folder => doc.uri.startsWith(folder.uri));
   if (workspaceFolder && workspaceFolder.length === 1 && RULES_CACHE.has(workspaceFolder[0].uri)) {
     const rules = RULES_CACHE.get(workspaceFolder[0].uri)?.rules;
     return rules
-      ? getRosieRules(await getLanguageForDocument(doc, connection), rules, doc.uri)
+      ? getRosieRules(getLanguageForDocument(doc), rules, doc.uri)
       : [];
   }
   return [];

@@ -6,6 +6,7 @@ import {MockConnection} from "./connectionMocks";
 import {CacheData, CodigaYmlConfig} from "../rosie/rosieCache";
 import * as fs from "fs";
 import {Position, Range} from "vscode-languageserver";
+import {cacheWorkspaceFolders} from "../utils/workspaceCache";
 
 export const wait = async (ms: number) =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
@@ -32,6 +33,7 @@ export function initWorkspaceFolder(workspaceFolder: vsUri) {
     name: Utils.dirname(workspaceFolder).path,
     uri: workspaceFolder.path
   }];
+  cacheWorkspaceFolders((connection as MockConnection).workspace.workspaceFolders);
 }
 
 /**

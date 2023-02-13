@@ -6,7 +6,6 @@ import { getCommentSign } from "../utils/languageUtils";
 import { Position, CodeAction, CodeActionKind, Diagnostic, TextEdit, WorkspaceEdit } from 'vscode-languageserver-types';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
 import { CodeActionParams } from 'vscode-languageserver';
-import { connection } from '../server';
 
 /**
  * Constructs and collects the applicable ignore fix CodeActions in the current document
@@ -16,17 +15,17 @@ import { connection } from '../server';
  * @param range the range for which the CodeActions have to be collected
  * @param context the code action parameters for additional context information
  */
-export const provideIgnoreFixCodeActions = async (
+export const provideIgnoreFixCodeActions = (
   document: TextDocument,
   range: Range,
   context: CodeActionParams
-): Promise<CodeAction[]> => {
+): CodeAction[] => {
   const diagnostics = context.context.diagnostics
     .filter(diagnostic => diagnostic.source?.toLocaleString().indexOf(DIAGNOSTIC_SOURCE) != -1);
 
   const ignoreFixes: CodeAction[] = [];
   for (const diagnostic of diagnostics) {
-    ignoreFixes.push(await createIgnoreFix(diagnostic, document));
+    ignoreFixes.push(createIgnoreFix(diagnostic, document));
   }
 
   return ignoreFixes;
@@ -38,10 +37,10 @@ export const provideIgnoreFixCodeActions = async (
  * @param diagnostic the Diagnostic object for which the ignore fix is created
  * @param document the document in which the CodeAction is being registered
  */
-export const createIgnoreFix = async (
+export const createIgnoreFix = (
   diagnostic: Diagnostic,
   document: TextDocument
-): Promise<CodeAction> => {
+): CodeAction => {
   const ruleIdentifier = diagnostic.code;
   const title = ruleIdentifier
     ? `Ignore rule ${ruleIdentifier}`
@@ -82,12 +81,12 @@ export const createIgnoreFix = async (
  * @param document the document in which the comment is to be added
  * @param range the range of the diagnostic based on which the comment is added (e.g. indentation-wise)
  */
-export const createIgnoreWorkspaceEdit = async (
+export const createIgnoreWorkspaceEdit = (
   document: TextDocument,
   range: Range,
-): Promise<WorkspaceEdit> => {
+): WorkspaceEdit => {
   const insertPosition = Position.create(range.start.line, 0);
-  const language = await getLanguageForDocument(document, connection);
+  const language = getLanguageForDocument(document);
   const commentSymbol = getCommentSign(language);
   const indentation = getCurrentIndentationForDocument(
     document,

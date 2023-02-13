@@ -4,7 +4,6 @@ import {getRosieLanguage} from "./rosieLanguage";
 import axios from "axios";
 import {ROSIE_ENDPOINT_PROD} from "./rosieConstants";
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { connection } from '../server';
 import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
 
 /**
@@ -26,10 +25,10 @@ export const getRuleResponses = async (
   rules: Rule[]
 ): Promise<RuleResponse[]> => {
   if (global.isInTestMode) {
-    return await getMockRuleResponses(document);
+    return getMockRuleResponses(document);
   }
 
-  const language = await getLanguageForDocument(document, connection);
+  const language = getLanguageForDocument(document);
   const rosieLanguage = getRosieLanguage(language);
 
   if (!rosieLanguage) {
@@ -37,7 +36,7 @@ export const getRuleResponses = async (
     return [];
   }
 
-  const relativePath = await asRelativePath(connection, document);
+  const relativePath = asRelativePath(document);
 
   // Convert the code to Base64
   const codeBuffer = Buffer.from(document.getText());

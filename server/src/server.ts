@@ -19,6 +19,7 @@ import {createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from './diagnost
 import { cacheCodigaApiToken } from './graphql-api/configuration';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
 import { RosieFixEdit } from "./rosie/rosieTypes";
+import {cacheWorkspaceFolders} from "./utils/workspaceCache";
 
 /**
  * Retrieves the 'fingerprint' command line argument, so that later we can determine whether the
@@ -40,6 +41,7 @@ export const connection: _Connection | MockConnection = !global.isInTestMode
 //Creates a simple text document manager
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
+let hasWorkspaceCapability: boolean;
 let hasDiagnosticCapability: boolean;
 let hasApplyEditCapability: boolean;
 let hasCodeActionLiteralSupport: boolean;
@@ -62,9 +64,11 @@ connection.onInitialize((_params: InitializeParams) => {
     _params.capabilities.textDocument.publishDiagnostics
   );
 
+  hasWorkspaceCapability = !!(_params.capabilities.workspace);
+
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_executeCommand
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_applyEdit
-  hasApplyEditCapability = !!(_params.capabilities.workspace && _params.capabilities.workspace?.applyEdit);
+  hasApplyEditCapability = !!(hasWorkspaceCapability && _params.capabilities.workspace?.applyEdit);
 
   /**
    * Clients need to announce their support for code action literals (e.g. literals of type CodeAction) and
@@ -100,14 +104,14 @@ connection.onInitialize((_params: InitializeParams) => {
    * This is executed not just when displaying the list of quick fixes for a diagnostic,
    * but also when diagnostics are computed.
    */
-  connection.onCodeAction(async params => {
+  connection.onCodeAction(params => {
     const codeActions: CodeAction[] = [];
 
     if (hasApplyEditCapability && hasCodeActionLiteralSupport && params.context.diagnostics.length > 0) {
       const document = documents.get(params.textDocument.uri);
       if (document) {
         codeActions.push(...provideApplyFixCodeActions(document, params.range));
-        const ignoreFixes = await provideIgnoreFixCodeActions(document, params.range, params);
+        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params);
         codeActions.push(...ignoreFixes);
       }
     }
@@ -121,7 +125,7 @@ connection.onInitialize((_params: InitializeParams) => {
    * It computes the 'edit' property of the CodeAction in this handler, so that it is evaluated
    * only when we actually need that information, kind of lazy evaluation.
    */
-  connection.onCodeActionResolve(async codeAction => {
+  connection.onCodeActionResolve(codeAction => {
     if (codeAction.data) {
       if (codeAction.data.fixKind === "rosie.rule.fix") {
         const document = documents.get(codeAction.data.documentUri);
@@ -133,7 +137,7 @@ connection.onInitialize((_params: InitializeParams) => {
         const document = documents.get(codeAction.data.documentUri);
         if (document && codeAction.diagnostics) {
           //codeAction.diagnostics[0] is alright because there is only one Diagnostic saved per ignore-violation CodeAction.
-          codeAction.edit = await createIgnoreWorkspaceEdit(document, codeAction.diagnostics[0]?.range);
+          codeAction.edit = createIgnoreWorkspaceEdit(document, codeAction.diagnostics[0]?.range);
         }
       }
     }
@@ -206,7 +210,17 @@ connection.onInitialize((_params: InitializeParams) => {
 /**
  * Runs when the language server finished initialization.
  */
-connection.onInitialized(() => {
+connection.onInitialized(async () => {
+  if (hasWorkspaceCapability) {
+    //Initial caching when initialized
+    cacheWorkspaceFolders(await connection.workspace.getWorkspaceFolders());
+
+    //Whenever the set of workspace folders changes, we cache the new set
+    connection.workspace.onDidChangeWorkspaceFolders(async e => {
+      cacheWorkspaceFolders(await connection.workspace.getWorkspaceFolders());
+    });
+  }
+
   //If there is only one 'fingerprint' command line argument, get its value,
   // otherwise we return undefined, so that the server will generate its value.
   const userFingerprint = fingerprintArgs && fingerprintArgs.length === 1

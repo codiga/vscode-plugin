@@ -4,9 +4,9 @@ import {TextDocument} from "vscode-languageserver-textdocument";
 /**
  * Provides mock RuleResponse objects for testing.
  */
-export async function getMockRuleResponses(
+export function getMockRuleResponses(
   document: TextDocument
-): Promise<RuleResponse[]> {
+): RuleResponse[] {
   let ruleResponse: RuleResponse;
 
   //This branch is to provide an updated set of diagnostics when the document changes
