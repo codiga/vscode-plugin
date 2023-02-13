@@ -191,12 +191,12 @@ const shouldProceed = async (doc: TextDocument): Promise<boolean> => {
 };
 
 /**
- * Maps the argument Rosie severity to the VS Code specific DiagnosticSeverity,
+ * Maps the argument Rosie severity to the LSP specific DiagnosticSeverity,
  * to have squiggles with proper severities displayed in the editor.
  *
  * @param rosieSeverity the severity to map
  */
-const mapRosieSeverityToVsCodeSeverity = (
+const mapRosieSeverityToLSPSeverity = (
   rosieSeverity: string
 ): DiagnosticSeverity => {
   if (rosieSeverity.toLocaleUpperCase() === ROSIE_SEVERITY_CRITICAL) {
@@ -277,7 +277,7 @@ export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[
         const diag = Diagnostic.create(
           range,
           violation.message,
-          mapRosieSeverityToVsCodeSeverity(violation.severity),
+          mapRosieSeverityToLSPSeverity(violation.severity),
           ruleResponse.identifier,
           DIAGNOSTIC_SOURCE);
 
