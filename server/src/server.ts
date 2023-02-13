@@ -14,7 +14,7 @@ import { cacheUserFingerprint } from './utils/configurationUtils';
 import { provideApplyFixCodeActions, createAndSetRuleFixCodeActionEdit } from './rosie/rosiefix';
 import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 import { addRuleFixRecord } from './graphql-api/add-rule-fix-record';
-import { _Connection, InitializeResult } from 'vscode-languageserver';
+import {_Connection, DidChangeConfigurationNotification, InitializeResult} from 'vscode-languageserver';
 import {createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from './diagnostics/ignore-violation';
 import { cacheCodigaApiToken } from './graphql-api/configuration';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
@@ -41,6 +41,7 @@ export const connection: _Connection | MockConnection = !global.isInTestMode
 //Creates a simple text document manager
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
+let hasConfigurationCapability: boolean;
 let hasWorkspaceCapability: boolean;
 let hasDiagnosticCapability: boolean;
 let hasApplyEditCapability: boolean;
@@ -58,13 +59,16 @@ let clientVersion: string | undefined;
  * and a new language client is initialized.
  */
 connection.onInitialize((_params: InitializeParams) => {
+  //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didChangeConfiguration
+  hasConfigurationCapability = !!(_params.capabilities.workspace && !!_params.capabilities.workspace.configuration);
+
+  hasWorkspaceCapability = !!(_params.capabilities.workspace);
+
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics
   hasDiagnosticCapability = !!(
     _params.capabilities.textDocument &&
     _params.capabilities.textDocument.publishDiagnostics
   );
-
-  hasWorkspaceCapability = !!(_params.capabilities.workspace);
 
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_executeCommand
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_applyEdit
@@ -92,7 +96,8 @@ connection.onInitialize((_params: InitializeParams) => {
   /**
    * Runs when the configuration, e.g. the Codiga API Token changes.
    */
-  connection.onDidChangeConfiguration(_change => {
+  connection.onDidChangeConfiguration(async _change => {
+    cacheCodigaApiToken(await connection.workspace.getConfiguration("codiga.api.token"));
     documents.all().forEach(validateTextDocument);
   });
 
@@ -180,7 +185,6 @@ connection.onInitialize((_params: InitializeParams) => {
    */
   documents.onDidChangeContent(change => {
     recordLastActivity();
-    cacheCodigaApiToken();
     validateTextDocument(change.document);
   });
 
@@ -211,6 +215,11 @@ connection.onInitialize((_params: InitializeParams) => {
  * Runs when the language server finished initialization.
  */
 connection.onInitialized(async () => {
+  //Based on https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+  if (!global.isInTestMode && hasConfigurationCapability) {
+    await (connection as _Connection).client.register(DidChangeConfigurationNotification.type, undefined);
+  }
+
   if (hasWorkspaceCapability) {
     //Initial caching when initialized
     cacheWorkspaceFolders(await connection.workspace.getWorkspaceFolders());
@@ -232,7 +241,7 @@ connection.onInitialized(async () => {
   //Initializes the GraphQL client
   initializeClient(clientName, clientVersion);
 
-  cacheCodigaApiToken();
+  cacheCodigaApiToken(await connection.workspace.getConfiguration("codiga.api.token"));
 
   //Start the rules cache updater only if the client supports diagnostics
   if (hasDiagnosticCapability)

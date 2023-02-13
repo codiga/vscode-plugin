@@ -17,8 +17,8 @@ export function initializeClient(clientName: string | undefined, clientVersion: 
   client = new GraphQLClient(GRAPHQL_ENDPOINT_PROD);
 }
 
-async function generateHeaders(): Promise<Record<string, string>> {
-  const apiToken = await getApiToken();
+function generateHeaders(): Record<string, string> {
+  const apiToken = getApiToken();
 
   const userAgentHeader = {
     [USER_AGENT_HEADER_KEY]: `${languageClientName ?? ""}/${languageClientVersion || ""}`
@@ -50,7 +50,7 @@ export async function doQuery(
   > = {}
 ) {
   const query = client
-    .request(graphqlQuery, variables, await generateHeaders())
+    .request(graphqlQuery, variables, generateHeaders())
     .catch((e) => {
       console.log("exception when querying the GraphQL API");
       console.log(e);
@@ -74,7 +74,7 @@ export async function doMutation(
   variables: Record<string, string | undefined | number | null> = {}
 ) {
   const query = client
-    .request(graphqlMutation, variables, await generateHeaders())
+    .request(graphqlMutation, variables, generateHeaders())
     .catch((e) => {
       console.error("exception");
       console.debug(e);

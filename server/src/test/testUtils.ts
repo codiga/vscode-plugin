@@ -41,6 +41,7 @@ export function initWorkspaceFolder(workspaceFolder: vsUri) {
  *
  * Language ids can be found at https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers
  *
+ * @param workspaceFolder the workspace folder in which the document is created
  * @param fileName the file name
  * @param languageId the language id of the file
  * @param content the content of the file
