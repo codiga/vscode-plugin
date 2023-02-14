@@ -12,7 +12,7 @@ import {
   registerFixForDocument,
   resetFixes,
 } from "../diagnostics/diagnostics";
-import {DiagnosticSeverity} from "vscode-languageserver";
+import {Diagnostic, DiagnosticSeverity} from "vscode-languageserver";
 
 suite("Rosie diagnostics", () => {
   const jsRule1 = createMockRule("javascript", "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==");
@@ -190,7 +190,12 @@ suite("Rosie diagnostics", () => {
   // refreshDiagnostics: no diagnostics cases
 
   async function testNoDiagnostics(fileName: string, content: string = "") {
-    const diagnostics = await refreshDiagnostics(createTextDocument(workspaceFolder, fileName, "plaintext", content));
+      const diagnostics: Diagnostic[] = [];
+      await refreshDiagnostics(createTextDocument(workspaceFolder, fileName, "plaintext", content),
+              diags => {
+                  diagnostics.push(...diags);
+                  return Promise.resolve();
+              });
 
     assert.strictEqual(diagnostics.length, 0);
   }
@@ -226,7 +231,11 @@ suite("Rosie diagnostics", () => {
 }
 `);
 
-    const diagnostics = await refreshDiagnostics(typescriptDocument);
+    const diagnostics: Diagnostic[] = [];
+    await refreshDiagnostics(typescriptDocument, diags => {
+        diagnostics.push(...diags);
+        return Promise.resolve();
+    });
 
     assert.strictEqual(diagnostics.length, 4);
 

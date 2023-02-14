@@ -223,20 +223,21 @@ const mapRosieSeverityToLSPSeverity = (
  *   <li>There is no rule cached for the current document's language.</li>
  * </ul>
  *
- * @param doc - the currently analysed document
+ * @param doc the currently analysed document
+ * @param sendDiagnostics the callback to send the diagnostics to the client
  */
-export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[]> {
+export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (diagnostics: Diagnostic[]) => Promise<void>): Promise<void> {
   const relativePath = asRelativePath(doc);
   const language: Language = getLanguageForFile(relativePath);
 
   if (language === Language.Unknown) {
-    return [];
+    return;
   }
   const supportedLanguages = Array.from(
     GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys()
   );
   if (supportedLanguages.indexOf(language) === -1) {
-    return [];
+    return;
   }
 
   /**
@@ -244,20 +245,20 @@ export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[
    */
   const shouldDoAnalysis = await shouldProceed(doc);
   if (!shouldDoAnalysis) {
-    return [];
+    return;
   }
 
   if (doc.getText().length === 0) {
     console.debug("empty code");
-    return [];
+    return;
   }
 
   if (doc.lineCount < 2) {
     console.debug("not enough lines");
-    return [];
+    return;
   }
 
-  const rules = await getRulesFromCache(doc);
+  const rules = getRulesFromCache(doc);
 
   // Empty the mapping between the analysis and the list of fixes
   resetFixesForDocument(doc.uri);
@@ -274,16 +275,19 @@ export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[
           Position.create(violation.end.line - 1, violation.end.col - 1)
         );
 
-        const diag = Diagnostic.create(
-          range,
-          violation.message,
-          mapRosieSeverityToLSPSeverity(violation.severity),
-          ruleResponse.identifier,
-          DIAGNOSTIC_SOURCE);
-
-        //The URL to open the rule in the browser
-        diag.codeDescription = {
-          href: `https://app.codiga.io/hub/ruleset/${ruleResponse.identifier}`
+        const diag: Diagnostic = {
+          range: range,
+          message: violation.message,
+          severity: mapRosieSeverityToLSPSeverity(violation.severity),
+          //For example, the 'source', 'code' and 'codeDescription' are displayed like
+          // this in VS Code: <source>(<code>), e.g. Codiga(rulesetname/ruleset), where
+          // the value in parentheses can be clicked to open the 'codeDescription.href' URL in a browser.
+          source: DIAGNOSTIC_SOURCE,
+          code: ruleResponse.identifier,
+          codeDescription: {
+            //The URL to open the rule in the browser
+            href: `https://app.codiga.io/hub/ruleset/${ruleResponse.identifier}`
+          }
         };
 
         if (violation.fixes) {
@@ -295,9 +299,8 @@ export async function refreshDiagnostics(doc: TextDocument): Promise<Diagnostic[
       });
     });
 
-    return diags;
+    sendDiagnostics(diags);
   } else {
     console.debug("no ruleset to use");
   }
-  return [];
 }

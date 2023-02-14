@@ -254,10 +254,7 @@ connection.onInitialized(async () => {
  */
 async function validateTextDocument(textDocument: TextDocument) {
   try {
-    const diagnostics = await refreshDiagnostics(textDocument);
-
-    //Sends the computed diagnostics to the client application.
-    connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+    refreshDiagnostics(textDocument, diags => connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: diags }));
   } catch (e) {
     connection.console.error(`Error while validating ${textDocument.uri}`);
     connection.console.error(String(e));
