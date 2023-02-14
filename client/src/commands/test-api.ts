@@ -10,11 +10,11 @@ export async function testApi(): Promise<void> {
   const user = await getUser();
   if (!user) {
     vscode.window.showInformationMessage(
-      "Invalid API keys. Enter valid API keys from your Code Inspector profile"
+      "Invalid API keys. Enter valid API keys from your Codiga profile"
     );
   } else {
     vscode.window.showInformationMessage(
-      `Code Inspector: identified as ${user.username} (${user.accountType})`
+      `Codiga: identified as ${user.username} (${user.accountType})`
     );
   }
 }

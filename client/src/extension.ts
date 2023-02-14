@@ -73,7 +73,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const allLanguages = await vscode.languages.getLanguages();
 
   /**
-   * Register the command to test the connection to the Code Inspector API.
+   * Register the command to test the connection to the Codiga API.
    */
   vscode.commands.registerCommand("codiga.testAPI", () => {
     testApi();
