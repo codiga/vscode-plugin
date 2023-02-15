@@ -1,10 +1,12 @@
 import {RosieResponse, Rule, RuleResponse} from "./rosieTypes";
-import { asRelativePath, getLanguageForDocument } from '../utils/fileUtils';
+import { asRelativePath, getLanguageForFile } from '../utils/fileUtils';
 import {getRosieLanguage} from "./rosieLanguage";
 import axios from "axios";
 import {ROSIE_ENDPOINT_PROD} from "./rosieConstants";
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
+
+import * as fs from "fs";
 
 /**
  * Sends a request to Rosie for the current document, and returns the received rule responses.
@@ -28,19 +30,22 @@ export const getRuleResponses = async (
     return getMockRuleResponses(document);
   }
 
-  const language = getLanguageForDocument(document);
+  const relativePath = asRelativePath(document);
+  const language = getLanguageForFile(relativePath);
   const rosieLanguage = getRosieLanguage(language);
+
+  fs.writeFileSync("/Users/daniel/console.txt", `Relative path of document: ${relativePath}\n`, { flag: "a+"});
 
   if (!rosieLanguage) {
     console.debug("language not supported by Rosie");
     return [];
   }
 
-  const relativePath = asRelativePath(document);
-
   // Convert the code to Base64
   const codeBuffer = Buffer.from(document.getText());
   const codeBase64 = codeBuffer.toString("base64");
+
+  fs.writeFileSync("/Users/daniel/console.txt", `code as base64: ${codeBase64}\n`, { flag: "a+"});
 
   // Build the request post data
   const data = {
@@ -62,12 +67,14 @@ export const getRuleResponses = async (
 
     if (!response || !response.data) {
       console.debug("no response from Rosie");
+      fs.writeFileSync("/Users/daniel/console.txt", `No response from Rosie.\n`, { flag: "a+"});
       return [];
     }
 
     return response.data.ruleResponses as RuleResponse[];
   } catch (err) {
     console.log("ERROR: ", err);
+    fs.writeFileSync("/Users/daniel/console.txt", `ERROR in rosieClient: ${err}\n`, { flag: "a+"});
     return [];
   }
 };
