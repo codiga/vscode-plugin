@@ -311,5 +311,6 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
     sendDiagnostics(diags);
   } else {
     // console.debug("no ruleset to use");
+    sendDiagnostics([]);
   }
 }
