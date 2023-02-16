@@ -59,6 +59,13 @@ or the configured rulesets (or underlying rules) have changed on Codiga Hub.
 
 The cache is updated according to the serialized content (a `CodigaYmlConfig` instance from `server.ts`) of the `codiga.yml` file.
 
+#### Document revalidation
+
+We also revalidate all open text documents when the cache is updated.
+
+This makes sure that both on IDE startup (when there is a document open, but the cache is not yet populated),
+and later, the editor shows diagnostics based on the up-to-date state of the cache.
+
 ### Rosie client
 
 [`rosieClient.ts`](/server/src/rosie/rosieClient.ts) is responsible for the communication between the language server and the Rosie service.
@@ -201,6 +208,8 @@ the tests and avoids handling file creation, cleanup, etc.
 ## Outstanding issues
 
 - Currently, the Rosie quick fixes are displayed in ignore-apply order instead of the desired apply-ignore order.
+- `console.debug()` and some `console.log()` statements are commented out on server side because at least debug logging
+crashes the server in non-VSCode IDEs like Sublime Text.
 
 ## Limitations
 

@@ -6,7 +6,7 @@ import {
   TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { refreshCachePeriodic } from './rosie/rosieCache';
+import {refreshCachePeriodic, setAllTextDocumentsValidator} from './rosie/rosieCache';
 import { initializeClient } from './graphql-api/client';
 import { refreshDiagnostics } from './diagnostics/diagnostics';
 import { recordLastActivity } from './utils/activity';
@@ -245,6 +245,7 @@ connection.onInitialized(async () => {
 
   //Start the rules cache updater only if the client supports diagnostics
   if (hasDiagnosticCapability)
+    setAllTextDocumentsValidator(() => documents.all().forEach(validateTextDocument));
     refreshCachePeriodic();
 });
 

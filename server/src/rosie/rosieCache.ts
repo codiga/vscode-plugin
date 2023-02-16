@@ -27,6 +27,23 @@ export interface CacheData {
   rules: Rule[];
 }
 
+/**
+ * Holds a callback into server.ts, so that we can revalidate all open text documents when the cache is updated.
+ *
+ * This makes sure that both on IDE startup (when there is a document open, but the cache is not yet populated),
+ * and later the editor shows violations based on the up-to-date state of the cache.
+ */
+let revalidateAllTextDocuments: Function;
+
+/**
+ * Sets the all text document validator callback.
+ *
+ * @param validator
+ */
+export const setAllTextDocumentsValidator = (validator: Function) => {
+  revalidateAllTextDocuments = validator;
+};
+
 //Have to use URI (the URI of the Workspace folder) instead of WorkspaceFolder,
 // because otherwise the Map.has() call doesn't find the WorkspaceFolder.
 const RULES_CACHE = new Map<URI, CacheData>();
@@ -261,6 +278,7 @@ export const updateCacheForWorkspace = async (
     };
 
     cache.set(workspace, newCacheData);
+    revalidateAllTextDocuments();
   } catch (e) {
     console.log("error when reading or updating the rules");
     console.log(e);
