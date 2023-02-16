@@ -252,13 +252,13 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
   }
 
   if (doc.getText().length === 0) {
-    console.debug("empty code");
+    // console.debug("empty code");
     fs.writeFileSync("/Users/daniel/console.txt", `Empty file content.\n`, { flag: "a+"});
     return;
   }
 
   if (doc.lineCount < 2) {
-    console.debug("not enough lines");
+    // console.debug("not enough lines");
     fs.writeFileSync("/Users/daniel/console.txt", `One-line content.\n`, { flag: "a+"});
     return;
   }
@@ -310,6 +310,6 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
 
     sendDiagnostics(diags);
   } else {
-    console.debug("no ruleset to use");
+    // console.debug("no ruleset to use");
   }
 }

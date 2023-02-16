@@ -37,7 +37,7 @@ export const getRuleResponses = async (
   fs.writeFileSync("/Users/daniel/console.txt", `Relative path of document: ${relativePath}\n`, { flag: "a+"});
 
   if (!rosieLanguage) {
-    console.debug("language not supported by Rosie");
+    // console.debug("language not supported by Rosie");
     return [];
   }
 
@@ -66,14 +66,14 @@ export const getRuleResponses = async (
     });
 
     if (!response || !response.data) {
-      console.debug("no response from Rosie");
+      // console.debug("no response from Rosie");
       fs.writeFileSync("/Users/daniel/console.txt", `No response from Rosie.\n`, { flag: "a+"});
       return [];
     }
 
     return response.data.ruleResponses as RuleResponse[];
   } catch (err) {
-    console.log("ERROR: ", err);
+    // console.log("ERROR: ", err);
     fs.writeFileSync("/Users/daniel/console.txt", `ERROR in rosieClient: ${err}\n`, { flag: "a+"});
     return [];
   }
