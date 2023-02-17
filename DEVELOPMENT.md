@@ -208,7 +208,7 @@ the tests and avoids handling file creation, cleanup, etc.
 ## Outstanding issues
 
 - Currently, the Rosie quick fixes are displayed in ignore-apply order instead of the desired apply-ignore order.
-- `console.debug()` and some `console.log()` statements are commented out on server side because at least debug logging
+- `console.debug()` statements are commented out on server side because at least debug logging
 crashes the server in non-VSCode IDEs like Sublime Text.
 
 ## Limitations

@@ -1,8 +1,10 @@
-import {WorkspaceFolder} from "vscode-languageserver";
-
 let currentFingerprint: string | undefined;
 let codigaApiToken: any;
-let workspaceFolders: WorkspaceFolder[] = [];
+/**
+ * Since there are client applications that don't support multiple workspaces, but only a single one
+ * (announced via 'InitializeParams.rootUri'), we have to rely on string URI values instead of `WorkspaceFolder` objects.
+ */
+let workspaceFolderUris: string[] = [];
 
 // -------- Fingerprint --------
 
@@ -65,15 +67,15 @@ export function cacheCodigaApiToken(apiToken: any) {
 /**
  * Saves the argument workspace folders. If null is provided, then an empty list is cached.
  *
- * @param folders the workspacefolders to cache
+ * @param folderUris the workspace folder URIs to cache
  */
-export function cacheWorkspaceFolders(folders: WorkspaceFolder[] | null) {
-  workspaceFolders = folders ?? [];
+export function cacheWorkspaceFolders(folderUris: string[] | null) {
+  workspaceFolderUris = folderUris ?? [];
 }
 
 /**
  * Returns the workspace folders from this cache.
  */
-export function getWorkspaceFolders(): WorkspaceFolder[] {
-  return workspaceFolders;
+export function getWorkspaceFolders(): string[] {
+  return workspaceFolderUris;
 }

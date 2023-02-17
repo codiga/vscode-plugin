@@ -56,10 +56,10 @@ export const EXTENSION_TO_LANGUAGE: Record<string, Language> = {
 };
 
 export function asRelativePath(document: TextDocument) {
-  const wsFolder = getWorkspaceFolders().filter(folder => document.uri?.startsWith(folder.uri));
+  const wsFolder = getWorkspaceFolders().filter(folder => document.uri?.startsWith(folder));
   const documentPath = URI.parse(document.uri).path;
   return wsFolder && wsFolder.length === 1
-    ? documentPath.replace(URI.parse(wsFolder[0].uri).path, "")
+    ? documentPath.replace(URI.parse(wsFolder[0]).path, "")
     : documentPath;
 }
 

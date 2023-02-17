@@ -42,6 +42,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
 let hasConfigurationCapability: boolean;
 let hasWorkspaceCapability: boolean;
+let hasWorkspaceFoldersCapability: boolean;
 let hasDiagnosticCapability: boolean;
 let hasApplyEditCapability: boolean;
 let hasCodeActionLiteralSupport: boolean;
@@ -62,6 +63,14 @@ connection.onInitialize((_params: InitializeParams) => {
   hasConfigurationCapability = !!(_params.capabilities.workspace && !!_params.capabilities.workspace.configuration);
 
   hasWorkspaceCapability = !!(_params.capabilities.workspace);
+
+  //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_workspaceFolders
+  //While text editors like VS Code, Sublime Text and such support multiple workspaces, for example Jupyter Lab doesn't,
+  // so in those cases we rely on 'rootUri' as the single workspace root.
+  hasWorkspaceFoldersCapability = !!(_params.capabilities.workspace?.workspaceFolders);
+  if (!hasWorkspaceFoldersCapability) {
+    cacheWorkspaceFolders(_params.rootUri ? [_params.rootUri] : []);
+  }
 
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics
   hasDiagnosticCapability = !!(
@@ -220,13 +229,15 @@ connection.onInitialized(async () => {
     await (connection as _Connection).client.register(DidChangeConfigurationNotification.type, undefined);
   }
 
-  if (hasWorkspaceCapability) {
+  if (hasWorkspaceFoldersCapability) {
     //Initial caching when initialized
-    cacheWorkspaceFolders(await connection.workspace.getWorkspaceFolders());
+    const folders = (await connection.workspace.getWorkspaceFolders())?.map(folder => folder.uri) ?? [];
+    cacheWorkspaceFolders(folders);
 
     //Whenever the set of workspace folders changes, we cache the new set
     connection.workspace.onDidChangeWorkspaceFolders(async e => {
-      cacheWorkspaceFolders(await connection.workspace.getWorkspaceFolders());
+      const folders = (await connection.workspace.getWorkspaceFolders())?.map(folder => folder.uri) ?? [];
+      cacheWorkspaceFolders(folders);
     });
   }
 

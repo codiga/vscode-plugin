@@ -113,11 +113,11 @@ export const refreshCache = async (
     return;
   }
   getWorkspaceFolders().forEach((workspaceFolder) => {
-    const workspaceUri = vsUri.parse(workspaceFolder.uri);
+    const workspaceUri = vsUri.parse(workspaceFolder);
     const codigaFile = Utils.joinPath(workspaceUri, CODIGA_RULES_FILE);
     // If there is a Codiga file, let's fetch the rules
     if (fs.existsSync(codigaFile.fsPath)) { //existsSync() doesn't work with actual URIs. Needs file system path.
-      updateCacheForWorkspace(cache, workspaceFolder.uri, codigaFile);
+      updateCacheForWorkspace(cache, workspaceFolder, codigaFile);
     }
   });
 };
@@ -332,17 +332,17 @@ export const getRosieRules = (
   if (!rosieRulesForLanguage)
     return [];
 
-  const workspaceFolder = getWorkspaceFolders().filter(folder => pathOfAnalyzedFile.startsWith(folder.uri));
+  const workspaceFolder = getWorkspaceFolders().filter(folder => pathOfAnalyzedFile.startsWith(folder));
   if (workspaceFolder && workspaceFolder.length === 1) {
     const relativePathOfAnalyzedFile = vsUri.parse(pathOfAnalyzedFile).fsPath
-      .replace(vsUri.parse(workspaceFolder[0].uri).fsPath, "")
+      .replace(vsUri.parse(workspaceFolder[0]).fsPath, "")
       //Replaces backslash '\' symbols with forward slashes '/', so that in case of Windows specific paths,
       // we still can compare the relative paths properly.
       // Global match is applied to return all matches.
       .replace(/\\/g, "/");
 
     return rosieRulesForLanguage.filter(rosieRule => {
-      const ruleIgnore = RULES_CACHE.get(workspaceFolder[0].uri)
+      const ruleIgnore = RULES_CACHE.get(workspaceFolder[0])
         ?.codigaYmlConfig
         .ignore.get(rosieRule.rulesetName)
         ?.ruleIgnores.get(rosieRule.ruleName);
@@ -386,9 +386,9 @@ const removeLeadingSlash = (path: string): string => {
 export const getRulesFromCache = (
   doc: TextDocument
 ): Rule[] => {
-  const workspaceFolder = getWorkspaceFolders().filter(folder => doc.uri.startsWith(folder.uri));
-  if (workspaceFolder && workspaceFolder.length === 1 && RULES_CACHE.has(workspaceFolder[0].uri)) {
-    const rules = RULES_CACHE.get(workspaceFolder[0].uri)?.rules;
+  const workspaceFolder = getWorkspaceFolders().filter(folder => doc.uri.startsWith(folder));
+  if (workspaceFolder && workspaceFolder.length === 1 && RULES_CACHE.has(workspaceFolder[0])) {
+    const rules = RULES_CACHE.get(workspaceFolder[0])?.rules;
     return rules
       ? getRosieRules(getLanguageForDocument(doc), rules, doc.uri)
       : [];

@@ -33,7 +33,8 @@ export function initWorkspaceFolder(workspaceFolder: vsUri) {
     name: Utils.dirname(workspaceFolder).path,
     uri: workspaceFolder.path
   }];
-  cacheWorkspaceFolders((connection as MockConnection).workspace.workspaceFolders);
+  const folders = ((connection as MockConnection).workspace.workspaceFolders)?.map(folder => folder.uri) ?? [];
+  cacheWorkspaceFolders(folders);
 }
 
 /**
