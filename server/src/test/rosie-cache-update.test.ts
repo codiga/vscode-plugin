@@ -2,7 +2,7 @@ global.isInTestMode = true;
 
 import * as assert from "assert";
 import {createCacheData, createCodigaYml, createMockRule, initWorkspaceFolder} from "./testUtils";
-import {CacheData, CodigaYmlConfig, updateCacheForWorkspace} from "../rosie/rosieCache";
+import {CacheData, CodigaYmlConfig, setAllTextDocumentsValidator, updateCacheForWorkspace} from "../rosie/rosieCache";
 import * as fs from "fs";
 import {fail} from "assert";
 import {URI as vsUri} from 'vscode-uri';
@@ -142,7 +142,7 @@ suite("Rosie cache update", () => {
     assert.strictEqual(cacheData.lastRefreshed, 0);
   });
 
-  test("updateCacheForWorkspace: ache update with no lastRefreshed update, when existing cache data's last modification has changed", async () => {
+  test("updateCacheForWorkspace: cache update with no lastRefreshed update, when existing cache data's last modification has changed", async () => {
     const cacheData = {
       codigaYmlConfig: new CodigaYmlConfig(["actual-ruleset"]),
       lastRefreshed: 0,
@@ -172,6 +172,35 @@ suite("Rosie cache update", () => {
     assert.strictEqual(data.rules[1].language, "typescript");
 
     assert.strictEqual(cacheData.lastRefreshed, 0);
+  });
+
+  test("updateCacheForWorkspace: text document revalidation is called after cache update", async () => {
+    let areTextDocumentsRevalidated = false;
+    setAllTextDocumentsValidator(() => areTextDocumentsRevalidated = true);
+
+    const cacheData = {
+      codigaYmlConfig: new CodigaYmlConfig(["actual-ruleset"]),
+      lastRefreshed: 0,
+      lastTimestamp: 100, //see rules.ts#getRulesLastUpdatedTimestamp
+      fileLastModification: 0, //the last modification will be the file's actual timestamp in updateCacheForWorkspace
+      rules: [
+        createMockRule("python"),
+        createMockRule("javascript"),
+        createMockRule("python")
+      ]
+    };
+    const cache = await initializeRulesCache("rulesets:\n  - actual-ruleset", cacheData);
+
+    //Update cache
+
+    await updateCacheForWorkspace(cache, workspaceFolder.path, codigaYaml);
+
+    //Assertions
+
+    assert.strictEqual(cache.size, 1);
+    const data = cache.get(workspaceFolder.path);
+    assert.strictEqual(data?.rules.length, 2);
+    assert.strictEqual(areTextDocumentsRevalidated, true);
   });
 
   test("updateCacheForWorkspace: updates last refreshed timestamp on existing cache data", async () => {
