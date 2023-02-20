@@ -4,15 +4,15 @@ import {RemoteConsole} from "vscode-languageserver";
  * Acts as replacement for the regular Node console. This wrapper helps avoid using the server connection object
  * throughout the project.
  */
-let console: RemoteConsole;
+let _console: RemoteConsole | Console;
 
 /**
- * Saves language server connection's RemoteConsole.
+ * Saves the language server connection's RemoteConsole, or if in test mode, then uses the Node console.
  *
- * @param _console the remote console
+ * @param _remoteConsole the remote console
  */
-export function initConsole(_console: RemoteConsole) {
-    console = _console;
+export function initConsole(_remoteConsole: RemoteConsole) {
+    _console = !global.isInTestMode ? _remoteConsole : console;
 }
 
 /**
@@ -21,7 +21,7 @@ export function initConsole(_console: RemoteConsole) {
  * @param message the log message
  */
 export function log(message: string) {
-    console.log(message);
+    _console.log(message);
 }
 
 /**
@@ -30,5 +30,5 @@ export function log(message: string) {
  * @param message the log message
  */
 export function error(message: string) {
-    console.error(message);
+    _console.error(message);
 }
