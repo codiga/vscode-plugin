@@ -5,6 +5,7 @@ import axios from "axios";
 import {ROSIE_ENDPOINT_PROD} from "./rosieConstants";
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {getMockRuleResponses as getMockRuleResponses} from "./rosieClientMocks";
+import * as console from '../utils/connectionLogger';
 
 /**
  * Sends a request to Rosie for the current document, and returns the received rule responses.
@@ -33,7 +34,7 @@ export const getRuleResponses = async (
   const rosieLanguage = getRosieLanguage(language);
 
   if (!rosieLanguage) {
-    // console.debug("language not supported by Rosie");
+    // console.log("language not supported by Rosie");
     return [];
   }
 
@@ -60,13 +61,13 @@ export const getRuleResponses = async (
     });
 
     if (!response || !response.data) {
-      // console.debug("no response from Rosie");
+      // console.log("no response from Rosie");
       return [];
     }
 
     return response.data.ruleResponses as RuleResponse[];
   } catch (err) {
-    console.log("ERROR: ", err);
+    console.log(`ERROR: ${err}`);
     return [];
   }
 };

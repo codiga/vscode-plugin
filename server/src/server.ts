@@ -23,6 +23,7 @@ import {_Connection, DidChangeConfigurationNotification, InitializeResult} from 
 import {createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from './diagnostics/ignore-violation';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
 import { RosieFixEdit } from "./rosie/rosieTypes";
+import {initConsole} from "./utils/connectionLogger";
 
 /**
  * Retrieves the 'fingerprint' command line argument, so that later we can determine whether the
@@ -40,6 +41,8 @@ const fingerprintArgs = process.argv.filter(arg => arg.match('fingerprint=.*'));
 export const connection: _Connection | MockConnection = !global.isInTestMode
   ? createConnection(ProposedFeatures.all)
   : createMockConnection();
+
+initConsole(connection.console);
 
 //Creates a simple text document manager
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);

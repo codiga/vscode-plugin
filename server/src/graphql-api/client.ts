@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import { API_TOKEN_HEADER_KEY, GRAPHQL_ENDPOINT_PROD, USER_AGENT_HEADER_KEY } from '../constants';
 import { getApiToken } from '../utils/configurationCache';
 import { rollbarLogger } from "../utils/rollbarUtils";
+import * as console from '../utils/connectionLogger';
 
 let client: GraphQLClient;
 let languageClientName: string | undefined;
@@ -77,7 +78,7 @@ export async function doMutation(
     .request(graphqlMutation, variables, generateHeaders())
     .catch((e) => {
       console.error("exception");
-      console.debug(e);
+      console.error(e);
       rollbarLogger(e, { variables });
       return undefined;
     });

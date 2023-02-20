@@ -17,6 +17,7 @@ import { getRulesFromCache } from "../rosie/rosieCache";
 import {URI} from "vscode-uri";
 import { Range, Position, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { DocumentUri, TextDocument } from 'vscode-languageserver-textdocument';
+//import * as console from '../utils/connectionLogger';
 
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
@@ -248,12 +249,12 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
   }
 
   if (doc.getText().length === 0) {
-    // console.debug("empty code");
+    // console.log("empty code");
     return;
   }
 
   if (doc.lineCount < 2) {
-    // console.debug("not enough lines");
+    // console.log("not enough lines");
     return;
   }
 
@@ -267,7 +268,7 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
     const diags: Diagnostic[] = [];
 
     ruleResponses.forEach((ruleResponse) => {
-      // console.debug(`Response took ${ruleResponse.executionTimeMs} ms`);
+      // console.log(`Response took ${ruleResponse.executionTimeMs} ms`);
       ruleResponse.violations.forEach((violation) => {
         const range = Range.create(
           Position.create(violation.start.line - 1, violation.start.col - 1),
@@ -300,7 +301,7 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
 
     sendDiagnostics(diags);
   } else {
-    // console.debug("no ruleset to use");
+    // console.log("no ruleset to use");
     sendDiagnostics([]);
   }
 }

@@ -15,6 +15,7 @@ import {URI} from 'vscode-languageserver-types';
 import {URI as vsUri, Utils} from 'vscode-uri';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {getWorkspaceFolders} from "../utils/configurationCache";
+import * as console from '../utils/connectionLogger';
 
 /**
  * All timestamps are in milliseconds.
@@ -150,8 +151,7 @@ export const parseCodigaConfig = async (
     }
     return CodigaYmlConfig.EMPTY;
   } catch (e) {
-    console.log("Error when parsing the codiga.yml file.");
-    console.log(e);
+    console.log(`Error when parsing the codiga.yml file: ${e}`);
     rollbarLogger(e);
     return CodigaYmlConfig.EMPTY;
   }
@@ -280,8 +280,7 @@ export const updateCacheForWorkspace = async (
     cache.set(workspace, newCacheData);
     revalidateAllTextDocuments();
   } catch (e) {
-    console.log("error when reading or updating the rules");
-    console.log(e);
+    console.log(`error when reading or updating the rules: ${e}`);
     rollbarLogger(e);
   }
 };
