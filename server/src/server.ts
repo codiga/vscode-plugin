@@ -10,7 +10,12 @@ import {refreshCachePeriodic, setAllTextDocumentsValidator} from './rosie/rosieC
 import { initializeClient } from './graphql-api/client';
 import { refreshDiagnostics } from './diagnostics/diagnostics';
 import { recordLastActivity } from './utils/activity';
-import { cacheUserFingerprint, cacheCodigaApiToken, cacheWorkspaceFolders } from './utils/configurationCache';
+import {
+  cacheUserFingerprint,
+  cacheCodigaApiToken,
+  cacheWorkspaceFolders,
+  getApiToken
+} from './utils/configurationCache';
 import { provideApplyFixCodeActions, createAndSetRuleFixCodeActionEdit } from './rosie/rosiefix';
 import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 import { addRuleFixRecord } from './graphql-api/add-rule-fix-record';
@@ -59,7 +64,10 @@ let clientVersion: string | undefined;
  */
 connection.onInitialize((_params: InitializeParams) => {
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didChangeConfiguration
-  hasConfigurationCapability = !!(_params.capabilities.workspace && !!_params.capabilities.workspace.configuration);
+  hasConfigurationCapability = !!(
+      _params.capabilities.workspace
+      && _params.capabilities.workspace.configuration
+      && _params.capabilities.workspace?.didChangeConfiguration);
 
   hasWorkspaceCapability = !!(_params.capabilities.workspace);
 
@@ -104,7 +112,8 @@ connection.onInitialize((_params: InitializeParams) => {
    * Runs when the configuration, e.g. the Codiga API Token changes.
    */
   connection.onDidChangeConfiguration(async _change => {
-    cacheCodigaApiToken(await connection.workspace.getConfiguration("codiga.api.token"));
+    cacheCodigaApiToken(_change.settings?.codiga?.api?.token);
+
     documents.all().forEach(validateTextDocument);
   });
 
@@ -250,7 +259,13 @@ connection.onInitialized(async () => {
   //Initializes the GraphQL client
   initializeClient(clientName, clientVersion);
 
-  cacheCodigaApiToken(await connection.workspace.getConfiguration("codiga.api.token"));
+  //May be already set by 'onDidChangeConfiguration()'. This can happen e.g. in Jupyter Lab where the configuration is not available
+  // via 'connection.workspace.getConfiguration()' but only via the DidChangeConfigurationParams.
+  // 'onDidChangeConfiguration()' may be executed before 'onInitialized()',
+  // so if there is an API token set at launch, it can be picked up and cached by that event handler before 'onInitialized()' would pick it up.
+  if (!getApiToken()) {
+    cacheCodigaApiToken(await connection.workspace.getConfiguration("codiga.api.token"));
+  }
 
   //Start the rules cache updater only if the client supports diagnostics
   if (hasDiagnosticCapability)

@@ -1,5 +1,5 @@
 let currentFingerprint: string | undefined;
-let codigaApiToken: any;
+let codigaApiToken: any = undefined;
 /**
  * Since there are client applications that don't support multiple workspaces, but only a single one
  * (announced via 'InitializeParams.rootUri'), we have to rely on string URI values instead of `WorkspaceFolder` objects.
