@@ -18,8 +18,6 @@ import {URI} from "vscode-uri";
 import { Range, Position, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { DocumentUri, TextDocument } from 'vscode-languageserver-textdocument';
 
-import * as fs from "fs";
-
 const DIAGNOSTICS_TIMESTAMP: Map<string, number> = new Map();
 const FIXES_BY_DOCUMENT: Map<
   DocumentUri,
@@ -232,14 +230,12 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
   const language: Language = getLanguageForDocument(doc);
 
   if (language === Language.Unknown) {
-    fs.writeFileSync("/Users/daniel/console.txt", `Language is Unknown.\n`, { flag: "a+"});
     return;
   }
   const supportedLanguages = Array.from(
     GRAPHQL_LANGUAGE_TO_ROSIE_LANGUAGE.keys()
   );
   if (supportedLanguages.indexOf(language) === -1) {
-    fs.writeFileSync("/Users/daniel/console.txt", `Language is not supported: ${language}.\n`, { flag: "a+"});
     return;
   }
 
@@ -253,13 +249,11 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
 
   if (doc.getText().length === 0) {
     // console.debug("empty code");
-    fs.writeFileSync("/Users/daniel/console.txt", `Empty file content.\n`, { flag: "a+"});
     return;
   }
 
   if (doc.lineCount < 2) {
     // console.debug("not enough lines");
-    fs.writeFileSync("/Users/daniel/console.txt", `One-line content.\n`, { flag: "a+"});
     return;
   }
 
@@ -270,8 +264,6 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
 
   if (rules && rules.length > 0) {
     const ruleResponses = await rosieClient.getRuleResponses(doc, rules);
-    fs.writeFileSync("/Users/daniel/console.txt", `Number of violations: ${ruleResponses.flatMap(rr => rr.violations).length}\n`, { flag: "a+"});
-    fs.writeFileSync("/Users/daniel/console.txt", `Rules in response: ${JSON.stringify(ruleResponses)}\n`, { flag: "a+"});
     const diags: Diagnostic[] = [];
 
     ruleResponses.forEach((ruleResponse) => {
@@ -305,8 +297,6 @@ export async function refreshDiagnostics(doc: TextDocument, sendDiagnostics: (di
         diags.push(diag);
       });
     });
-
-    fs.writeFileSync("/Users/daniel/console.txt", `Sending ${diags.length} diagnostics.\n`, { flag: "a+"});
 
     sendDiagnostics(diags);
   } else {

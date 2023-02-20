@@ -18,7 +18,6 @@ import {_Connection, DidChangeConfigurationNotification, InitializeResult} from 
 import {createIgnoreWorkspaceEdit, provideIgnoreFixCodeActions} from './diagnostics/ignore-violation';
 import { createMockConnection, MockConnection } from "./test/connectionMocks";
 import { RosieFixEdit } from "./rosie/rosieTypes";
-import * as fs from "fs";
 
 /**
  * Retrieves the 'fingerprint' command line argument, so that later we can determine whether the
@@ -192,7 +191,6 @@ connection.onInitialize((_params: InitializeParams) => {
    * Save doesn't have to be invoked on the document in order for this event handler to execute.
    */
   documents.onDidChangeContent(change => {
-    fs.writeFileSync("/Users/daniel/console.txt", `Changed file content at ${Date.now()}\n`, { flag: "a+"});
     recordLastActivity();
     validateTextDocument(change.document);
   });
@@ -267,11 +265,9 @@ connection.onInitialized(async () => {
  * @param textDocument the text document being analyzed
  */
 async function validateTextDocument(textDocument: TextDocument) {
-  fs.writeFileSync("/Users/daniel/console.txt", `Validating text document.\n`, { flag: "a+"});
   try {
     refreshDiagnostics(textDocument, diags => connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: diags }));
   } catch (e) {
-    fs.writeFileSync("/Users/daniel/console.txt", `Error while validating ${textDocument.uri}\n`, { flag: "a+"});
     connection.console.error(`Error while validating ${textDocument.uri}`);
     connection.console.error(String(e));
   }
