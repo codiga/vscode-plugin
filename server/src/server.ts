@@ -262,18 +262,29 @@ connection.onInitialized(async () => {
   //Initializes the GraphQL client
   initializeClient(clientName, clientVersion);
 
-  //May be already set by 'onDidChangeConfiguration()'. This can happen e.g. in Jupyter Lab where the configuration is not available
-  // via 'connection.workspace.getConfiguration()' but only via the DidChangeConfigurationParams.
-  // 'onDidChangeConfiguration()' may be executed before 'onInitialized()',
-  // so if there is an API token set at launch, it can be picked up and cached by that event handler before 'onInitialized()' would pick it up.
+  /*
+    In Jupyter Lab, the configuration is not available via 'connection.workspace.getConfiguration("codiga.api.token")' for some reason,
+    but only via the DidChangeConfigurationParams in 'connection.onDidChangeConfiguration()'.
+    Also, Jupyter Lab triggers a call for `onDidChangeConfiguration()` when 'getConfiguration()' is first called here.
+    This trigger doesn't seem to happen with VS Code and Sublime Text.
+
+    There are two such calls, one with an empty configuration ({}), the second one with the actual contents of the configuration.
+
+    Thus, in order to have the codiga.api.token cached, we
+      - first, call 'getConfiguration()', and save its result,
+      - if `onDidChangeConfiguration()` cached the value in the meantime, we don't update the cache (e.g. Jupyter Lab)
+      - if `onDidChangeConfiguration()` didn't cache the value, we use the returned value (e.g. VS Code)
+   */
+  const apiToken = await connection.workspace.getConfiguration("codiga.api.token");
   if (!getApiToken()) {
-    cacheCodigaApiToken(await connection.workspace.getConfiguration("codiga.api.token"));
+    cacheCodigaApiToken(apiToken);
   }
 
   //Start the rules cache updater only if the client supports diagnostics
-  if (hasDiagnosticCapability)
+  if (hasDiagnosticCapability) {
     setAllTextDocumentsValidator(() => documents.all().forEach(validateTextDocument));
     refreshCachePeriodic();
+  }
 });
 
 /**
