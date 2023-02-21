@@ -29,7 +29,7 @@
     "React",
     "Typescript"
   ],
-  "version": "0.9.1",
+  "version": "1.0.0",
   "engines": {
     "node": "^16.0.0",
     "vscode": "^1.70.0"
@@ -157,30 +157,33 @@
   "scripts": {
     "prepare": "husky install",
     "compile": "npm-run-all compile:*",
-    "compile:extension": "tsc -p ./",
+    "compile:extension": "tsc -b ./",
     "compile:webview": "webpack --mode production",
-    "watch:extension": "tsc -watch -p ./",
+    "watch:extension": "tsc -watch -b ./",
     "watch:webview": "webpack --watch --mode development",
     "watch": "npm-run-all -p watch:*",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "lint-fix": "eslint src --ext ts --fix",
-    "test": "node ./out/test/runTest.js",
+    "lint": "eslint client/src --ext ts && eslint server/src --ext ts",
+    "lint-fix": "eslint client/src --ext ts --fix && eslint server/src --ext ts --fix",
+    "test:client": "node ./out/test/runTest.js",
+    "test:server": "cd server && npm run test && cd ..",
+    "test": "npm run test:client && npm run test:server",
     "deploy": "vsce publish --no-yarn",
     "vscode:prepublish": "npm-run-all compile:webview \"esbuild-base -- --minify\"",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./client/src/extension.ts --bundle --outfile=/client/out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run -S esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run -S esbuild-base -- --sourcemap --watch",
-    "test-compile": "tsc -p ./"
+    "test-compile": "tsc -b ./",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
     "@types/mocha": "^8.2.3",
     "@types/node": "^14.18.12",
+    "@types/vscode": "^1.70.0",
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.0",
     "@types/sinon": "^10.0.13",
-    "@types/vscode": "^1.69.0",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "@vscode/test-electron": "^2.1.2",
@@ -199,7 +202,6 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "@vscode/webview-ui-toolkit": "^1.0.0",
     "graphql": "^16.6.0",
     "graphql-request": "^5.0.0",
     "react": "^16.14.0",
@@ -208,7 +210,7 @@
     "remark": "^14.0.2",
     "remark-html": "^15.0.1",
     "rollbar": "^2.26.0",
-    "yaml": "^2.1.1"
+    "vscode-languageclient": "^8.0.2"
   },
   "__metadata": {
     "id": "251775d3-1b6c-426f-bb28-419880a36f83",

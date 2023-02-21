@@ -1,0 +1,28 @@
+{
+	"name": "vscode-plugin-client",
+	"description": "VSCode client for the Codiga language server",
+	"author": "Codiga",
+	"license": "MIT",
+	"version": "1.0.0",
+	"publisher": "vscode",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/codiga/vscode-plugin"
+	},
+	"engines": {
+		"node": "^16.0.0",
+		"vscode": "^1.70.0"
+	},
+	"dependencies": {
+		"react": "^16.14.0",
+		"react-dom": "^16.14.0",
+		"@vscode/webview-ui-toolkit": "^1.0.0",
+		"vscode-languageclient": "^8.0.2"
+	},
+	"devDependencies": {
+		"vsce": "^2.6.7",
+		"@types/node": "^14.18.12",
+		"@types/vscode": "^1.70.0",
+		"@vscode/test-electron": "^2.1.2"
+	}
+}
