@@ -3,7 +3,7 @@
 	"description": "VSCode client for the Codiga language server",
 	"author": "Codiga",
 	"license": "MIT",
-	"version": "0.9.0",
+	"version": "1.0.0",
 	"publisher": "vscode",
 	"repository": {
 		"type": "git",
