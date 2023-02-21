@@ -1,6 +1,6 @@
 {
-	"name": "codiga-lsp-server",
-	"description": "Codiga language server",
+	"name": "rosie-language-server",
+	"description": "Rosie Language Server",
 	"version": "0.9.0",
 	"author": "Xcoding Labs Inc",
 	"publisher": "codiga",
