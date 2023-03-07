@@ -57,6 +57,11 @@ let hasCodeActionDataSupport: boolean;
 
 let clientName: string | undefined;
 let clientVersion: string | undefined;
+/**
+ * This is set to true for clients that don't support codeAction/resolve,
+ * or they support it, but they announce their support incorrectly, e.g. due to a bug.
+ */
+let shouldComputeEditInCodeAction: boolean | undefined = false;
 
 /**
  * Starts to initialize the language server.
@@ -101,12 +106,20 @@ connection.onInitialize((_params: InitializeParams) => {
   //Retrieves client information, so that we can use it in the User-Agent header of GraphQL requests
   clientName = _params.clientInfo?.name;
   clientVersion = _params.clientInfo?.version;
+  //The condition for Eclipse can be removed, when
+  // https://github.com/eclipse/lsp4e/commit/2cf0a803936635a62d7fad2d05fde78bc7ce6a17 is released.
+  if (clientName?.startsWith("Eclipse IDE")) {
+    shouldComputeEditInCodeAction = true;
+  }
 
   /**
    * Runs when the configuration, e.g. the Codiga API Token changes.
    */
   connection.onDidChangeConfiguration(async _change => {
-    cacheCodigaApiToken(_change.settings?.codiga?.api?.token);
+    if (_change.settings?.codiga?.api?.token)
+      cacheCodigaApiToken(_change.settings?.codiga?.api?.token);
+    else if (_change.settings?.codigaApiToken)
+      cacheCodigaApiToken(_change.settings?.codigaApiToken);
 
     documents.all().forEach(validateTextDocument);
   });
@@ -125,8 +138,8 @@ connection.onInitialize((_params: InitializeParams) => {
     if (hasApplyEditCapability && hasCodeActionLiteralSupport && params.context.diagnostics.length > 0) {
       const document = documents.get(params.textDocument.uri);
       if (document) {
-        codeActions.push(...provideApplyFixCodeActions(document, params.range));
-        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params);
+        codeActions.push(...provideApplyFixCodeActions(document, params.range, shouldComputeEditInCodeAction));
+        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params, shouldComputeEditInCodeAction);
         codeActions.push(...ignoreFixes);
       }
     }
@@ -141,7 +154,7 @@ connection.onInitialize((_params: InitializeParams) => {
    * only when we actually need that information, kind of lazy evaluation.
    */
   connection.onCodeActionResolve(codeAction => {
-    if (codeAction.data) {
+    if (!shouldComputeEditInCodeAction && codeAction.data) {
       if (codeAction.data.fixKind === "rosie.rule.fix") {
         const document = documents.get(codeAction.data.documentUri);
         if (document) {
@@ -266,7 +279,11 @@ connection.onInitialized(async () => {
       - if `onDidChangeConfiguration()` cached the value in the meantime, we don't update the cache (e.g. Jupyter Lab)
       - if `onDidChangeConfiguration()` didn't cache the value, we use the returned value (e.g. VS Code)
    */
-  const apiToken = await connection.workspace.getConfiguration("codiga.api.token");
+  let apiToken = await connection.workspace.getConfiguration("codiga.api.token");
+  if (!apiToken) {
+    apiToken = await connection.workspace.getConfiguration("codigaApiToken");
+  }
+
   if (!getApiToken()) {
     cacheCodigaApiToken(apiToken);
   }

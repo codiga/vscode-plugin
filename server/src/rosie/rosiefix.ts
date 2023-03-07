@@ -121,11 +121,12 @@ const validateOffsetsAndCreateTextEdit = (
  */
 export const provideApplyFixCodeActions = (
   document: TextDocument,
-  range: Range
+  range: Range,
+  shouldComputeEdit: boolean | undefined = false
 ): CodeAction[] => {
   const fixes = getFixesForDocument(document.uri, range);
   return fixes
-    ? fixes?.map(rosieFix => createRuleFix(document, rosieFix))
+    ? fixes?.map(rosieFix => createRuleFix(document, rosieFix, shouldComputeEdit))
     : [];
 };
 
@@ -139,13 +140,14 @@ export const provideApplyFixCodeActions = (
  */
 export const createRuleFix = (
   document: TextDocument,
-  rosieFix: RosieFix
+  rosieFix: RosieFix,
+  shouldComputeEdit: boolean | undefined = false
 ): CodeAction => {
   /*
     From CodeAction's documentation:
       If a code action provides an edit and a command, first the edit is executed and then the command.
   */
-  return {
+  const ruleFix: CodeAction = {
     title: `Fix: ${rosieFix.description}`,
     kind: CodeActionKind.QuickFix,
     //Registers the 'codiga.applyFix' command for this CodeAction, so that we can execute further
@@ -165,4 +167,9 @@ export const createRuleFix = (
       rosieFixEdits: rosieFix.edits
     }
   };
+  if (shouldComputeEdit) {
+    const rosieFixEdits = ruleFix.data.rosieFixEdits as RosieFixEdit[];
+    createAndSetRuleFixCodeActionEdit(ruleFix, document, rosieFixEdits);
+  }
+  return ruleFix;
 };
