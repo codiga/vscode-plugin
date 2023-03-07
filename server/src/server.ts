@@ -50,7 +50,6 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasConfigurationCapability: boolean;
 let hasWorkspaceCapability: boolean;
 let hasWorkspaceFoldersCapability: boolean;
-let hasDiagnosticCapability: boolean;
 let hasApplyEditCapability: boolean;
 let hasCodeActionLiteralSupport: boolean;
 let hasCodeActionResolveSupport: boolean;
@@ -64,6 +63,9 @@ let clientVersion: string | undefined;
  *
  * In case of VS Code, upon opening a different folder in the same window, the server is shut down,
  * and a new language client is initialized.
+ *
+ * The language server presumes that diagnostics are supported by the client application, otherwise the integration
+ * of the server would not make much sense, thus there is no check for the textDocument/publishDiagnostics capability.
  */
 connection.onInitialize((_params: InitializeParams) => {
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didChangeConfiguration
@@ -82,12 +84,6 @@ connection.onInitialize((_params: InitializeParams) => {
     cacheWorkspaceFolders(_params.rootUri ? [_params.rootUri] : []);
   }
 
-  //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics
-  hasDiagnosticCapability = !!(
-    _params.capabilities.textDocument &&
-    _params.capabilities.textDocument.publishDiagnostics
-  );
-
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_executeCommand
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_applyEdit
   hasApplyEditCapability = !!(hasWorkspaceCapability && _params.capabilities.workspace?.applyEdit);
@@ -101,11 +97,6 @@ connection.onInitialize((_params: InitializeParams) => {
   hasCodeActionLiteralSupport = !!(_params.capabilities.textDocument?.codeAction?.codeActionLiteralSupport);
   hasCodeActionResolveSupport = !!(_params.capabilities.textDocument?.codeAction?.resolveSupport);
   hasCodeActionDataSupport = !!(_params.capabilities.textDocument?.codeAction?.dataSupport);
-
-  //If there is no support for diagnostics, which is the core functionality and purpose of the Rosie platform,
-  // return with no capability, and don't register any further event handler.
-  if (!hasDiagnosticCapability)
-    return { capabilities: {} };
 
   //Retrieves client information, so that we can use it in the User-Agent header of GraphQL requests
   clientName = _params.clientInfo?.name;
@@ -280,11 +271,8 @@ connection.onInitialized(async () => {
     cacheCodigaApiToken(apiToken);
   }
 
-  //Start the rules cache updater only if the client supports diagnostics
-  if (hasDiagnosticCapability) {
-    setAllTextDocumentsValidator(() => documents.all().forEach(validateTextDocument));
-    refreshCachePeriodic();
-  }
+  setAllTextDocumentsValidator(() => documents.all().forEach(validateTextDocument));
+  refreshCachePeriodic();
 });
 
 /**
