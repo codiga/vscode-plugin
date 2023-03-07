@@ -61,7 +61,7 @@ let clientVersion: string | undefined;
  * This is set to true for clients that don't support codeAction/resolve,
  * or they support it, but they announce their support incorrectly, e.g. due to a bug.
  */
-let shouldComputeEditInCodeAction: boolean | undefined = false;
+let isShouldComputeEditInCodeAction: boolean | undefined = false;
 
 /**
  * Starts to initialize the language server.
@@ -109,7 +109,7 @@ connection.onInitialize((_params: InitializeParams) => {
   //The condition for Eclipse can be removed, when
   // https://github.com/eclipse/lsp4e/commit/2cf0a803936635a62d7fad2d05fde78bc7ce6a17 is released.
   if (clientName?.startsWith("Eclipse IDE")) {
-    shouldComputeEditInCodeAction = true;
+    isShouldComputeEditInCodeAction = true;
   }
 
   /**
@@ -138,8 +138,8 @@ connection.onInitialize((_params: InitializeParams) => {
     if (hasApplyEditCapability && hasCodeActionLiteralSupport && params.context.diagnostics.length > 0) {
       const document = documents.get(params.textDocument.uri);
       if (document) {
-        codeActions.push(...provideApplyFixCodeActions(document, params.range, shouldComputeEditInCodeAction));
-        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params, shouldComputeEditInCodeAction);
+        codeActions.push(...provideApplyFixCodeActions(document, params.range, isShouldComputeEditInCodeAction));
+        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params, isShouldComputeEditInCodeAction);
         codeActions.push(...ignoreFixes);
       }
     }
@@ -154,7 +154,7 @@ connection.onInitialize((_params: InitializeParams) => {
    * only when we actually need that information, kind of lazy evaluation.
    */
   connection.onCodeActionResolve(codeAction => {
-    if (!shouldComputeEditInCodeAction && codeAction.data) {
+    if (!isShouldComputeEditInCodeAction && codeAction.data) {
       if (codeAction.data.fixKind === "rosie.rule.fix") {
         const document = documents.get(codeAction.data.documentUri);
         if (document) {
