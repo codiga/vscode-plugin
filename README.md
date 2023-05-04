@@ -1,9 +1,10 @@
+[Datadog acquired Codiga](https://www.codiga.io/blog/codiga-joins-datadog/). This repository is no longer active.
+
+
 [![Slack](https://img.shields.io/badge/Slack-@codigahq.svg?logo=slack)](https://join.slack.com/t/codigahq/shared_invite/zt-9hvmfwie-9BUVFwZDwvpIGlkHv2mzYQ)
 [![Twitter](https://img.shields.io/badge/Twitter-getcodiga-blue?logo=twitter&logoColor=blue&color=blue)](https://twitter.com/getcodiga)
 [![Visual Studio Marketplace](https://img.shields.io/badge/Visual%20Studio%20Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
 [![Rating](https://img.shields.io/visual-studio-marketplace/r/codiga.vscode-plugin)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
-[![Code Grade](https://api.codiga.io/project/29693/status/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
-[![Code Quality](https://api.codiga.io/project/29693/score/svg)](https://app.codiga.io/public/project/29693/vscode-plugin/dashboard)
 
 # Codiga: Static Code Analysis on Steroids 🚀
 
