@@ -50,7 +50,6 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasConfigurationCapability: boolean;
 let hasWorkspaceCapability: boolean;
 let hasWorkspaceFoldersCapability: boolean;
-let hasDiagnosticCapability: boolean;
 let hasApplyEditCapability: boolean;
 let hasCodeActionLiteralSupport: boolean;
 let hasCodeActionResolveSupport: boolean;
@@ -58,12 +57,20 @@ let hasCodeActionDataSupport: boolean;
 
 let clientName: string | undefined;
 let clientVersion: string | undefined;
+/**
+ * This is set to true for clients that don't support codeAction/resolve,
+ * or they support it, but they announce their support incorrectly, e.g. due to a bug.
+ */
+let isShouldComputeEditInCodeAction: boolean | undefined = false;
 
 /**
  * Starts to initialize the language server.
  *
  * In case of VS Code, upon opening a different folder in the same window, the server is shut down,
  * and a new language client is initialized.
+ *
+ * The language server presumes that diagnostics are supported by the client application, otherwise the integration
+ * of the server would not make much sense, thus there is no check for the textDocument/publishDiagnostics capability.
  */
 connection.onInitialize((_params: InitializeParams) => {
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didChangeConfiguration
@@ -82,12 +89,6 @@ connection.onInitialize((_params: InitializeParams) => {
     cacheWorkspaceFolders(_params.rootUri ? [_params.rootUri] : []);
   }
 
-  //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics
-  hasDiagnosticCapability = !!(
-    _params.capabilities.textDocument &&
-    _params.capabilities.textDocument.publishDiagnostics
-  );
-
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_executeCommand
   //https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_applyEdit
   hasApplyEditCapability = !!(hasWorkspaceCapability && _params.capabilities.workspace?.applyEdit);
@@ -102,20 +103,23 @@ connection.onInitialize((_params: InitializeParams) => {
   hasCodeActionResolveSupport = !!(_params.capabilities.textDocument?.codeAction?.resolveSupport);
   hasCodeActionDataSupport = !!(_params.capabilities.textDocument?.codeAction?.dataSupport);
 
-  //If there is no support for diagnostics, which is the core functionality and purpose of the Rosie platform,
-  // return with no capability, and don't register any further event handler.
-  if (!hasDiagnosticCapability)
-    return { capabilities: {} };
-
   //Retrieves client information, so that we can use it in the User-Agent header of GraphQL requests
   clientName = _params.clientInfo?.name;
   clientVersion = _params.clientInfo?.version;
+  //The condition for Eclipse can be removed, when
+  // https://github.com/eclipse/lsp4e/commit/2cf0a803936635a62d7fad2d05fde78bc7ce6a17 is released.
+  if (clientName?.startsWith("Eclipse IDE")) {
+    isShouldComputeEditInCodeAction = true;
+  }
 
   /**
    * Runs when the configuration, e.g. the Codiga API Token changes.
    */
   connection.onDidChangeConfiguration(async _change => {
-    cacheCodigaApiToken(_change.settings?.codiga?.api?.token);
+    if (_change.settings?.codiga?.api?.token)
+      cacheCodigaApiToken(_change.settings?.codiga?.api?.token);
+    else if (_change.settings?.codigaApiToken)
+      cacheCodigaApiToken(_change.settings?.codigaApiToken);
 
     documents.all().forEach(validateTextDocument);
   });
@@ -134,8 +138,8 @@ connection.onInitialize((_params: InitializeParams) => {
     if (hasApplyEditCapability && hasCodeActionLiteralSupport && params.context.diagnostics.length > 0) {
       const document = documents.get(params.textDocument.uri);
       if (document) {
-        codeActions.push(...provideApplyFixCodeActions(document, params.range));
-        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params);
+        codeActions.push(...provideApplyFixCodeActions(document, params.range, isShouldComputeEditInCodeAction));
+        const ignoreFixes = provideIgnoreFixCodeActions(document, params.range, params, isShouldComputeEditInCodeAction);
         codeActions.push(...ignoreFixes);
       }
     }
@@ -150,7 +154,7 @@ connection.onInitialize((_params: InitializeParams) => {
    * only when we actually need that information, kind of lazy evaluation.
    */
   connection.onCodeActionResolve(codeAction => {
-    if (codeAction.data) {
+    if (!isShouldComputeEditInCodeAction && codeAction.data) {
       if (codeAction.data.fixKind === "rosie.rule.fix") {
         const document = documents.get(codeAction.data.documentUri);
         if (document) {
@@ -275,16 +279,17 @@ connection.onInitialized(async () => {
       - if `onDidChangeConfiguration()` cached the value in the meantime, we don't update the cache (e.g. Jupyter Lab)
       - if `onDidChangeConfiguration()` didn't cache the value, we use the returned value (e.g. VS Code)
    */
-  const apiToken = await connection.workspace.getConfiguration("codiga.api.token");
+  let apiToken = await connection.workspace.getConfiguration("codiga.api.token");
+  if (!apiToken) {
+    apiToken = await connection.workspace.getConfiguration("codigaApiToken");
+  }
+
   if (!getApiToken()) {
     cacheCodigaApiToken(apiToken);
   }
 
-  //Start the rules cache updater only if the client supports diagnostics
-  if (hasDiagnosticCapability) {
-    setAllTextDocumentsValidator(() => documents.all().forEach(validateTextDocument));
-    refreshCachePeriodic();
-  }
+  setAllTextDocumentsValidator(() => documents.all().forEach(validateTextDocument));
+  refreshCachePeriodic();
 });
 
 /**

@@ -18,14 +18,15 @@ import { CodeActionParams } from 'vscode-languageserver';
 export const provideIgnoreFixCodeActions = (
   document: TextDocument,
   range: Range,
-  context: CodeActionParams
+  context: CodeActionParams,
+  shouldComputeEdit: boolean | undefined = false
 ): CodeAction[] => {
   const diagnostics = context.context.diagnostics
     .filter(diagnostic => diagnostic.source?.toLocaleString().indexOf(DIAGNOSTIC_SOURCE) != -1);
 
   const ignoreFixes: CodeAction[] = [];
   for (const diagnostic of diagnostics) {
-    ignoreFixes.push(createIgnoreFix(diagnostic, document));
+    ignoreFixes.push(createIgnoreFix(diagnostic, document, shouldComputeEdit));
   }
 
   return ignoreFixes;
@@ -39,14 +40,15 @@ export const provideIgnoreFixCodeActions = (
  */
 export const createIgnoreFix = (
   diagnostic: Diagnostic,
-  document: TextDocument
+  document: TextDocument,
+  shouldComputeEdit: boolean | undefined = false
 ): CodeAction => {
   const ruleIdentifier = diagnostic.code;
   const title = ruleIdentifier
     ? `Ignore rule ${ruleIdentifier}`
     : "Ignore rule";
 
-  return {
+  const ignoreFix: CodeAction = {
     title: title,
     kind: CodeActionKind.QuickFix,
     /**
@@ -73,6 +75,11 @@ export const createIgnoreFix = (
       documentUri: document.uri
     }
   };
+  if (shouldComputeEdit) {
+    // @ts-ignore
+    ignoreFix.edit = createIgnoreWorkspaceEdit(document, ignoreFix.diagnostics[0]?.range);
+  }
+  return ignoreFix;
 };
 
 /**
