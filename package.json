@@ -170,7 +170,7 @@
     "test": "npm run test:client && npm run test:server",
     "deploy": "vsce publish --no-yarn",
     "vscode:prepublish": "npm-run-all compile:webview \"esbuild-base -- --minify\"",
-    "esbuild-base": "esbuild ./client/src/extension.ts --bundle --outfile=/client/out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./client/src/extension.ts --bundle --outfile=/out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run -S esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run -S esbuild-base -- --sourcemap --watch",
     "test-compile": "tsc -b ./",

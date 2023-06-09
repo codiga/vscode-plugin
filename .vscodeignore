@@ -1,8 +1,10 @@
 .vscode/**
 .vscode-test/**
 out/test/**
+server/out/test/**
 .prettierignore
-src/**
+client/src/**
+server/src/**
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md
@@ -12,3 +14,5 @@ vsc-extension-quickstart.md
 **/*.ts
 *~
 node_modules
+client/node_modules
+server/node_modules
